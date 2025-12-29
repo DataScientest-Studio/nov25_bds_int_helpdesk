@@ -11,5 +11,5 @@ dependencies:
   - matplotlib
   - scikit-learn
   - pytest
-  - openpyxl
+  - openpyxl
   - seaborn
