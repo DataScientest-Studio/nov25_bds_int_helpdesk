@@ -82,6 +82,7 @@ def render_q_score_details(model_data, model_type):
     metrics = model_data.get('metrics', {})
     
     if metrics:
+        # Metriken pro Target (Q1, Q2, Q3)
         cols = st.columns(len(targets))
         
         for idx, (target, col) in enumerate(zip(targets, cols)):
@@ -90,26 +91,110 @@ def render_q_score_details(model_data, model_type):
                 with col:
                     st.markdown(f"### {target}")
                     st.metric(get_text('accuracy'), f"{m.get('accuracy', 0)*100:.1f}%")
-                    st.metric(get_text('cohens_kappa'), f"{m.get('kappa', 0):.3f}")
                     st.metric(get_text('mae'), f"{m.get('mae', 0):.3f}")
-                    if 'f1' in m:
-                        st.metric(get_text('f1_score'), f"{m.get('f1', 0):.3f}")
+                    st.metric("CV Score", f"{m.get('cv_mean', 0)*100:.1f}%")
+                    st.metric("Macro-F1", f"{m.get('f1_macro', 0):.3f}")
+                    st.metric("Weighted-F1", f"{m.get('f1_weighted', 0):.3f}")
+                    st.metric("Cohen's Kappa", f"{m.get('kappa', 0):.3f}")
+                    st.metric("QWK", f"{m.get('qwk', 0):.3f}")
         
-        # Average
+        # Durchschnittswerte
         st.markdown("---")
         available_targets = [t for t in targets if t in metrics]
         if available_targets:
             avg_acc = np.mean([metrics[t].get('accuracy', 0) for t in available_targets])
+            avg_mae = np.mean([metrics[t].get('mae', 0) for t in available_targets])
+            avg_cv = np.mean([metrics[t].get('cv_mean', 0) for t in available_targets])
+            avg_f1_macro = np.mean([metrics[t].get('f1_macro', 0) for t in available_targets])
+            avg_f1_weighted = np.mean([metrics[t].get('f1_weighted', 0) for t in available_targets])
             avg_kappa = np.mean([metrics[t].get('kappa', 0) for t in available_targets])
-            cv_mean = np.mean([metrics[t].get('cv_mean', 0) for t in available_targets])
+            avg_qwk = np.mean([metrics[t].get('qwk', 0) for t in available_targets])
             
-            col1, col2, col3 = st.columns(3)
+            st.markdown("### Ø Durchschnitt (Q1, Q2, Q3)")
+            
+            # Zeile 1
+            col1, col2, col3, col4 = st.columns(4)
             with col1:
-                st.metric(e("📈 ") + get_text('avg_accuracy'), f"{avg_acc*100:.1f}%")
+                st.metric(e("📈 ") + "Ø Accuracy", f"{avg_acc*100:.1f}%")
             with col2:
-                st.metric(e("📊 ") + get_text('avg_kappa'), f"{avg_kappa:.3f}")
+                st.metric(e("📉 ") + "Ø MAE", f"{avg_mae:.3f}")
             with col3:
-                st.metric(e("🔄 ") + get_text('avg_cv_score'), f"{cv_mean*100:.1f}%")
+                st.metric(e("🔄 ") + "Ø CV Score", f"{avg_cv*100:.1f}%")
+            with col4:
+                st.metric(e("📊 ") + "Ø Macro-F1", f"{avg_f1_macro:.3f}")
+            
+            # Zeile 2
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("Ø Weighted-F1", f"{avg_f1_weighted:.3f}")
+            with col2:
+                st.metric("Ø Cohen's Kappa", f"{avg_kappa:.3f}")
+            with col3:
+                st.metric("Ø QWK", f"{avg_qwk:.3f}")
+            with col4:
+                pass  # Platzhalter für symmetrisches Layout
+            
+            # Fazit
+            st.markdown("---")
+            st.markdown("### " + e("📋 ") + "Metriken-Interpretation (Durchschnitt)")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                acc_rating = "🟢 Gut" if avg_acc >= 0.7 else "🟡 Akzeptabel" if avg_acc >= 0.5 else "🔴 Verbesserungsbedarf"
+                st.markdown(f"""
+                **Accuracy ({avg_acc*100:.1f}%)** {acc_rating}
+                > Anteil korrekt klassifizierter Samples. Bei 5 Klassen wäre Zufall 20%.
+                """)
+                
+                mae_rating = "🟢 Sehr gut" if avg_mae < 0.5 else "🟡 Akzeptabel" if avg_mae < 0.8 else "🔴 Hoch"
+                st.markdown(f"""
+                **MAE ({avg_mae:.3f})** {mae_rating}
+                > Mittlerer Fehler in Klassen. <0.5 = Fehler meist nur ±1 Klasse.
+                """)
+                
+                cv_rating = "🟢 Stabil" if avg_cv >= 0.6 else "🟡 Moderat" if avg_cv >= 0.5 else "🔴 Instabil"
+                st.markdown(f"""
+                **CV Score ({avg_cv*100:.1f}%)** {cv_rating}
+                > Cross-Validation zeigt Generalisierungsfähigkeit.
+                """)
+                
+                f1m_rating = "🟢 Gut" if avg_f1_macro >= 0.5 else "🟡 Moderat" if avg_f1_macro >= 0.3 else "🔴 Schwach"
+                st.markdown(f"""
+                **Macro-F1 ({avg_f1_macro:.3f})** {f1m_rating}
+                > Ungewichteter Durchschnitt über alle Klassen.
+                """)
+            
+            with col2:
+                f1w_rating = "🟢 Gut" if avg_f1_weighted >= 0.6 else "🟡 Moderat" if avg_f1_weighted >= 0.5 else "🔴 Schwach"
+                st.markdown(f"""
+                **Weighted-F1 ({avg_f1_weighted:.3f})** {f1w_rating}
+                > Nach Klassengröße gewichtet.
+                """)
+                
+                kappa_rating = "🟢 Substanziell" if avg_kappa >= 0.5 else "🟡 Moderat" if avg_kappa >= 0.3 else "🔴 Schwach"
+                st.markdown(f"""
+                **Cohen's Kappa ({avg_kappa:.3f})** {kappa_rating}
+                > Übereinstimmung über Zufall hinaus.
+                """)
+                
+                qwk_rating = "🟢 Sehr gut" if avg_qwk >= 0.6 else "🟡 Gut" if avg_qwk >= 0.4 else "🔴 Moderat"
+                st.markdown(f"""
+                **QWK ({avg_qwk:.3f})** {qwk_rating}
+                > Quadratic Weighted Kappa - bestraft große Fehler stärker.
+                """)
+            
+            # Gesamtfazit
+            st.markdown("---")
+            good_metrics = sum([avg_acc >= 0.65, avg_mae < 0.6, avg_cv >= 0.6, 
+                               avg_f1_weighted >= 0.6, avg_kappa >= 0.4, avg_qwk >= 0.6])
+            
+            if good_metrics >= 5:
+                st.success(e("✅ ") + f"**Gesamtbewertung: Sehr gut** ({good_metrics}/6 Metriken im grünen Bereich)")
+            elif good_metrics >= 3:
+                st.info(e("👍 ") + f"**Gesamtbewertung: Gut** ({good_metrics}/6 Metriken im grünen Bereich)")
+            else:
+                st.warning(e("⚠️ ") + f"**Gesamtbewertung: Verbesserungspotential** ({good_metrics}/6 Metriken im grünen Bereich)")
     
     st.markdown("---")
     

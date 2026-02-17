@@ -9,8 +9,38 @@ import joblib
 
 from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score, cohen_kappa_score, mean_absolute_error, confusion_matrix
+from sklearn.metrics import (
+    accuracy_score, cohen_kappa_score, mean_absolute_error, 
+    confusion_matrix, f1_score
+)
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
+
+
+def quadratic_weighted_kappa(y_true, y_pred, num_classes=5):
+    """
+    Berechnet Quadratic Weighted Kappa (QWK).
+    Bestraft groessere Abweichungen staerker als kleinere.
+    """
+    cm = confusion_matrix(y_true, y_pred, labels=list(range(num_classes)))
+    
+    weights = np.zeros((num_classes, num_classes))
+    for i in range(num_classes):
+        for j in range(num_classes):
+            weights[i, j] = ((i - j) ** 2) / ((num_classes - 1) ** 2)
+    
+    hist_true = np.bincount(y_true, minlength=num_classes)
+    hist_pred = np.bincount(y_pred, minlength=num_classes)
+    
+    n = len(y_true)
+    expected = np.outer(hist_true, hist_pred).astype(float) / n
+    
+    num = np.sum(weights * cm)
+    den = np.sum(weights * expected)
+    
+    if den == 0:
+        return 1.0
+    
+    return 1.0 - (num / den)
 
 # Optional: XGBoost und LightGBM
 try:
@@ -127,10 +157,17 @@ def train_model(X, y, test_size=0.2):
         # Vorhersage
         y_pred = model.predict(X_test_scaled)
         
-        # Metriken
+        # Basis-Metriken
         accuracy = accuracy_score(y_test, y_pred)
-        kappa = cohen_kappa_score(y_test, y_pred)
         mae = mean_absolute_error(y_test, y_pred)
+        
+        # F1-Scores
+        f1_macro = f1_score(y_test, y_pred, average='macro', zero_division=0)
+        f1_weighted = f1_score(y_test, y_pred, average='weighted', zero_division=0)
+        
+        # Kappa-Metriken
+        kappa = cohen_kappa_score(y_test, y_pred)
+        qwk = quadratic_weighted_kappa(np.array(y_test), np.array(y_pred))
         
         # Cross-Validation
         cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -138,15 +175,22 @@ def train_model(X, y, test_size=0.2):
         
         metrics[target] = {
             'accuracy': round(accuracy, 3),
-            'kappa': round(kappa, 3),
             'mae': round(mae, 3),
+            'f1_macro': round(f1_macro, 3),
+            'f1_weighted': round(f1_weighted, 3),
+            'kappa': round(kappa, 3),
+            'qwk': round(qwk, 3),
             'cv_mean': round(cv_scores.mean(), 3),
             'cv_std': round(cv_scores.std(), 3),
             'confusion_matrix': confusion_matrix(y_test, y_pred).tolist()
         }
         
         print(f"   Accuracy: {accuracy:.3f}")
+        print(f"   MAE: {mae:.3f}")
+        print(f"   Macro-F1: {f1_macro:.3f}")
+        print(f"   Weighted-F1: {f1_weighted:.3f}")
         print(f"   Kappa: {kappa:.3f}")
+        print(f"   QWK: {qwk:.3f}")
         print(f"   CV: {cv_scores.mean():.3f} ± {cv_scores.std():.3f}")
         
         models[target] = model
