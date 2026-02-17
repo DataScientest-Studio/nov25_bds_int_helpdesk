@@ -95,30 +95,17 @@ if not IS_CLOUD:
         
         if st.button(e("🔄 ") + get_text('simulation_reset'), type="primary", use_container_width=True):
             with st.spinner(get_text('resetting_database')):
-                venv_python = PROJECT_ROOT / "venv" / "bin" / "python"
+                # Clear Streamlit cache
+                st.cache_data.clear()
                 
-                if venv_python.exists():
-                    result = subprocess.run(
-                        [str(venv_python), "src/database/db_setup.py"],
-                        cwd=str(PROJECT_ROOT),
-                        capture_output=True,
-                        text=True
-                    )
-                    
-                    subprocess.run(
-                        ["systemctl", "--user", "restart", "helpdesk-simulator"],
-                        capture_output=True
-                    )
-                    
-                    st.cache_data.clear()
-                    
-                    if result.returncode == 0:
-                        st.success(e("✅ ") + get_text('simulation_restarted'))
-                        st.balloons()
-                    else:
-                        st.error(e("❌ ") + f"{get_text('error')}: {result.stderr}")
-                else:
-                    st.error("venv not found")
+                # Restart simulator service if available
+                subprocess.run(
+                    ["systemctl", "--user", "restart", "helpdesk-simulator"],
+                    capture_output=True
+                )
+                
+                st.success(e("✅ ") + get_text('simulation_restarted'))
+                st.balloons()
 
     with col2:
         st.markdown(f"**{get_text('simulator_service')}**")
