@@ -64,27 +64,6 @@ def main():
     st.title("🔬 Score-Vergleich: Q-Score vs O-Score")
     st.markdown("**Paralleler Vergleich: Manager-Bewertung (subjektiv) vs Objektive Metriken**")
     
-    # === MODEL TOGGLE ===
-    st.sidebar.markdown("---")
-    st.sidebar.subheader("Modell-Auswahl")
-    
-    model_choice = st.sidebar.radio(
-        "Aktives Bewertungssystem:",
-        ["Q-Score (Manager)", "O-Score (Objektiv)"],
-        index=0,
-        help="Q-Score: Basiert auf Manager-Bewertung (Q1, Q2, Q3)\nO-Score: Basiert auf objektiven Metriken"
-    )
-    
-    # In Session State speichern fuer andere Seiten
-    st.session_state['active_model'] = 'q_score' if 'Q-Score' in model_choice else 'o_score'
-    
-    if st.session_state['active_model'] == 'o_score':
-        st.sidebar.success("O-Score Modell aktiv")
-    else:
-        st.sidebar.info("Q-Score Modell aktiv")
-    
-    st.sidebar.markdown("---")
-    
     # Daten laden
     data = load_comparison_data()
     
