@@ -173,8 +173,6 @@ def render_o_score_details(model_data, model_type):
         classifier_metrics = metrics.get('classifier', {})
         regressor_metrics = metrics.get('regressor', {})
         
-        st.markdown("### Classifier Metrics")
-        
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
@@ -192,21 +190,6 @@ def render_o_score_details(model_data, model_type):
         with col4:
             cv_std = classifier_metrics.get('cv_std', 0)
             st.metric("CV Std", f"±{cv_std*100:.1f}%")
-        
-        st.markdown("---")
-        
-        st.markdown("### Regressor Metrics")
-        
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            reg_mae = regressor_metrics.get('mae', 0)
-            st.metric(e("📊 ") + "MAE", f"{reg_mae:.3f}")
-        with col2:
-            reg_r2 = regressor_metrics.get('r2', 0)
-            st.metric(e("📈 ") + "R²", f"{reg_r2:.3f}")
-        with col3:
-            reg_rmse = regressor_metrics.get('rmse', 0)
-            st.metric(e("📉 ") + "RMSE", f"{reg_rmse:.3f}")
     
     st.markdown("---")
     
