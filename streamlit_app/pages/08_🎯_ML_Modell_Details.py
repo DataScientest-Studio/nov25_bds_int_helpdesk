@@ -171,6 +171,7 @@ def render_o_score_details(model_data, model_type):
     if metrics:
         classifier_metrics = metrics.get('classifier', {})
         
+        # Zeile 1: Accuracy, MAE, CV Score, CV Std
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
@@ -188,6 +189,25 @@ def render_o_score_details(model_data, model_type):
         with col4:
             cv_std = classifier_metrics.get('cv_std', 0)
             st.metric("CV Std", f"±{cv_std*100:.1f}%")
+        
+        # Zeile 2: F1-Scores und Kappa-Metriken
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            f1_macro = classifier_metrics.get('f1_macro', 0)
+            st.metric("Macro-F1", f"{f1_macro:.3f}")
+        
+        with col2:
+            f1_weighted = classifier_metrics.get('f1_weighted', 0)
+            st.metric("Weighted-F1", f"{f1_weighted:.3f}")
+        
+        with col3:
+            kappa = classifier_metrics.get('kappa', 0)
+            st.metric("Cohen's Kappa", f"{kappa:.3f}")
+        
+        with col4:
+            qwk = classifier_metrics.get('qwk', 0)
+            st.metric("QWK", f"{qwk:.3f}")
     
     st.markdown("---")
     
