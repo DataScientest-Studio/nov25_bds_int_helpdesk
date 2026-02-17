@@ -1,5 +1,5 @@
 """
-NLP-Analyse - Sentiment und Kommunikationsqualität
+NLP Analysis - Sentiment and communication quality
 """
 
 import pandas as pd
@@ -77,7 +77,7 @@ def extract_text_features(text):
 
 
 def extract_patterns(text):
-    """Zählt Kommunikationsmuster im Text."""
+    """Count communication patterns in text."""
     if pd.isna(text) or not str(text).strip():
         return {
             'politeness_score': 0,

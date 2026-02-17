@@ -1,6 +1,6 @@
 """
 Plot-Generator für Projektdokumentation
-Create alle benötigten Visualisierungen als PNG (300 dpi)
+Creates all required visualizations as PNG (300 dpi)
 """
 
 import pandas as pd
@@ -26,7 +26,7 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def load_data():
-    """Lädt alle benötigten Data."""
+    """Load all required data."""
     print("📊 Load Data...")
     
     data = {}
@@ -53,7 +53,7 @@ def load_data():
     wf_path = Path("data/processed/workflow_analysis.csv")
     if wf_path.exists():
         data['workflow'] = pd.read_csv(wf_path)
-        print(f"   Workflow: {len(data['workflow'])} Einträge")
+        print(f"   Workflow: {len(data['workflow'])} entries")
     
     return data
 
@@ -63,7 +63,7 @@ def plot_score_distribution(data):
     print("📈 Erstelle Score-Verteilung...")
     
     if 'ground_truth' not in data:
-        print("   ⚠️ Ground Truth nicht verfügbar")
+        print("   ⚠️ Ground Truth not available")
         return
     
     df = data['ground_truth']
@@ -103,7 +103,7 @@ def plot_correlation_matrix(data):
     print("📈 Erstelle Korrelationsmatrix...")
     
     if 'ground_truth' not in data:
-        print("   ⚠️ Ground Truth nicht verfügbar")
+        print("   ⚠️ Ground Truth not available")
         return
     
     df = data['ground_truth']
@@ -145,7 +145,7 @@ def plot_employee_performance(data):
     print("📈 Erstelle Employee-Performance...")
     
     if 'ground_truth' not in data:
-        print("   ⚠️ Ground Truth nicht verfügbar")
+        print("   ⚠️ Ground Truth not available")
         return
     
     df = data['ground_truth']
@@ -262,7 +262,7 @@ def plot_confusion_matrices(data):
     print("📈 Erstelle Confusion Matrices...")
     
     if 'model' not in data or 'ml_dataset' not in data:
-        print("   ⚠️ Model oder Data nicht verfügbar")
+        print("   ⚠️ Model oder Data not available")
         return
     
     model_data = data['model']
@@ -318,7 +318,7 @@ def plot_feature_importance(data):
     print("📈 Erstelle Feature Importance...")
     
     if 'model' not in data:
-        print("   ⚠️ Model nicht verfügbar")
+        print("   ⚠️ Model not available")
         return
     
     model_data = data['model']

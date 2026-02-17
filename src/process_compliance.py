@@ -1,5 +1,5 @@
 """
-Prozess-Compliance - Prüft die Einhaltung des Workflow-Prozesses
+Process Compliance - Checks adherence to workflow process
 """
 
 import pandas as pd
@@ -10,7 +10,7 @@ from pathlib import Path
 # Erwarteter Prozessfluss
 EXPECTED_PROCESS = ["Open", "In Progress", "Resolved", "Closed"]
 
-# Erlaubte Statusübergänge
+# Allowed status transitions
 VALID_TRANSITIONS = {
     "Open": ["In Progress", "Closed"],
     "In Progress": ["Waiting", "Resolved", "Open"],
@@ -22,7 +22,7 @@ VALID_TRANSITIONS = {
 
 def check_compliance(status_history):
     """
-    Prüft ob ein Workflow den Prozess korrekt einhält.
+    Check if a workflow correctly follows the process.
     
     Args:
         status_history: Liste der Status-Werte
@@ -45,12 +45,12 @@ def check_compliance(status_history):
         prev_status = status_history[i-1]
         curr_status = status_history[i]
         
-        # Prüfe auf ungültige Übergänge
+        # Check for invalid transitions
         valid_next = VALID_TRANSITIONS.get(prev_status, [])
         if curr_status not in valid_next:
             violations += 1
         
-        # Prüfe auf Rückwärtsschritte
+        # Check for backward steps
         if prev_status in EXPECTED_PROCESS and curr_status in EXPECTED_PROCESS:
             prev_idx = EXPECTED_PROCESS.index(prev_status)
             curr_idx = EXPECTED_PROCESS.index(curr_status)
@@ -72,7 +72,7 @@ def check_compliance(status_history):
 def analyze_workflow_from_wfe(issues_df):
     """
     Analyze Workflows basierend auf wfe_* columns.
-    (wfe_ = Anzahl der Durchläufe pro Status)
+    (wfe_ = Number of passes per status)
     
     Args:
         issues_df: DataFrame mit Issues
@@ -93,12 +93,12 @@ def analyze_workflow_from_wfe(issues_df):
         # Calculate Metriken
         total_steps = sum(row[col] for col in wfe_cols if pd.notna(row[col]))
         
-        # Reopens zählen
+        # Count reopens
         reopens = 0
         if 'wfe_reopened' in issues_df.columns:
             reopens = row['wfe_reopened'] if pd.notna(row['wfe_reopened']) else 0
         
-        # Rückwärtsschritte (mehrfache Durchläufe)
+        # Backward steps (multiple passes)
         backward = 0
         for col in wfe_cols:
             if pd.notna(row[col]) and row[col] > 1:
