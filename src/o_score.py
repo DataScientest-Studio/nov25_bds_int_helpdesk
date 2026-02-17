@@ -6,9 +6,6 @@ Berechnet einen datenbasierten Performance-Score (1-5) basierend auf:
 - Effizienz (25%): Bearbeitungszeit
 - Produktivität (20%): Volumen, Processing Steps
 - Kommunikation (20%): First-Touch, Kommentare
-
-Autor: Frank (AI Assistant)
-Datum: 2026-02-16
 """
 
 import pandas as pd
