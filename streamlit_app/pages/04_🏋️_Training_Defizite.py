@@ -40,7 +40,18 @@ page_header(
 def load_training_report():
     report_path = Path(__file__).parent.parent.parent / "reports" / "training_report.csv"
     if report_path.exists():
-        return pd.read_csv(report_path)
+        df = pd.read_csv(report_path)
+        # Normalize column names for compatibility
+        df = df.rename(columns={
+            'employee': 'Employee',
+            'overall_score': 'Avg Score',
+            'ticket_count': 'Tickets',
+            'risk_level': 'Risk Level',
+            'training_areas': 'Training Areas',
+            'flags': 'Flags',
+            'recommendations': 'Recommendations'
+        })
+        return df
     return None
 
 @st.cache_data
