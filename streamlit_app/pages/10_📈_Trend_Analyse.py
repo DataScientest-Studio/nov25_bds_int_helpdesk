@@ -47,13 +47,25 @@ def load_data():
     workflow_path = project_root / "data" / "processed" / "workflow_analysis.csv"
     workflow_df = pd.read_csv(workflow_path) if workflow_path.exists() else pd.DataFrame()
     
-    # Training Report
-    training_path = project_root / "reports" / "training_report.csv"
-    training_df = pd.read_csv(training_path) if training_path.exists() else pd.DataFrame()
+    # O-Score Results (employee performance)
+    o_score_path = project_root / "data" / "processed" / "o_score_results.csv"
+    o_score_df = pd.DataFrame()
+    if o_score_path.exists():
+        o_score_df = pd.read_csv(o_score_path)
+        # Add Risk Level based on o_score
+        o_score_df['Risk Level'] = pd.cut(
+            o_score_df['o_score'],
+            bins=[0, 2.5, 3.5, 5],
+            labels=['RED', 'YELLOW', 'GREEN']
+        )
+        # Rename for compatibility
+        o_score_df['Employee'] = o_score_df['employee']
+        o_score_df['Avg Score'] = o_score_df['o_score']
+        o_score_df['Tickets'] = o_score_df['ticket_count']
     
-    return ml_df, workflow_df, training_df
+    return ml_df, workflow_df, o_score_df
 
-ml_df, workflow_df, training_df = load_data()
+ml_df, workflow_df, employee_df = load_data()
 
 # Tabs
 tab1, tab2 = st.tabs([
@@ -64,12 +76,12 @@ tab1, tab2 = st.tabs([
 with tab1:
     section_header(e("👥 ") + get_text('performance_per_employee'), 'trend_employees')
     
-    if not training_df.empty:
+    if not employee_df.empty:
         # Risk Level Distribution
         col1, col2 = st.columns(2)
         
         with col1:
-            risk_counts = training_df['Risk Level'].value_counts()
+            risk_counts = employee_df['Risk Level'].value_counts()
             
             fig = px.pie(
                 values=risk_counts.values,
@@ -83,7 +95,7 @@ with tab1:
         with col2:
             # Score distribution by Risk Level
             fig = px.box(
-                training_df,
+                employee_df,
                 x='Risk Level',
                 y='Avg Score',
                 title=get_text('scores_by_risk'),
@@ -99,19 +111,19 @@ with tab1:
         
         with col1:
             st.markdown(f"**{e('🥇')} {get_text('top_10_highest')}**")
-            top10 = training_df.nlargest(10, 'Avg Score')[['Employee', 'Avg Score', 'Tickets', 'Risk Level']]
+            top10 = employee_df.nlargest(10, 'Avg Score')[['Employee', 'Avg Score', 'Tickets', 'Risk Level']]
             st.dataframe(top10, use_container_width=True, hide_index=True)
         
         with col2:
             st.markdown(f"**{e('⚠️')} {get_text('bottom_10_lowest')}**")
-            bottom10 = training_df.nsmallest(10, 'Avg Score')[['Employee', 'Avg Score', 'Tickets', 'Risk Level']]
+            bottom10 = employee_df.nsmallest(10, 'Avg Score')[['Employee', 'Avg Score', 'Tickets', 'Risk Level']]
             st.dataframe(bottom10, use_container_width=True, hide_index=True)
         
         # Ticket Volume vs Score
         section_header(e("📊 ") + get_text('ticket_volume_vs_performance'))
         
         fig = px.scatter(
-            training_df,
+            employee_df,
             x='Tickets',
             y='Avg Score',
             color='Risk Level',
@@ -124,7 +136,7 @@ with tab1:
         st.plotly_chart(fig, use_container_width=True)
         
         # Calculate correlation
-        corr = training_df['Tickets'].corr(training_df['Avg Score'])
+        corr = employee_df['Tickets'].corr(employee_df['Avg Score'])
         
         if corr > 0.3:
             st.success(f"{e('📈')} {get_text('positive_correlation')} ({corr:.2f}): {get_text('more_tickets_higher')}")
@@ -138,7 +150,7 @@ with tab1:
 with tab2:
     section_header(e("🔮 ") + get_text('forecast_recommendations'), 'forecast')
     
-    if not training_df.empty:
+    if not employee_df.empty:
         # Simulated forecast (based on current trends)
         st.markdown(f"""
         ### {get_text('what_if_scenario')}
@@ -158,80 +170,102 @@ with tab2:
             )
         
         with col2:
-            training_coverage = st.slider(
-                get_text('training_coverage'),
-                min_value=0,
-                max_value=100,
-                value=50,
-                step=10
+            target_employees = st.multiselect(
+                get_text('target_group'),
+                options=['RED', 'YELLOW', 'GREEN'],
+                default=['RED', 'YELLOW']
             )
         
-        # Simulation
-        yellow_count = len(training_df[training_df['Risk Level'] == 'YELLOW'])
-        trained = int(yellow_count * training_coverage / 100)
-        improved = int(trained * 0.8)  # 80% success rate assumed
+        # Calculate simulation
+        simulated_df = employee_df.copy()
+        mask = simulated_df['Risk Level'].isin(target_employees)
+        simulated_df.loc[mask, 'Avg Score'] = simulated_df.loc[mask, 'Avg Score'] * (1 + training_effect)
+        simulated_df.loc[simulated_df['Avg Score'] > 5, 'Avg Score'] = 5  # Cap at 5
         
-        st.markdown("---")
+        # Recalculate Risk Levels
+        simulated_df['New Risk Level'] = pd.cut(
+            simulated_df['Avg Score'],
+            bins=[0, 2.5, 3.5, 5],
+            labels=['RED', 'YELLOW', 'GREEN']
+        )
         
-        current_green = len(training_df[training_df['Risk Level'] == 'GREEN'])
+        # Show impact
+        st.markdown(f"### {get_text('simulation_results')}")
         
-        st.markdown(f"""
-        ### {e('📊')} {get_text('forecast_at')} {training_coverage}% Training Coverage:
+        col1, col2, col3 = st.columns(3)
         
-        | {get_text('metric')} | {get_text('current')} | {get_text('after_training')} |
-        |--------|---------|---------------|
-        | YELLOW {get_text('employees')} | {yellow_count} | {yellow_count - improved} |
-        | GREEN {get_text('employees')} | {current_green} | {current_green + improved} |
-        | {get_text('expected_improvement')} | - | +{training_effect:.1f} {get_text('average')} |
+        with col1:
+            old_red = (employee_df['Risk Level'] == 'RED').sum()
+            new_red = (simulated_df['New Risk Level'] == 'RED').sum()
+            delta = new_red - old_red
+            st.metric(
+                e("🔴 ") + "RED",
+                new_red,
+                delta=delta,
+                delta_color="inverse"
+            )
         
-        **{get_text('roi_estimate')}:**
-        - {get_text('trained_employees')}: {trained}
-        - {get_text('expected_improvements')}: {improved} (80% {get_text('success_rate')})
-        - {get_text('potential_productivity')}: ~{improved * 5}% {get_text('team_performance')}
-        """)
+        with col2:
+            old_yellow = (employee_df['Risk Level'] == 'YELLOW').sum()
+            new_yellow = (simulated_df['New Risk Level'] == 'YELLOW').sum()
+            delta = new_yellow - old_yellow
+            st.metric(
+                e("🟡 ") + "YELLOW",
+                new_yellow,
+                delta=delta,
+                delta_color="inverse"
+            )
         
-        # Temporal trend (simulated)
-        st.markdown("---")
-        section_header(e("📈 ") + get_text('simulated_6month_trend'))
+        with col3:
+            old_green = (employee_df['Risk Level'] == 'GREEN').sum()
+            new_green = (simulated_df['New Risk Level'] == 'GREEN').sum()
+            delta = new_green - old_green
+            st.metric(
+                e("🟢 ") + "GREEN",
+                new_green,
+                delta=delta,
+                delta_color="normal"
+            )
         
-        # Generate simulated trend data
-        months = pd.date_range(start='2026-01', periods=6, freq='M')
-        
-        current_avg = training_df['Avg Score'].mean()
-        trend_data = []
-        
-        for i, month in enumerate(months):
-            # Simulate gradual improvement trend
-            improvement = (training_effect * training_coverage / 100) * (i / 5)
-            trend_data.append({
-                get_text('month'): month.strftime('%b %Y'),
-                get_text('without_intervention'): current_avg + np.random.normal(0, 0.1),
-                get_text('with_training'): current_avg + improvement + np.random.normal(0, 0.1)
-            })
-        
-        trend_df = pd.DataFrame(trend_data)
-        
+        # Comparison chart
         fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=trend_df[get_text('month')],
-            y=trend_df[get_text('without_intervention')],
-            name=get_text('without_intervention'),
-            line=dict(color='#f44336', dash='dash')
-        ))
-        fig.add_trace(go.Scatter(
-            x=trend_df[get_text('month')],
-            y=trend_df[get_text('with_training')],
-            name=get_text('with_training'),
-            line=dict(color='#4CAF50')
-        ))
+        
+        for risk, color in [('RED', '#f44336'), ('YELLOW', '#FF9800'), ('GREEN', '#4CAF50')]:
+            fig.add_trace(go.Bar(
+                name=f'{risk} (Current)',
+                x=[risk],
+                y=[(employee_df['Risk Level'] == risk).sum()],
+                marker_color=color,
+                opacity=0.5
+            ))
+            fig.add_trace(go.Bar(
+                name=f'{risk} (After)',
+                x=[risk],
+                y=[(simulated_df['New Risk Level'] == risk).sum()],
+                marker_color=color
+            ))
         
         fig.update_layout(
-            title=get_text('forecast_score_development'),
-            xaxis_title=get_text('month'),
-            yaxis_title="Ø Score",
+            title=get_text('before_after_comparison'),
+            barmode='group',
             height=400
         )
         st.plotly_chart(fig, use_container_width=True)
+        
+        # Recommendations
+        st.markdown(f"### {e('💡')} {get_text('recommendations')}")
+        
+        improvements = old_red - new_red + old_yellow - new_yellow
+        if improvements > 0:
+            st.success(f"""
+            {get_text('with_training_effect')} **{training_effect*100:.0f}%** {get_text('on_employees')} 
+            **{', '.join(target_employees)}** {get_text('categories')}:
+            
+            - **{improvements}** {get_text('employees_would_improve')}
+            - **{new_green - old_green}** {get_text('more_in_green')}
+            """)
+        else:
+            st.info(get_text('adjust_parameters'))
     else:
         st.info(get_text('no_data'))
 
