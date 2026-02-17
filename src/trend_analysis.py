@@ -9,12 +9,12 @@ from pathlib import Path
 
 def calculate_employee_trends(scored_df):
     """
-    Berechnet Trends pro Mitarbeiter.
+    Calculatet Trends pro Employee.
     
     Returns:
         DataFrame mit Trend-Metriken
     """
-    print("📈 Berechne Mitarbeiter-Trends...")
+    print("📈 Calculate Employee-Trends...")
     
     # Nur gültige Scores
     valid_df = scored_df[scored_df['Q1'] > 0].copy()
@@ -48,7 +48,7 @@ def calculate_employee_trends(scored_df):
     # Sortieren nach Score
     trends = trends.sort_values('overall_score', ascending=False)
     
-    print(f"   {len(trends)} Mitarbeiter analysiert")
+    print(f"   {len(trends)} Employee analysiert")
     
     return trends
 
@@ -65,7 +65,7 @@ def get_top_bottom(trends_df, n=10):
 
 
 def calculate_team_statistics(trends_df):
-    """Berechnet Team-Statistiken."""
+    """Calculatet Team-Statistiken."""
     stats = {
         'total_employees': len(trends_df),
         'avg_score': round(trends_df['overall_score'].mean(), 2),
@@ -82,19 +82,19 @@ def calculate_team_statistics(trends_df):
 
 def simulate_training_effect(trends_df, improvement=0.5, coverage=0.5):
     """
-    Simuliert den Effekt von Training auf YELLOW-Mitarbeiter.
+    Simuliert den Effekt von Training auf YELLOW-Employee.
     
     Args:
         trends_df: Trends DataFrame
         improvement: Score-Verbesserung durch Training
-        coverage: Anteil der YELLOW-Mitarbeiter die trainiert werden
+        coverage: Anteil der YELLOW-Employee die trainiert werden
         
     Returns:
         dict: Vorher/Nachher Statistiken
     """
     yellow_employees = trends_df[trends_df['risk_level'] == 'YELLOW'].copy()
     
-    # Anzahl zu trainierender Mitarbeiter
+    # Anzahl zu trainierender Employee
     n_to_train = int(len(yellow_employees) * coverage)
     
     # Simuliere Verbesserung
@@ -128,7 +128,7 @@ def print_trend_report(trends_df):
     
     # Team-Statistiken
     print(f"\n📊 TEAM-STATISTIKEN:")
-    print(f"   Mitarbeiter: {stats['total_employees']}")
+    print(f"   Employee: {stats['total_employees']}")
     print(f"   Ø Score: {stats['avg_score']}")
     print(f"   Tickets gesamt: {stats['total_tickets']}")
     
@@ -150,7 +150,7 @@ def print_trend_report(trends_df):
     
     # Training-Simulation
     simulation = simulate_training_effect(trends_df)
-    print(f"\n📊 TRAINING-SIMULATION (50% der YELLOW-Mitarbeiter):")
+    print(f"\n📊 TRAINING-SIMULATION (50% der YELLOW-Employee):")
     print(f"   Aktueller Ø: {simulation['current_avg']}")
     print(f"   Nach Training: {simulation['projected_avg']}")
     print(f"   Verbesserung: +{simulation['improvement']}")
@@ -161,12 +161,12 @@ if __name__ == "__main__":
     print("📈 TREND-ANALYSE")
     print("="*50)
     
-    # Daten laden
+    # Data laden
     data_path = Path("data/raw/issues_snapshot_sample.xlsx")
     
     if data_path.exists():
         scored_df = pd.read_excel(data_path)
-        print(f"📁 Geladen: {len(scored_df)} bewertete Samples")
+        print(f"📁 Loaded: {len(scored_df)} bewertete Samples")
         
         # Trends berechnen
         trends_df = calculate_employee_trends(scored_df)
@@ -174,10 +174,10 @@ if __name__ == "__main__":
         # Report
         print_trend_report(trends_df)
         
-        # Speichern
+        # Saven
         output_path = Path("reports/trend_analysis.csv")
         output_path.parent.mkdir(parents=True, exist_ok=True)
         trends_df.to_csv(output_path, index=False)
-        print(f"\n💾 Gespeichert: {output_path}")
+        print(f"\n💾 Saved: {output_path}")
     else:
-        print("❌ Bewertete Samples nicht gefunden!")
+        print("❌ Bewertete Samples not found!")

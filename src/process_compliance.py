@@ -71,7 +71,7 @@ def check_compliance(status_history):
 
 def analyze_workflow_from_wfe(issues_df):
     """
-    Analysiert Workflows basierend auf wfe_* Spalten.
+    Analyze Workflows basierend auf wfe_* columns.
     (wfe_ = Anzahl der Durchläufe pro Status)
     
     Args:
@@ -82,7 +82,7 @@ def analyze_workflow_from_wfe(issues_df):
     """
     print("🔄 Analysiere Workflows...")
     
-    # Finde alle wfe_ Spalten
+    # Finde alle wfe_ columns
     wfe_cols = [col for col in issues_df.columns if col.startswith('wfe_')]
     
     results = []
@@ -90,7 +90,7 @@ def analyze_workflow_from_wfe(issues_df):
     for idx, row in issues_df.iterrows():
         issue_id = row.get('id', idx)
         
-        # Berechne Metriken
+        # Calculate Metriken
         total_steps = sum(row[col] for col in wfe_cols if pd.notna(row[col]))
         
         # Reopens zählen
@@ -126,7 +126,7 @@ def analyze_workflow_from_wfe(issues_df):
 
 
 def get_compliance_summary(workflow_df):
-    """Erstellt eine Zusammenfassung der Compliance."""
+    """Create eine Summary der Compliance."""
     return {
         'total_issues': len(workflow_df),
         'compliant_count': int(workflow_df['is_compliant'].sum()),
@@ -148,12 +148,12 @@ if __name__ == "__main__":
     
     if data_path.exists():
         issues = pd.read_csv(data_path)
-        print(f"📁 Geladen: {len(issues):,} Issues")
+        print(f"📁 Loaded: {len(issues):,} Issues")
         
         # Analyse
         workflow_df = analyze_workflow_from_wfe(issues)
         
-        # Zusammenfassung
+        # Summary
         summary = get_compliance_summary(workflow_df)
         
         print("\n📊 ZUSAMMENFASSUNG:")
@@ -162,10 +162,10 @@ if __name__ == "__main__":
         print(f"   Ø Compliance Score: {summary['avg_compliance_score']}")
         print(f"   Reopen Rate: {summary['reopen_rate']}%")
         
-        # Speichern
+        # Saven
         output_path = Path("data/processed/workflow_analysis.csv")
         output_path.parent.mkdir(parents=True, exist_ok=True)
         workflow_df.to_csv(output_path, index=False)
-        print(f"\n💾 Gespeichert: {output_path}")
+        print(f"\n💾 Saved: {output_path}")
     else:
-        print("❌ Issues-Datei nicht gefunden!")
+        print("❌ Issues-Datei not found!")

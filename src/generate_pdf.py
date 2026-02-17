@@ -1,6 +1,6 @@
 """
 PDF-Generator fur Projektdokumentation
-Konvertiert Markdown zu PDF mit eingebetteten Plots
+Converts Markdown to PDF with embedded plots
 """
 
 import markdown

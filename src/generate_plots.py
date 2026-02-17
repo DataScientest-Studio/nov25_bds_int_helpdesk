@@ -1,6 +1,6 @@
 """
 Plot-Generator für Projektdokumentation
-Erstellt alle benötigten Visualisierungen als PNG (300 dpi)
+Create alle benötigten Visualisierungen als PNG (300 dpi)
 """
 
 import pandas as pd
@@ -26,12 +26,12 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def load_data():
-    """Lädt alle benötigten Daten."""
-    print("📊 Lade Daten...")
+    """Lädt alle benötigten Data."""
+    print("📊 Load Data...")
     
     data = {}
     
-    # ML-Datensatz
+    # ML-Datasatz
     ml_path = Path("data/processed/ml_dataset.csv")
     if ml_path.exists():
         data['ml_dataset'] = pd.read_csv(ml_path)
@@ -43,11 +43,11 @@ def load_data():
         data['ground_truth'] = pd.read_excel(gt_path)
         print(f"   Ground Truth: {len(data['ground_truth'])} Samples")
     
-    # Modell laden für Feature Importance
+    # Model laden für Feature Importance
     model_path = Path("models/performance_scorer.joblib")
     if model_path.exists():
         data['model'] = joblib.load(model_path)
-        print("   Modell geladen")
+        print("   Model geladen")
     
     # Workflow-Analyse
     wf_path = Path("data/processed/workflow_analysis.csv")
@@ -141,8 +141,8 @@ def plot_correlation_matrix(data):
 
 
 def plot_employee_performance(data):
-    """Plot 3: Top/Bottom 10 Mitarbeiter."""
-    print("📈 Erstelle Mitarbeiter-Performance...")
+    """Plot 3: Top/Bottom 10 Employee."""
+    print("📈 Erstelle Employee-Performance...")
     
     if 'ground_truth' not in data:
         print("   ⚠️ Ground Truth nicht verfügbar")
@@ -151,10 +151,10 @@ def plot_employee_performance(data):
     df = data['ground_truth']
     
     if 'assignee' not in df.columns:
-        print("   ⚠️ 'assignee' Spalte nicht gefunden")
+        print("   ⚠️ 'assignee' Spalte not found")
         return
     
-    # Aggregiere pro Mitarbeiter mit neuer Formel:
+    # Aggregiere pro Employee mit neuer Formel:
     # Quality = (Q1 + Q2) / 2, Client = Q3, Overall = 0.5 * Quality + 0.5 * Client
     emp_scores = df.groupby('assignee').agg({
         'Q1': 'mean',
@@ -181,7 +181,7 @@ def plot_employee_performance(data):
     ax1.set_yticks(range(len(top10)))
     ax1.set_yticklabels([f"MA-{i+1}" for i in range(len(top10))])
     ax1.set_xlabel('Overall Score')
-    ax1.set_title('TOP 10 Mitarbeiter', fontsize=12, fontweight='bold')
+    ax1.set_title('TOP 10 Employee', fontsize=12, fontweight='bold')
     ax1.set_xlim(0, 5)
     ax1.axvline(3.0, color='orange', linestyle='--', alpha=0.7, label='Grenzwert (3.0)')
     ax1.legend()
@@ -198,7 +198,7 @@ def plot_employee_performance(data):
     ax2.set_yticks(range(len(bottom10_sorted)))
     ax2.set_yticklabels([f"MA-{89-i}" for i in range(len(bottom10_sorted))])
     ax2.set_xlabel('Overall Score')
-    ax2.set_title('BOTTOM 10 Mitarbeiter', fontsize=12, fontweight='bold')
+    ax2.set_title('BOTTOM 10 Employee', fontsize=12, fontweight='bold')
     ax2.set_xlim(0, 5)
     ax2.axvline(3.0, color='orange', linestyle='--', alpha=0.7, label='Grenzwert (3.0)')
     ax2.axvline(2.0, color='red', linestyle='--', alpha=0.7, label='Kritisch (2.0)')
@@ -217,7 +217,7 @@ def plot_workflow_status(data):
     """Plot 4: Workflow-Status Verteilung."""
     print("📈 Erstelle Workflow-Status...")
     
-    # Beispiel-Daten für typischen Helpdesk-Workflow
+    # Beispiel-Data für typischen Helpdesk-Workflow
     status_data = {
         'Status': ['Open', 'In Progress', 'Waiting Feedback', 'Verification', 'Resolved', 'Closed'],
         'Anteil': [5, 15, 10, 8, 12, 50]
@@ -262,7 +262,7 @@ def plot_confusion_matrices(data):
     print("📈 Erstelle Confusion Matrices...")
     
     if 'model' not in data or 'ml_dataset' not in data:
-        print("   ⚠️ Modell oder Daten nicht verfügbar")
+        print("   ⚠️ Model oder Data nicht verfügbar")
         return
     
     model_data = data['model']
@@ -318,13 +318,13 @@ def plot_feature_importance(data):
     print("📈 Erstelle Feature Importance...")
     
     if 'model' not in data:
-        print("   ⚠️ Modell nicht verfügbar")
+        print("   ⚠️ Model nicht verfügbar")
         return
     
     model_data = data['model']
     
     if 'feature_importance' not in model_data:
-        print("   ⚠️ Feature Importance nicht im Modell")
+        print("   ⚠️ Feature Importance nicht im Model")
         return
     
     # Q1 Feature Importance als Beispiel
@@ -358,7 +358,7 @@ def plot_team_score_trend(data):
     """Plot 7: Team-Score Trend (simuliert)."""
     print("📈 Erstelle Team-Score Trend...")
     
-    # Simulierte monatliche Daten
+    # Simulierte monatliche Data
     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     
     np.random.seed(42)
@@ -420,7 +420,7 @@ def plot_risk_distribution(data):
         shadow=True,
         textprops={'fontsize': 11}
     )
-    ax1.set_title('Mitarbeiter Risk-Verteilung', fontsize=12, fontweight='bold')
+    ax1.set_title('Employee Risk-Verteilung', fontsize=12, fontweight='bold')
     
     # Erklarung
     ax2 = axes[1]
@@ -520,8 +520,8 @@ def plot_workflow_diagram():
 
 
 def plot_model_comparison():
-    """Plot 10: Modell-Metriken Vergleich."""
-    print("📈 Erstelle Modell-Vergleich...")
+    """Plot 10: Model-Metriken Vergleich."""
+    print("📈 Erstelle Model-Vergleich...")
     
     # Neue Metriken mit max_depth=6
     metrics = {
@@ -580,7 +580,7 @@ def plot_model_comparison():
         height = bar.get_height()
         ax3.text(bar.get_x() + bar.get_width()/2., height + 0.02, f'{height:.3f}', ha='center', fontweight='bold')
     
-    plt.suptitle('ML-Modell Performance (max_depth=6)', fontsize=14, fontweight='bold', y=1.02)
+    plt.suptitle('ML-Model Performance (max_depth=6)', fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout()
     plt.savefig(OUTPUT_DIR / "10_model_metrics.png", bbox_inches='tight')
     plt.close()
@@ -592,7 +592,7 @@ def main():
     print("📊 PLOT-GENERATOR FUR PROJEKTDOKUMENTATION")
     print("="*60)
     
-    # Daten laden
+    # Data laden
     data = load_data()
     
     print("\n📈 Erstelle Plots...")

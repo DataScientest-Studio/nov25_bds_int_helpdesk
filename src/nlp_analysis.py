@@ -40,7 +40,7 @@ SOLUTION_WORDS = [
 
 def analyze_sentiment(text):
     """
-    Analysiert das Sentiment eines Textes.
+    Analyze das Sentiment eines Textes.
     
     Returns:
         dict: Sentiment-Scores (compound, pos, neg, neu)
@@ -160,7 +160,7 @@ def aggregate_by_issue(features_df):
         'solution_score': 'sum'
     }).reset_index()
     
-    # Spalten umbenennen
+    # columns umbenennen
     aggregated.columns = ['_'.join(col).strip('_') for col in aggregated.columns]
     
     print(f"✅ {len(aggregated):,} Issues aggregiert")
@@ -177,7 +177,7 @@ if __name__ == "__main__":
     
     if data_path.exists():
         utterances = pd.read_csv(data_path)
-        print(f"📁 Geladen: {len(utterances):,} Kommentare")
+        print(f"📁 Loaded: {len(utterances):,} Kommentare")
         
         # Verarbeiten
         features = process_utterances(utterances)
@@ -185,15 +185,15 @@ if __name__ == "__main__":
         # Aggregieren
         issue_features = aggregate_by_issue(features)
         
-        # Speichern
+        # Saven
         output_path = Path("data/processed/nlp_features.csv")
         output_path.parent.mkdir(parents=True, exist_ok=True)
         issue_features.to_csv(output_path, index=False)
-        print(f"\n💾 Gespeichert: {output_path}")
+        print(f"\n💾 Saved: {output_path}")
         
         # Statistiken
         if 'sentiment_compound_mean' in issue_features.columns:
             avg_sentiment = issue_features['sentiment_compound_mean'].mean()
             print(f"\n📊 Durchschnittliches Sentiment: {avg_sentiment:.3f}")
     else:
-        print("❌ Utterances-Datei nicht gefunden!")
+        print("❌ Utterances-Datei not found!")
