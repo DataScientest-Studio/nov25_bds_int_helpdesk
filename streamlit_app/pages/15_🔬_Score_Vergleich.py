@@ -15,7 +15,15 @@ import sys
 # Projekt-Pfad (pages -> streamlit_app -> project)
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from components.settings import (
+    render_settings_sidebar, init_session_state, get_text, e
+)
+
 st.set_page_config(page_title="Score-Vergleich", page_icon="🔬", layout="wide")
+
+# Initialize and render sidebar
+init_session_state()
+render_settings_sidebar()
 
 # Pfade - von pages aus: parent = streamlit_app, parent.parent = project root
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
