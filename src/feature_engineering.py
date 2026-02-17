@@ -101,12 +101,15 @@ def prepare_ml_dataset(scored_df):
     target_cols = ['Q1', 'Q2', 'Q3']
     
     # Columns we do NOT use as features
+    # Note: 'spent hours' and 'comments count' are excluded because
+    # they are renamed to 'spent_hours' and 'comments_count' (normalized names)
     exclude_cols = [
         'id', 'no', 'project', 'reporter', 'assignee',
         'started', 'ended', 'Notes', 'valid',
         'issue_proj', 'issue_reporter', 'issue_assignee',
         'issue_created', 'issue_resolution_date', 'last_change_date',
-        'type', 'issue_type', 'issue_priority', 'priority'
+        'type', 'issue_type', 'issue_priority', 'priority',
+        'spent hours', 'comments count'  # Use normalized names instead
     ] + target_cols
     
     # Only numeric columns as features

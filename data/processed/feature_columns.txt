@@ -1,17 +1,6 @@
 contributors
 turn_no
-spent hours
 steps
-comments count
 spent_hours
-steps_count
 comments_count
 priority_numeric
-type_Deployment
-type_HD Service
-type_Ticket
-is_multi_assignee
-is_first_turn
-assignee_avg_time
-assignee_std_time
-assignee_ticket_count

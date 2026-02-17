@@ -211,7 +211,7 @@ def train_model(X, y, test_size=0.2):
     }
 
 
-def save_model(model_data, output_path="models/performance_scorer.joblib"):
+def save_model(model_data, output_path="models/q_score_model.joblib"):
     """Save the trained model."""
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -220,7 +220,7 @@ def save_model(model_data, output_path="models/performance_scorer.joblib"):
     print(f"\n💾 Model saved: {output_path}")
 
 
-def load_model(model_path="models/performance_scorer.joblib"):
+def load_model(model_path="models/q_score_model.joblib"):
     """Load a saved model."""
     model_path = Path(model_path)
     if model_path.exists():
