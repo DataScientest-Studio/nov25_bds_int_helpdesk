@@ -1,0 +1,287 @@
+"""
+Training & Deficits
+Identification of training needs and disciplinary actions.
+"""
+
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Import components
+from components.settings import (
+    render_navigation,
+    render_settings_sidebar, section_header, page_header, render_footer,
+    get_text, get_help, init_session_state, e
+)
+
+st.set_page_config(page_title="Training & Deficits", page_icon="🏋️", layout="wide")
+
+# Initialize settings
+init_session_state()
+
+# Render settings sidebar
+render_settings_sidebar()
+
+# Page header
+page_header(
+    e("🏋️ ") + get_text('training_deficits'),
+    get_text('training_subtitle'),
+    help_key='training'
+)
+
+# Load data
+@st.cache_data
+def load_training_report():
+    report_path = Path(__file__).parent.parent.parent / "reports" / "training_report.csv"
+    if report_path.exists():
+        return pd.read_csv(report_path)
+    return None
+
+@st.cache_data
+def load_scored_data():
+    data_path = Path(__file__).parent.parent.parent / "data" / "raw" / "issues_snapshot_sample.xlsx"
+    if data_path.exists():
+        return pd.read_excel(data_path)
+    return None
+
+report_df = load_training_report()
+scored_df = load_scored_data()
+
+if report_df is None:
+    st.warning(e("⚠️ ") + "Training Report not found. Please run `training_deficits.py` first.")
+    st.stop()
+
+# KPI Cards
+col1, col2, col3, col4 = st.columns(4)
+
+green_count = len(report_df[report_df['Risk Level'] == 'GREEN'])
+yellow_count = len(report_df[report_df['Risk Level'] == 'YELLOW'])
+red_count = len(report_df[report_df['Risk Level'] == 'RED'])
+total = len(report_df)
+
+with col1:
+    st.metric(e("👥 ") + get_text('total_employees'), total)
+    
+with col2:
+    st.metric(e("🟢 ") + f"OK (GREEN)", green_count, f"{green_count/total*100:.0f}%")
+    
+with col3:
+    st.metric(e("🟡 ") + f"Training (YELLOW)", yellow_count, f"{yellow_count/total*100:.0f}%")
+    
+with col4:
+    st.metric(e("🔴 ") + f"{get_text('disciplinary')} (RED)", red_count, f"{red_count/total*100:.0f}%")
+
+st.markdown("---")
+
+# Pie Chart
+col1, col2 = st.columns([1, 2])
+
+with col1:
+    section_header(e("📊 ") + get_text('risk_overview'))
+    
+    fig = go.Figure(data=[go.Pie(
+        labels=[e('🟢') + ' GREEN', e('🟡') + ' YELLOW', e('🔴') + ' RED'],
+        values=[green_count, yellow_count, red_count],
+        hole=0.4,
+        marker_colors=['#28a745', '#ffc107', '#dc3545']
+    )])
+    fig.update_layout(height=300)
+    st.plotly_chart(fig, use_container_width=True)
+
+with col2:
+    section_header(e("📈 ") + get_text('score_by_risk'))
+    
+    fig = px.box(
+        report_df, 
+        x='Risk Level', 
+        y='Avg Score',
+        color='Risk Level',
+        color_discrete_map={'GREEN': '#28a745', 'YELLOW': '#ffc107', 'RED': '#dc3545'},
+        title=""
+    )
+    fig.update_layout(height=300, showlegend=False)
+    st.plotly_chart(fig, use_container_width=True)
+
+st.markdown("---")
+
+# Tabs for different views
+tab1, tab2, tab3, tab4 = st.tabs([
+    e("🔴 ") + get_text('urgent'), 
+    e("🟡 ") + get_text('training_recommended'), 
+    e("📋 ") + get_text('all_employees'),
+    e("📖 ") + get_text('risk_level_def')
+])
+
+with tab1:
+    section_header(e("🔴 ") + get_text('immediate_action'))
+    
+    red_employees = report_df[report_df['Risk Level'] == 'RED'].copy()
+    
+    if len(red_employees) == 0:
+        st.success(e("✅ ") + get_text('no_critical'))
+    else:
+        st.error(e("⚠️ ") + f"{len(red_employees)} {get_text('critical_attention')}")
+        
+        for _, row in red_employees.iterrows():
+            with st.expander(f"{e('👤')} {row['Employee']} - Score: {row['Avg Score']:.2f}"):
+                st.markdown(f"""
+                **{get_text('flags')}:** {row['Flags']}
+                
+                **{get_text('training_areas')}:** {row['Training Areas']}
+                
+                **{get_text('recommendations')}:**
+                - Personal conversation with the employee
+                - Root cause analysis of low scores
+                - Create individual development plan
+                """)
+
+with tab2:
+    section_header(e("🟡 ") + get_text('training_recommended'))
+    
+    yellow_employees = report_df[report_df['Risk Level'] == 'YELLOW'].copy()
+    
+    if len(yellow_employees) == 0:
+        st.success(e("✅ ") + get_text('no_training_needed'))
+    else:
+        st.warning(e("📚 ") + f"{len(yellow_employees)} {get_text('should_receive_training')}")
+        
+        # Group by training areas
+        training_areas_all = []
+        for areas in yellow_employees['Training Areas'].dropna():
+            training_areas_all.extend([a.strip() for a in areas.split(',')])
+        
+        if training_areas_all:
+            area_counts = pd.Series(training_areas_all).value_counts()
+            
+            fig = px.bar(
+                x=area_counts.values,
+                y=area_counts.index,
+                orientation='h',
+                title=get_text('common_training_needs')
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        
+        st.dataframe(yellow_employees[['Employee', 'Avg Score', 'Tickets', 'Training Areas']], 
+                     use_container_width=True)
+
+with tab3:
+    section_header(e("📋 ") + get_text('all_employees'))
+    
+    # Filter
+    col1, col2 = st.columns(2)
+    with col1:
+        risk_filter = st.multiselect(
+            get_text('risk_level') + " " + get_text('filter'),
+            options=['GREEN', 'YELLOW', 'RED'],
+            default=['GREEN', 'YELLOW', 'RED']
+        )
+    
+    with col2:
+        min_tickets = st.slider(get_text('min_tickets'), 0, int(report_df['Tickets'].max()), 0)
+    
+    filtered_df = report_df[
+        (report_df['Risk Level'].isin(risk_filter)) &
+        (report_df['Tickets'] >= min_tickets)
+    ]
+    
+    st.dataframe(
+        filtered_df.style.apply(
+            lambda x: ['background-color: #d4edda' if v == 'GREEN' 
+                      else 'background-color: #fff3cd' if v == 'YELLOW'
+                      else 'background-color: #f8d7da' if v == 'RED'
+                      else '' for v in x],
+            subset=['Risk Level']
+        ),
+        use_container_width=True
+    )
+
+with tab4:
+    section_header(e("📖 ") + get_text('risk_level_def'))
+    
+    st.markdown(get_text('interpretation') if st.session_state.language == 'en' else 
+                "Die Risk Level Klassifikation basiert auf objektiven Kriterien.")
+    
+    # RED Definition
+    st.markdown(f"### {e('🔴')} RED - {get_text('critical')}")
+    st.error(f"""
+    **RED** classification when **at least one** condition is met:
+    
+    | {get_text('criterion')} | {get_text('threshold')} | {get_text('meaning')} |
+    |-----------|---------------|-----------|
+    | **Critical low score** | Ø < **1.5** | Performance extremely poor |
+    | **Critical reopen rate** | > **30%** | Every 3rd ticket reopened |
+    | **Repeated violations** | > **5** in 30 days | Constant process violations |
+    | **Consecutively low** | **3x** in a row < 2 | Persistently poor performance |
+    """)
+    
+    # YELLOW Definition
+    st.markdown(f"### {e('🟡')} YELLOW - {get_text('training_recommended')}")
+    st.warning(f"""
+    **YELLOW** classification when **at least one** condition is met (but no RED):
+    
+    | {get_text('criterion')} | {get_text('threshold')} | Training |
+    |-----------|---------------|---------------------|
+    | **Low score** | Ø < **2.5** | General quality training |
+    | **High reopen rate** | > **15%** | Quality assurance training |
+    | **Low compliance** | < **70%** | Process training |
+    | **Slow processing** | > **2x** team avg | Efficiency training |
+    | **Weak communication** | Score < **2.0** | Communication training |
+    """)
+    
+    # GREEN Definition
+    st.markdown(f"### {e('🟢')} GREEN - {get_text('all_ok')}")
+    st.success("""
+    **GREEN** classification when:
+    - **No** YELLOW conditions are met
+    - **No** RED conditions are met
+    """)
+    
+    # Threshold table
+    st.markdown(f"### {e('📊')} {get_text('all_thresholds')}")
+    
+    thresholds_df = pd.DataFrame({
+        get_text('category'): ['Training', 'Training', 'Training', 'Training', 'Training', 
+                     get_text('disciplinary'), get_text('disciplinary'), get_text('disciplinary'), get_text('disciplinary')],
+        get_text('criterion'): ['Low Score', 'High Reopen Rate', 'Low Compliance', 
+                     'Slow Processing', 'Weak Communication',
+                     'Critical Low Score', 'Critical Reopen Rate', 
+                     'Repeated Violations', 'Consecutively Low'],
+        get_text('threshold'): ['< 2.5', '> 15%', '< 70%', '> 2x Team Avg', '< 2.0',
+                         '< 1.5', '> 30%', '> 5 in 30 days', '3x < 2'],
+        get_text('risk_level'): [e('🟡') + ' YELLOW', e('🟡') + ' YELLOW', e('🟡') + ' YELLOW', 
+                       e('🟡') + ' YELLOW', e('🟡') + ' YELLOW',
+                       e('🔴') + ' RED', e('🔴') + ' RED', e('🔴') + ' RED', e('🔴') + ' RED']
+    })
+    
+    st.dataframe(thresholds_df, use_container_width=True, hide_index=True)
+
+st.markdown("---")
+
+# Recommendations
+section_header(e("💡 ") + get_text('management_recommendations'))
+
+st.markdown(f"""
+### {get_text('immediate_action')} ({e('🔴')} RED):
+1. **Personal meeting** within 5 business days
+2. **Root cause analysis** - External factors involved?
+3. **Written development plan** with clear goals
+
+### Training Programs ({e('🟡')} YELLOW):
+1. **Workshop: Problem Analysis** - Systematic approach
+2. **Mentoring Program** - Pair work with experienced colleagues
+3. **Process Training** - Improve workflow compliance
+
+### Preventive Measures:
+1. Regular **feedback sessions** (monthly)
+2. **Peer review** for critical tickets
+3. **Automated alerts** on score deterioration
+""")
+
+# Footer
+render_footer()

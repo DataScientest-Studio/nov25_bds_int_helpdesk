@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Performance - Project Architecture</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #1a237e;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #283593;
+            border-bottom: 2px solid #3f51b5;
+            padding-bottom: 10px;
+        }
+        .mermaid {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        th {
+            background: #3f51b5;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        code {
+            background: #e8eaf6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+        }
+        .legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        .data { background: #e1f5fe; border: 2px solid #01579b; }
+        .script { background: #fff3e0; border: 2px solid #e65100; }
+        .model { background: #f3e5f5; border: 2px solid #7b1fa2; }
+        .dash { background: #e8f5e9; border: 2px solid #2e7d32; }
+        .report { background: #fce4ec; border: 2px solid #c2185b; }
+    </style>
+</head>
+<body>
+    <h1>🎯 Employee Performance Prediction System</h1>
+    <h2>Project Architecture & Data Flow</h2>
+    
+    <div class="legend">
+        <div class="legend-item"><div class="legend-color data"></div> Data Files</div>
+        <div class="legend-item"><div class="legend-color script"></div> Scripts & Notebooks</div>
+        <div class="legend-item"><div class="legend-color model"></div> ML Models</div>
+        <div class="legend-item"><div class="legend-color dash"></div> Dashboard Pages</div>
+        <div class="legend-item"><div class="legend-color report"></div> Reports</div>
+    </div>
+
+    <div class="mermaid">
+flowchart TB
+    subgraph DATA["📁 RAW DATA"]
+        I1[("issues.csv<br/>66,691 rows")]
+        I2[("issues_snapshot.csv<br/>90,963 rows")]
+        I3[("issues_change_history.csv<br/>257,508 rows")]
+        I4[("sample_utterances.csv<br/>30,104 rows")]
+        I5[("issues_snapshot_sample.xlsx<br/>747 scored")]
+    end
+
+    subgraph NOTEBOOKS["📓 NOTEBOOKS"]
+        N1["01_Data-inventory.ipynb"]
+        N2["02_EDA_Initial.ipynb"]
+    end
+
+    subgraph SRC["⚙️ PROCESSING SCRIPTS"]
+        S1["data_loader.py"]
+        S2["feature_engineering.py"]
+        S3["bias_analysis.py"]
+        S4["o_score.py"]
+        S5["ml_model_q.py"]
+        S6["ml_model_o.py"]
+        S7["nlp_analysis.py"]
+        S8["process_compliance.py"]
+    end
+
+    subgraph PROCESSED["📊 PROCESSED DATA"]
+        P1[("ml_dataset.csv<br/>603 rows")]
+        P2[("o_score_results.csv<br/>231 employees")]
+        P3[("q_vs_o_score_comparison.csv")]
+        P4[("nlp_features.csv")]
+        P5[("workflow_analysis.csv")]
+    end
+
+    subgraph MODELS["🤖 TRAINED MODELS"]
+        M1[("q_score_model.joblib<br/>Acc: 68.6%")]
+        M2[("o_score_model.joblib<br/>Acc: 72.3%")]
+    end
+
+    subgraph DASHBOARD["🖥️ STREAMLIT DASHBOARD (Port 8502)"]
+        D0["app.py"]
+        D1["Dashboard"]
+        D2["Employee Performance"]
+        D3["ML Model Details"]
+        D4["Score Comparison"]
+        D5["Training Deficits"]
+    end
+
+    %% Data Flow
+    I1 & I2 --> S1
+    S1 --> S2
+    S2 --> P1
+    
+    I2 --> S4
+    S4 --> P2
+    
+    I5 --> S3
+    S3 --> P3
+    
+    I4 --> S7
+    S7 --> P4
+    
+    I1 --> S8
+    S8 --> P5
+    
+    P1 --> S5
+    P1 & P2 --> S6
+    
+    S5 --> M1
+    S6 --> M2
+    
+    DATA --> NOTEBOOKS
+    PROCESSED --> DASHBOARD
+    MODELS --> D3
+
+    %% Styling
+    classDef dataNode fill:#e1f5fe,stroke:#01579b
+    classDef scriptNode fill:#fff3e0,stroke:#e65100
+    classDef modelNode fill:#f3e5f5,stroke:#7b1fa2
+    classDef dashNode fill:#e8f5e9,stroke:#2e7d32
+    
+    class I1,I2,I3,I4,I5,P1,P2,P3,P4,P5 dataNode
+    class S1,S2,S3,S4,S5,S6,S7,S8,N1,N2 scriptNode
+    class M1,M2 modelNode
+    class D0,D1,D2,D3,D4,D5 dashNode
+    </div>
+
+    <h2>📓 Notebooks</h2>
+    <table>
+        <tr><th>Notebook</th><th>Purpose</th><th>Output</th></tr>
+        <tr><td><code>01_Data-inventory.ipynb</code></td><td>Data exploration, schema analysis</td><td>Data overview, missing values report</td></tr>
+        <tr><td><code>02_EDA_Initial.ipynb</code></td><td>Initial exploratory data analysis</td><td>Distribution plots, correlations</td></tr>
+    </table>
+
+    <h2>⚙️ Source Scripts & Outputs</h2>
+    <table>
+        <tr><th>Script</th><th>Input</th><th>Output</th><th>Key Results</th></tr>
+        <tr><td><code>data_loader.py</code></td><td>raw/*.csv</td><td>DataFrames</td><td>66,691 tickets loaded</td></tr>
+        <tr><td><code>feature_engineering.py</code></td><td>issues.csv, snapshot.csv</td><td>ml_dataset.csv</td><td>603 samples, 20 features</td></tr>
+        <tr><td><code>bias_analysis.py</code></td><td>scored samples</td><td>Bias metrics</td><td>Halo: r=0.971, Leniency: +1.0</td></tr>
+        <tr><td><code>o_score.py</code></td><td>issues_snapshot.csv</td><td>o_score_results.csv</td><td>231 employees scored (1-5)</td></tr>
+        <tr><td><code>ml_model_q.py</code></td><td>ml_dataset.csv</td><td>q_score_model.joblib</td><td><b>Acc: 68.6%, CV: 65.1%</b></td></tr>
+        <tr><td><code>ml_model_o.py</code></td><td>o_score_results.csv</td><td>o_score_model.joblib</td><td><b>Acc: 72.3%, CV: 80.9%</b></td></tr>
+        <tr><td><code>nlp_analysis.py</code></td><td>sample_utterances.csv</td><td>nlp_features.csv, dialog_acts.csv</td><td>Sentiment, Dialog Acts classified</td></tr>
+        <tr><td><code>process_compliance.py</code></td><td>issues.csv</td><td>workflow_analysis.csv</td><td>SLA compliance metrics</td></tr>
+        <tr><td><code>training_deficits.py</code></td><td>o_score_results.csv</td><td>Training recommendations</td><td>RED: 43, YELLOW: 89, GREEN: 99</td></tr>
+        <tr><td><code>trend_analysis.py</code></td><td>issues.csv</td><td>Time series plots</td><td>Seasonal patterns identified</td></tr>
+    </table>
+
+    <h2>🤖 Trained Models</h2>
+    <table>
+        <tr><th>Model</th><th>Algorithm</th><th>Targets</th><th>Accuracy</th><th>CV Score</th></tr>
+        <tr><td><code>q_score_model.joblib</code></td><td>XGBoost + LightGBM + RF Ensemble</td><td>Q1, Q2, Q3</td><td>68.6%</td><td>65.1%</td></tr>
+        <tr><td><code>o_score_model.joblib</code></td><td>XGBoost + LightGBM + RF Ensemble</td><td>O-Score (1-5)</td><td>72.3%</td><td>80.9%</td></tr>
+    </table>
+
+    <h2>🖥️ Dashboard Pages</h2>
+    <table>
+        <tr><th>Page</th><th>Data Sources</th><th>Features</th></tr>
+        <tr><td>Data Inventory</td><td>raw/*.csv</td><td>Schema, statistics, data quality</td></tr>
+        <tr><td>Dashboard</td><td>All data</td><td>KPIs, overview metrics</td></tr>
+        <tr><td>Ticket Monitor</td><td>issues.csv</td><td>Real-time ticket tracking</td></tr>
+        <tr><td>Employee Performance</td><td>o_score_results.csv</td><td>Rankings, risk levels (GREEN/YELLOW/RED)</td></tr>
+        <tr><td>Training Deficits</td><td>o_score_results.csv</td><td>Training recommendations</td></tr>
+        <tr><td>Objectivity Check</td><td>scored samples</td><td>Bias visualization (Halo, Leniency)</td></tr>
+        <tr><td>Communication NLP</td><td>nlp_features.csv</td><td>Sentiment analysis, dialog acts</td></tr>
+        <tr><td>Process Compliance</td><td>workflow_analysis.csv</td><td>SLA metrics, workflow times</td></tr>
+        <tr><td>ML Model Details</td><td>*.joblib</td><td>Feature importance, confusion matrix</td></tr>
+        <tr><td>Trend Analysis</td><td>issues.csv</td><td>Time series charts</td></tr>
+        <tr><td>Score Comparison</td><td>q_vs_o_score_comparison.csv</td><td>Q-Score vs O-Score scatter</td></tr>
+    </table>
+
+    <p style="text-align:center; color:#666; margin-top:40px;">Generated: 2026-02-17 | Employee Performance 2</p>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>

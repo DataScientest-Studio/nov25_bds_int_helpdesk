@@ -1,0 +1,77 @@
+[
+  {
+    "timestamp": "2026-02-13T12:09:59.634462",
+    "features": {
+      "contributors": 2,
+      "turn_no": 1,
+      "spent hours": 19.743551541261112,
+      "steps": 8,
+      "comments count": 17
+    },
+    "actual_scores": {
+      "Q1": 1,
+      "Q2": 5,
+      "Q3": 4
+    }
+  },
+  {
+    "timestamp": "2026-02-13T12:09:59.635722",
+    "features": {
+      "contributors": 1,
+      "turn_no": 1,
+      "spent hours": 4.144042657673526,
+      "steps": 2,
+      "comments count": 16
+    },
+    "actual_scores": {
+      "Q1": 5,
+      "Q2": 1,
+      "Q3": 2
+    }
+  },
+  {
+    "timestamp": "2026-02-13T12:09:59.637047",
+    "features": {
+      "contributors": 2,
+      "turn_no": 1,
+      "spent hours": 3.0413947240906127,
+      "steps": 8,
+      "comments count": 18
+    },
+    "actual_scores": {
+      "Q1": 1,
+      "Q2": 2,
+      "Q3": 2
+    }
+  },
+  {
+    "timestamp": "2026-02-13T12:09:59.638276",
+    "features": {
+      "contributors": 4,
+      "turn_no": 1,
+      "spent hours": 11.03834272746831,
+      "steps": 6,
+      "comments count": 18
+    },
+    "actual_scores": {
+      "Q1": 5,
+      "Q2": 4,
+      "Q3": 2
+    }
+  },
+  {
+    "timestamp": "2026-02-13T12:09:59.639601",
+    "features": {
+      "contributors": 3,
+      "turn_no": 1,
+      "spent hours": 12.667211769987105,
+      "steps": 7,
+      "comments count": 13
+    },
+    "actual_scores": {
+      "Q1": 5,
+      "Q2": 4,
+      "Q3": 5
+    }
+  }
+]
