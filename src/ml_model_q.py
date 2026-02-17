@@ -1,5 +1,5 @@
 """
-ML-Modell - Trainiert ein Ensemble-Modell für Score-Vorhersage
+ML Model - Trains an ensemble model for score prediction
 """
 
 import pandas as pd
@@ -18,8 +18,8 @@ from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 
 def quadratic_weighted_kappa(y_true, y_pred, num_classes=5):
     """
-    Berechnet Quadratic Weighted Kappa (QWK).
-    Bestraft groessere Abweichungen staerker als kleinere.
+    Calculate Quadratic Weighted Kappa (QWK).
+    Penalizes larger deviations more than smaller ones.
     """
     cm = confusion_matrix(y_true, y_pred, labels=list(range(num_classes)))
     
@@ -42,7 +42,7 @@ def quadratic_weighted_kappa(y_true, y_pred, num_classes=5):
     
     return 1.0 - (num / den)
 
-# Optional: XGBoost und LightGBM
+# Optional: XGBoost and LightGBM
 try:
     import xgboost as xgb
     XGBOOST_AVAILABLE = True
@@ -58,19 +58,19 @@ except ImportError:
 
 def create_model():
     """
-    Erstellt das ML-Ensemble.
+    Create ML ensemble.
     
-    Besteht aus:
-    - XGBoost (falls verfügbar)
-    - LightGBM (falls verfügbar)
-    - RandomForest (immer verfügbar)
+    Consists of:
+    - XGBoost (if available)
+    - LightGBM (if available)
+    - RandomForest (always available)
     """
     estimators = []
     
-    # RandomForest (Basis)
+    # RandomForest (base)
     rf = RandomForestClassifier(
         n_estimators=100,
-        max_depth=6,  # Optimiert für Balance zwischen Bias und Varianz
+        max_depth=6,  # Optimized for balance between bias and variance
         random_state=42,
         n_jobs=-1
     )
@@ -80,7 +80,7 @@ def create_model():
     if XGBOOST_AVAILABLE:
         xgb_model = xgb.XGBClassifier(
             n_estimators=100,
-            max_depth=6,  # Einheitlich mit anderen Modellen
+            max_depth=6,  # Consistent with other models
             learning_rate=0.1,
             random_state=42,
             verbosity=0
@@ -91,7 +91,7 @@ def create_model():
     if LIGHTGBM_AVAILABLE:
         lgb_model = lgb.LGBMClassifier(
             n_estimators=100,
-            max_depth=6,  # Einheitlich mit anderen Modellen
+            max_depth=6,  # Consistent with other models
             learning_rate=0.1,
             random_state=42,
             verbose=-1
@@ -109,17 +109,17 @@ def create_model():
 
 def train_model(X, y, test_size=0.2):
     """
-    Trainiert das Modell.
+    Train the model.
     
     Args:
         X: Features DataFrame
         y: Target DataFrame (Q1, Q2, Q3)
-        test_size: Anteil Test-Daten
+        test_size: Test data proportion
         
     Returns:
-        dict: Trainierte Modelle und Metriken
+        dict: Trained models and metrics
     """
-    print("\n🤖 MODELL-TRAINING")
+    print("\n🤖 MODEL TRAINING")
     print("="*50)
     
     targets = ['Q1', 'Q2', 'Q3']
@@ -131,9 +131,9 @@ def train_model(X, y, test_size=0.2):
     scaler = StandardScaler()
     
     for target in targets:
-        print(f"\n📊 Training für {target}...")
+        print(f"\n📊 Training for {target}...")
         
-        # Target vorbereiten (Scores 1-5 -> 0-4)
+        # Prepare target (Scores 1-5 -> 0-4)
         y_target = y[target].values - 1
         
         # Train-Test Split
@@ -144,20 +144,20 @@ def train_model(X, y, test_size=0.2):
             stratify=y_target
         )
         
-        # Skalierung
+        # Scaling
         X_train_scaled = scaler.fit_transform(X_train)
         X_test_scaled = scaler.transform(X_test)
         
         print(f"   Train: {len(X_train)}, Test: {len(X_test)}")
         
-        # Modell erstellen und trainieren
+        # Create and train model
         model = create_model()
         model.fit(X_train_scaled, y_train)
         
-        # Vorhersage
+        # Prediction
         y_pred = model.predict(X_test_scaled)
         
-        # Basis-Metriken
+        # Base metrics
         accuracy = accuracy_score(y_test, y_pred)
         mae = mean_absolute_error(y_test, y_pred)
         
@@ -165,7 +165,7 @@ def train_model(X, y, test_size=0.2):
         f1_macro = f1_score(y_test, y_pred, average='macro', zero_division=0)
         f1_weighted = f1_score(y_test, y_pred, average='weighted', zero_division=0)
         
-        # Kappa-Metriken
+        # Kappa metrics
         kappa = cohen_kappa_score(y_test, y_pred)
         qwk = quadratic_weighted_kappa(np.array(y_test), np.array(y_pred))
         
@@ -195,7 +195,7 @@ def train_model(X, y, test_size=0.2):
         
         models[target] = model
         
-        # Feature Importance (von RandomForest)
+        # Feature Importance (from RandomForest)
         if hasattr(model.named_estimators_['rf'], 'feature_importances_'):
             importance_df = pd.DataFrame({
                 'feature': X.columns,
@@ -212,16 +212,16 @@ def train_model(X, y, test_size=0.2):
 
 
 def save_model(model_data, output_path="models/performance_scorer.joblib"):
-    """Speichert das trainierte Modell."""
+    """Save the trained model."""
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
     joblib.dump(model_data, output_path)
-    print(f"\n💾 Modell gespeichert: {output_path}")
+    print(f"\n💾 Model saved: {output_path}")
 
 
 def load_model(model_path="models/performance_scorer.joblib"):
-    """Lädt ein gespeichertes Modell."""
+    """Load a saved model."""
     model_path = Path(model_path)
     if model_path.exists():
         return joblib.load(model_path)
@@ -229,9 +229,9 @@ def load_model(model_path="models/performance_scorer.joblib"):
 
 
 def print_summary(metrics):
-    """Druckt eine Zusammenfassung."""
+    """Print summary."""
     print("\n" + "="*50)
-    print("📊 MODELL-ZUSAMMENFASSUNG")
+    print("📊 MODEL SUMMARY")
     print("="*50)
     
     for target, m in metrics.items():
@@ -240,28 +240,28 @@ def print_summary(metrics):
         print(f"   Kappa: {m['kappa']}")
         print(f"   CV: {m['cv_mean']} ± {m['cv_std']}")
     
-    # Durchschnitt
+    # Average
     avg_acc = np.mean([m['accuracy'] for m in metrics.values()])
     avg_kappa = np.mean([m['kappa'] for m in metrics.values()])
     
-    print(f"\n🎯 GESAMT:")
-    print(f"   Ø Accuracy: {avg_acc:.3f}")
-    print(f"   Ø Kappa: {avg_kappa:.3f}")
+    print(f"\n🎯 TOTAL:")
+    print(f"   Avg Accuracy: {avg_acc:.3f}")
+    print(f"   Avg Kappa: {avg_kappa:.3f}")
 
 
 if __name__ == "__main__":
     print("="*50)
-    print("🤖 ML-MODELL TRAINING")
+    print("🤖 ML MODEL TRAINING")
     print("="*50)
     
-    # ML-Datensatz laden
+    # Load ML dataset
     data_path = Path("data/processed/ml_dataset.csv")
     
     if data_path.exists():
         df = pd.read_csv(data_path)
-        print(f"📁 Geladen: {len(df)} Samples")
+        print(f"📁 Loaded: {len(df)} samples")
         
-        # Features und Targets trennen
+        # Separate features and targets
         target_cols = ['Q1', 'Q2', 'Q3']
         feature_cols = [col for col in df.columns if col not in target_cols]
         
@@ -273,17 +273,17 @@ if __name__ == "__main__":
         # Training
         model_data = train_model(X, y)
         
-        # Zusammenfassung
+        # Summary
         print_summary(model_data['metrics'])
         
-        # Speichern
+        # Save
         save_model(model_data)
         
-        # Top Features anzeigen
+        # Show top features
         print("\n📈 Top 5 Features (Q1):")
         if 'Q1' in model_data['feature_importance']:
             for _, row in model_data['feature_importance']['Q1'].head(5).iterrows():
                 print(f"   {row['feature']}: {row['importance']:.4f}")
     else:
-        print("❌ ML-Datensatz nicht gefunden!")
-        print("   Bitte zuerst feature_engineering.py ausführen.")
+        print("❌ ML dataset not found!")
+        print("   Please run feature_engineering.py first.")
