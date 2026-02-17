@@ -1,6 +1,6 @@
 """
 Trend Analysis
-Performance development over time.
+Performance development over time - based on Q-Scores (Manager ratings).
 """
 
 import streamlit as st
@@ -39,37 +39,40 @@ page_header(
 def load_data():
     project_root = Path(__file__).parent.parent.parent
     
-    # ML Dataset
-    ml_path = project_root / "data" / "processed" / "ml_dataset.csv"
-    ml_df = pd.read_csv(ml_path) if ml_path.exists() else pd.DataFrame()
+    # Q vs O Score Comparison (has Q-Scores per employee)
+    comparison_path = project_root / "data" / "processed" / "q_vs_o_score_comparison.csv"
+    employee_df = pd.DataFrame()
     
-    # Workflow Analysis (has timestamps)
+    if comparison_path.exists():
+        employee_df = pd.read_csv(comparison_path)
+        
+        # Calculate Risk Level based on Q-Score average
+        employee_df['Risk Level'] = pd.cut(
+            employee_df['q_score_avg'],
+            bins=[0, 2.5, 3.5, 5.01],
+            labels=['RED', 'YELLOW', 'GREEN']
+        )
+        
+        # Rename for compatibility
+        employee_df['Employee'] = employee_df['employee']
+        employee_df['Avg Score'] = employee_df['q_score_avg']
+        employee_df['Tickets'] = employee_df['ticket_count']
+        employee_df['Q1'] = employee_df['q1']
+        employee_df['Q2'] = employee_df['q2']
+        employee_df['Q3'] = employee_df['q3']
+    
+    # Workflow Analysis
     workflow_path = project_root / "data" / "processed" / "workflow_analysis.csv"
     workflow_df = pd.read_csv(workflow_path) if workflow_path.exists() else pd.DataFrame()
     
-    # O-Score Results (employee performance)
-    o_score_path = project_root / "data" / "processed" / "o_score_results.csv"
-    o_score_df = pd.DataFrame()
-    if o_score_path.exists():
-        o_score_df = pd.read_csv(o_score_path)
-        # Add Risk Level based on o_score
-        o_score_df['Risk Level'] = pd.cut(
-            o_score_df['o_score'],
-            bins=[0, 2.5, 3.5, 5],
-            labels=['RED', 'YELLOW', 'GREEN']
-        )
-        # Rename for compatibility
-        o_score_df['Employee'] = o_score_df['employee']
-        o_score_df['Avg Score'] = o_score_df['o_score']
-        o_score_df['Tickets'] = o_score_df['ticket_count']
-    
-    return ml_df, workflow_df, o_score_df
+    return employee_df, workflow_df
 
-ml_df, workflow_df, employee_df = load_data()
+employee_df, workflow_df = load_data()
 
 # Tabs
-tab1, tab2 = st.tabs([
+tab1, tab2, tab3 = st.tabs([
     e("👥 ") + get_text('employee_trends'), 
+    e("📊 ") + "Q-Score Details",
     e("🔮 ") + get_text('forecast')
 ])
 
@@ -86,7 +89,7 @@ with tab1:
             fig = px.pie(
                 values=risk_counts.values,
                 names=risk_counts.index,
-                title=get_text('risk_distribution'),
+                title=get_text('risk_distribution') + " (Q-Score)",
                 color=risk_counts.index,
                 color_discrete_map={'GREEN': '#4CAF50', 'YELLOW': '#FF9800', 'RED': '#f44336'}
             )
@@ -98,7 +101,7 @@ with tab1:
                 employee_df,
                 x='Risk Level',
                 y='Avg Score',
-                title=get_text('scores_by_risk'),
+                title=get_text('scores_by_risk') + " (Q-Score Avg)",
                 color='Risk Level',
                 color_discrete_map={'GREEN': '#4CAF50', 'YELLOW': '#FF9800', 'RED': '#f44336'}
             )
@@ -111,12 +114,12 @@ with tab1:
         
         with col1:
             st.markdown(f"**{e('🥇')} {get_text('top_10_highest')}**")
-            top10 = employee_df.nlargest(10, 'Avg Score')[['Employee', 'Avg Score', 'Tickets', 'Risk Level']]
+            top10 = employee_df.nlargest(10, 'Avg Score')[['Employee', 'Q1', 'Q2', 'Q3', 'Avg Score', 'Tickets', 'Risk Level']]
             st.dataframe(top10, use_container_width=True, hide_index=True)
         
         with col2:
             st.markdown(f"**{e('⚠️')} {get_text('bottom_10_lowest')}**")
-            bottom10 = employee_df.nsmallest(10, 'Avg Score')[['Employee', 'Avg Score', 'Tickets', 'Risk Level']]
+            bottom10 = employee_df.nsmallest(10, 'Avg Score')[['Employee', 'Q1', 'Q2', 'Q3', 'Avg Score', 'Tickets', 'Risk Level']]
             st.dataframe(bottom10, use_container_width=True, hide_index=True)
         
         # Ticket Volume vs Score
@@ -128,8 +131,8 @@ with tab1:
             y='Avg Score',
             color='Risk Level',
             size='Tickets',
-            hover_data=['Employee'],
-            title=get_text('relationship_tickets_performance'),
+            hover_data=['Employee', 'Q1', 'Q2', 'Q3'],
+            title=get_text('relationship_tickets_performance') + " (Q-Score)",
             color_discrete_map={'GREEN': '#4CAF50', 'YELLOW': '#FF9800', 'RED': '#f44336'}
         )
         fig.update_layout(height=500)
@@ -148,6 +151,98 @@ with tab1:
         st.info(get_text('no_data'))
 
 with tab2:
+    section_header(e("📊 ") + "Q-Score Dimensions")
+    
+    if not employee_df.empty:
+        st.markdown("""
+        **Q-Score Dimensionen (Manager-Bewertung 1-5):**
+        - **Q1** = Accuracy/Precision (Genauigkeit)
+        - **Q2** = Thoroughness (Gründlichkeit)
+        - **Q3** = Responsiveness (Reaktionsfähigkeit)
+        """)
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            fig = px.histogram(
+                employee_df, x='Q1', nbins=5,
+                title="Q1: Accuracy Distribution",
+                color_discrete_sequence=['#2196F3']
+            )
+            fig.update_layout(bargap=0.1)
+            st.plotly_chart(fig, use_container_width=True)
+            st.metric("Ø Q1", f"{employee_df['Q1'].mean():.2f}")
+        
+        with col2:
+            fig = px.histogram(
+                employee_df, x='Q2', nbins=5,
+                title="Q2: Thoroughness Distribution",
+                color_discrete_sequence=['#9C27B0']
+            )
+            fig.update_layout(bargap=0.1)
+            st.plotly_chart(fig, use_container_width=True)
+            st.metric("Ø Q2", f"{employee_df['Q2'].mean():.2f}")
+        
+        with col3:
+            fig = px.histogram(
+                employee_df, x='Q3', nbins=5,
+                title="Q3: Responsiveness Distribution",
+                color_discrete_sequence=['#FF9800']
+            )
+            fig.update_layout(bargap=0.1)
+            st.plotly_chart(fig, use_container_width=True)
+            st.metric("Ø Q3", f"{employee_df['Q3'].mean():.2f}")
+        
+        # Q-Score Correlation Matrix
+        section_header(e("🔗 ") + "Q-Score Korrelationen")
+        
+        q_cols = ['Q1', 'Q2', 'Q3', 'Avg Score', 'Tickets']
+        corr_matrix = employee_df[q_cols].corr()
+        
+        fig = px.imshow(
+            corr_matrix,
+            text_auto='.2f',
+            color_continuous_scale='RdBu_r',
+            title="Korrelation zwischen Q-Scores"
+        )
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Q-Score vs O-Score Comparison
+        if 'o_score' in employee_df.columns:
+            section_header(e("⚖️ ") + "Q-Score vs O-Score")
+            
+            fig = px.scatter(
+                employee_df,
+                x='q_score_avg',
+                y='o_score',
+                color='Risk Level',
+                hover_data=['Employee'],
+                title="Manager-Bewertung (Q) vs Objektive Metriken (O)",
+                labels={'q_score_avg': 'Q-Score (Manager)', 'o_score': 'O-Score (Objektiv)'},
+                color_discrete_map={'GREEN': '#4CAF50', 'YELLOW': '#FF9800', 'RED': '#f44336'}
+            )
+            # Add diagonal reference line
+            fig.add_trace(go.Scatter(
+                x=[1, 5], y=[1, 5],
+                mode='lines',
+                line=dict(dash='dash', color='gray'),
+                name='Ideal (Q=O)'
+            ))
+            fig.update_layout(height=500)
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # Bias indicator
+            avg_diff = employee_df['score_diff'].mean()
+            if avg_diff < -0.5:
+                st.warning(f"⚠️ **Leniency Bias erkannt:** Manager bewerten im Schnitt {abs(avg_diff):.1f} Punkte höher als objektive Metriken")
+            elif avg_diff > 0.5:
+                st.warning(f"⚠️ **Severity Bias erkannt:** Manager bewerten im Schnitt {avg_diff:.1f} Punkte niedriger als objektive Metriken")
+            else:
+                st.success(f"✅ Geringe Abweichung zwischen Q-Score und O-Score ({avg_diff:.2f})")
+    else:
+        st.info(get_text('no_data'))
+
+with tab3:
     section_header(e("🔮 ") + get_text('forecast_recommendations'), 'forecast')
     
     if not employee_df.empty:
@@ -185,7 +280,7 @@ with tab2:
         # Recalculate Risk Levels
         simulated_df['New Risk Level'] = pd.cut(
             simulated_df['Avg Score'],
-            bins=[0, 2.5, 3.5, 5],
+            bins=[0, 2.5, 3.5, 5.01],
             labels=['RED', 'YELLOW', 'GREEN']
         )
         
