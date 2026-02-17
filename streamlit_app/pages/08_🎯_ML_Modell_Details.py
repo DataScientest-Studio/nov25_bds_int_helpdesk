@@ -208,6 +208,82 @@ def render_o_score_details(model_data, model_type):
         with col4:
             qwk = classifier_metrics.get('qwk', 0)
             st.metric("QWK", f"{qwk:.3f}")
+        
+        # Fazit zu den Metriken
+        st.markdown("---")
+        st.markdown("### " + e("📋 ") + "Metriken-Interpretation")
+        
+        acc = classifier_metrics.get('accuracy', 0)
+        mae = classifier_metrics.get('mae', 0)
+        cv_mean = classifier_metrics.get('cv_mean', 0)
+        f1_macro = classifier_metrics.get('f1_macro', 0)
+        f1_weighted = classifier_metrics.get('f1_weighted', 0)
+        kappa = classifier_metrics.get('kappa', 0)
+        qwk = classifier_metrics.get('qwk', 0)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Accuracy Fazit
+            acc_rating = "🟢 Gut" if acc >= 0.7 else "🟡 Akzeptabel" if acc >= 0.5 else "🔴 Verbesserungsbedarf"
+            st.markdown(f"""
+            **Accuracy ({acc*100:.1f}%)** {acc_rating}
+            > Anteil korrekt klassifizierter Samples. Bei 5 Klassen wäre Zufall 20%.
+            """)
+            
+            # MAE Fazit
+            mae_rating = "🟢 Sehr gut" if mae < 0.4 else "🟡 Akzeptabel" if mae < 0.7 else "🔴 Hoch"
+            st.markdown(f"""
+            **MAE ({mae:.3f})** {mae_rating}
+            > Mittlerer Fehler in Klassen. 0.3 = Fehler meist nur ±1 Klasse.
+            """)
+            
+            # CV Score Fazit
+            cv_rating = "🟢 Stabil" if cv_mean >= 0.7 else "🟡 Moderat" if cv_mean >= 0.5 else "🔴 Instabil"
+            st.markdown(f"""
+            **CV Score ({cv_mean*100:.1f}%)** {cv_rating}
+            > Cross-Validation zeigt Generalisierungsfähigkeit. Höher = stabiler.
+            """)
+            
+            # Macro-F1 Fazit
+            f1m_rating = "🟢 Gut" if f1_macro >= 0.6 else "🟡 Moderat" if f1_macro >= 0.4 else "🔴 Schwach"
+            st.markdown(f"""
+            **Macro-F1 ({f1_macro:.3f})** {f1m_rating}
+            > Ungewichteter Durchschnitt über alle Klassen. Zeigt Balance.
+            """)
+        
+        with col2:
+            # Weighted-F1 Fazit
+            f1w_rating = "🟢 Gut" if f1_weighted >= 0.7 else "🟡 Moderat" if f1_weighted >= 0.5 else "🔴 Schwach"
+            st.markdown(f"""
+            **Weighted-F1 ({f1_weighted:.3f})** {f1w_rating}
+            > Nach Klassengröße gewichtet. Relevant bei unbalancierten Daten.
+            """)
+            
+            # Cohen's Kappa Fazit
+            kappa_rating = "🟢 Substanziell" if kappa >= 0.6 else "🟡 Moderat" if kappa >= 0.4 else "🔴 Schwach"
+            st.markdown(f"""
+            **Cohen's Kappa ({kappa:.3f})** {kappa_rating}
+            > Übereinstimmung über Zufall hinaus. >0.6 = gute Übereinstimmung.
+            """)
+            
+            # QWK Fazit
+            qwk_rating = "🟢 Sehr gut" if qwk >= 0.7 else "🟡 Gut" if qwk >= 0.5 else "🔴 Moderat"
+            st.markdown(f"""
+            **QWK ({qwk:.3f})** {qwk_rating}
+            > Quadratic Weighted Kappa bestraft große Fehler stärker. Ideal für ordinale Daten (1-5).
+            """)
+        
+        # Gesamtfazit
+        st.markdown("---")
+        good_metrics = sum([acc >= 0.7, mae < 0.4, cv_mean >= 0.7, f1_weighted >= 0.7, kappa >= 0.5, qwk >= 0.7])
+        
+        if good_metrics >= 5:
+            st.success(e("✅ ") + f"**Gesamtbewertung: Sehr gut** ({good_metrics}/6 Metriken im grünen Bereich)")
+        elif good_metrics >= 3:
+            st.info(e("👍 ") + f"**Gesamtbewertung: Gut** ({good_metrics}/6 Metriken im grünen Bereich)")
+        else:
+            st.warning(e("⚠️ ") + f"**Gesamtbewertung: Verbesserungspotential** ({good_metrics}/6 Metriken im grünen Bereich)")
     
     st.markdown("---")
     
