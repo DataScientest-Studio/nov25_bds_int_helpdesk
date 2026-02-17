@@ -4,8 +4,8 @@ ML-Modell mit O-Score als Target (Objektive Bewertung)
 Dieses Modell nutzt den berechneten O-Score als Zielvariable
 anstelle der subjektiven Q-Scores vom Manager.
 
-Target: O-Score (1-5, kontinuierlich -> diskretisiert)
-Features: Ticket-Metriken aus issues_snapshot.csv
+Target: O-Score (1-5, diskretisiert)
+Features: Ticket-Metriken aus o_score_results.csv
 """
 
 import pandas as pd
@@ -15,8 +15,8 @@ import joblib
 
 from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score, mean_absolute_error, confusion_matrix, r2_score
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, VotingClassifier
+from sklearn.metrics import accuracy_score, mean_absolute_error, confusion_matrix
+from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 
 try:
     import xgboost as xgb
@@ -34,7 +34,7 @@ except ImportError:
 # Modell-Konfiguration
 MODEL_CONFIG = {
     'n_estimators': 100,
-    'max_depth': 6,  # Einheitlich wie Q-Score Modell
+    'max_depth': 6,
     'random_state': 42
 }
 
@@ -77,8 +77,6 @@ def discretize_o_score(o_scores):
     """
     Diskretisiert den kontinuierlichen O-Score in Klassen 1-5.
     """
-    # O-Score Range: 1.0 - 5.0
-    # Klassen: 1 (1.0-1.8), 2 (1.8-2.6), 3 (2.6-3.4), 4 (3.4-4.2), 5 (4.2-5.0)
     bins = [0, 1.8, 2.6, 3.4, 4.2, 5.1]
     labels = [1, 2, 3, 4, 5]
     return pd.cut(o_scores, bins=bins, labels=labels).astype(int)
@@ -124,22 +122,9 @@ def create_ensemble_classifier():
     return VotingClassifier(estimators=estimators, voting='soft')
 
 
-def create_regressor():
-    """Erstellt Regressor fuer kontinuierliche O-Score Vorhersage."""
-    return RandomForestRegressor(
-        n_estimators=MODEL_CONFIG['n_estimators'],
-        max_depth=MODEL_CONFIG['max_depth'],
-        random_state=MODEL_CONFIG['random_state'],
-        n_jobs=-1
-    )
-
-
 def train_o_score_model(o_score_df, test_size=0.2):
     """
-    Trainiert das O-Score Modell.
-    
-    Trainiert sowohl Klassifikator (fuer diskrete Scores 1-5)
-    als auch Regressor (fuer kontinuierliche Vorhersage).
+    Trainiert das O-Score Klassifikationsmodell.
     """
     print("\n" + "="*50)
     print("O-SCORE MODELL TRAINING")
@@ -148,22 +133,17 @@ def train_o_score_model(o_score_df, test_size=0.2):
     # Features vorbereiten
     X, feature_cols = prepare_features(o_score_df)
     
-    # Targets
-    y_continuous = o_score_df['o_score'].values
-    y_discrete = discretize_o_score(o_score_df['o_score'])
+    # Target: diskrete Klassen 1-5
+    y = discretize_o_score(o_score_df['o_score'])
     
     print(f"\nDaten: {len(X)} Samples, {len(feature_cols)} Features")
     print(f"Features: {feature_cols}")
     print(f"\nO-Score Klassen-Verteilung:")
-    print(pd.Series(y_discrete).value_counts().sort_index())
+    print(pd.Series(y).value_counts().sort_index())
     
     # Train-Test Split
-    X_train, X_test, y_train_disc, y_test_disc = train_test_split(
-        X, y_discrete, test_size=test_size, random_state=42, stratify=y_discrete
-    )
-    
-    _, _, y_train_cont, y_test_cont = train_test_split(
-        X, y_continuous, test_size=test_size, random_state=42
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=test_size, random_state=42, stratify=y
     )
     
     print(f"\nTrain: {len(X_train)}, Test: {len(X_test)}")
@@ -173,36 +153,24 @@ def train_o_score_model(o_score_df, test_size=0.2):
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     
-    # === KLASSIFIKATOR ===
+    # Training
     print("\n--- Klassifikator (Klassen 1-5) ---")
     classifier = create_ensemble_classifier()
-    classifier.fit(X_train_scaled, y_train_disc)
+    classifier.fit(X_train_scaled, y_train)
     
-    y_pred_disc = classifier.predict(X_test_scaled)
+    # Evaluation
+    y_pred = classifier.predict(X_test_scaled)
     
-    accuracy = accuracy_score(y_test_disc, y_pred_disc)
-    mae_disc = mean_absolute_error(y_test_disc, y_pred_disc)
+    accuracy = accuracy_score(y_test, y_pred)
+    mae = mean_absolute_error(y_test, y_pred)
     
     # Cross-Validation
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-    cv_scores = cross_val_score(classifier, scaler.fit_transform(X), y_discrete, cv=cv)
+    cv_scores = cross_val_score(classifier, scaler.fit_transform(X), y, cv=cv)
     
     print(f"Accuracy: {accuracy:.3f}")
-    print(f"MAE: {mae_disc:.3f}")
+    print(f"MAE: {mae:.3f}")
     print(f"CV: {cv_scores.mean():.3f} +/- {cv_scores.std():.3f}")
-    
-    # === REGRESSOR ===
-    print("\n--- Regressor (kontinuierlich) ---")
-    regressor = create_regressor()
-    regressor.fit(X_train_scaled, y_train_cont)
-    
-    y_pred_cont = regressor.predict(X_test_scaled)
-    
-    mae_cont = mean_absolute_error(y_test_cont, y_pred_cont)
-    r2 = r2_score(y_test_cont, y_pred_cont)
-    
-    print(f"MAE: {mae_cont:.3f}")
-    print(f"R2: {r2:.3f}")
     
     # Feature Importance
     if hasattr(classifier.named_estimators_['rf'], 'feature_importances_'):
@@ -216,24 +184,19 @@ def train_o_score_model(o_score_df, test_size=0.2):
     else:
         importance_df = pd.DataFrame()
     
-    # Ergebnisse
+    # Metriken
     metrics = {
         'classifier': {
             'accuracy': round(accuracy, 3),
-            'mae': round(mae_disc, 3),
+            'mae': round(mae, 3),
             'cv_mean': round(cv_scores.mean(), 3),
             'cv_std': round(cv_scores.std(), 3),
-            'confusion_matrix': confusion_matrix(y_test_disc, y_pred_disc).tolist()
-        },
-        'regressor': {
-            'mae': round(mae_cont, 3),
-            'r2': round(r2, 3)
+            'confusion_matrix': confusion_matrix(y_test, y_pred).tolist()
         }
     }
     
     return {
         'classifier': classifier,
-        'regressor': regressor,
         'scaler': scaler,
         'feature_cols': feature_cols,
         'metrics': metrics,
@@ -260,17 +223,10 @@ def predict_o_score(model_data, X_new):
     Vorhersage fuer neue Daten.
     
     Returns:
-        dict mit 'class' (1-5) und 'score' (kontinuierlich)
+        Array mit vorhergesagten Klassen (1-5)
     """
     X_scaled = model_data['scaler'].transform(X_new)
-    
-    pred_class = model_data['classifier'].predict(X_scaled)
-    pred_score = model_data['regressor'].predict(X_scaled)
-    
-    return {
-        'class': pred_class,
-        'score': np.clip(pred_score, 1, 5)
-    }
+    return model_data['classifier'].predict(X_scaled)
 
 
 def print_summary(model_data):
@@ -285,10 +241,6 @@ def print_summary(model_data):
     print(f"   Accuracy: {metrics['classifier']['accuracy']}")
     print(f"   MAE: {metrics['classifier']['mae']}")
     print(f"   CV: {metrics['classifier']['cv_mean']} +/- {metrics['classifier']['cv_std']}")
-    
-    print("\nRegressor (kontinuierlich 1.0-5.0):")
-    print(f"   MAE: {metrics['regressor']['mae']}")
-    print(f"   R2: {metrics['regressor']['r2']}")
 
 
 if __name__ == "__main__":

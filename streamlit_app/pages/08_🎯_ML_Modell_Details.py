@@ -169,9 +169,7 @@ def render_o_score_details(model_data, model_type):
     metrics = model_data.get('metrics', {})
     
     if metrics:
-        # O-Score has 'classifier' and 'regressor' keys
         classifier_metrics = metrics.get('classifier', {})
-        regressor_metrics = metrics.get('regressor', {})
         
         col1, col2, col3, col4 = st.columns(4)
         
