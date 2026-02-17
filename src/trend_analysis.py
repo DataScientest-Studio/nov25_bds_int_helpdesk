@@ -16,7 +16,7 @@ def calculate_employee_trends(scored_df):
     """
     print("📈 Calculate Employee-Trends...")
     
-    # Nur gültige Scores
+    # Only valid scores
     valid_df = scored_df[scored_df['Q1'] > 0].copy()
     
     # Aggregation
@@ -31,7 +31,7 @@ def calculate_employee_trends(scored_df):
     # Gesamtscore
     trends['overall_score'] = (trends['avg_q1'] + trends['avg_q2'] + trends['avg_q3']) / 3
     
-    # Varianz (höher = inkonsistent)
+    # Variance (higher = inconsistent)
     trends['variance'] = trends['std_q1'].fillna(0)
     
     # Risk Level
@@ -54,7 +54,7 @@ def calculate_employee_trends(scored_df):
 
 
 def get_top_bottom(trends_df, n=10):
-    """Gibt Top und Bottom Performer zurück."""
+    """Return top and bottom performers."""
     top = trends_df.nlargest(n, 'overall_score')[['employee', 'overall_score', 'ticket_count']]
     bottom = trends_df.nsmallest(n, 'overall_score')[['employee', 'overall_score', 'ticket_count']]
     

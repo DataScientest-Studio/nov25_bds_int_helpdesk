@@ -16,7 +16,7 @@ except ImportError:
     print("⚠️ VADER nicht installiert. Installiere mit: pip install vaderSentiment")
 
 
-# Wortlisten für Pattern-Erkennung
+# Word lists for pattern recognition
 POLITENESS_WORDS = [
     'please', 'thank', 'thanks', 'appreciate', 'grateful',
     'sorry', 'apolog', 'kindly', 'would you', 'could you'

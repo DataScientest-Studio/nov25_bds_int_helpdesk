@@ -1,5 +1,5 @@
 """
-Plot-Generator für Projektdokumentation
+Plot generator for project documentation
 Creates all required visualizations as PNG (300 dpi)
 """
 
@@ -13,7 +13,7 @@ from sklearn.metrics import confusion_matrix
 import warnings
 warnings.filterwarnings('ignore')
 
-# Matplotlib-Konfiguration für bessere Qualität
+# Matplotlib configuration for better quality
 plt.rcParams['figure.dpi'] = 300
 plt.rcParams['savefig.dpi'] = 300
 plt.rcParams['font.size'] = 10
@@ -43,7 +43,7 @@ def load_data():
         data['ground_truth'] = pd.read_excel(gt_path)
         print(f"   Ground Truth: {len(data['ground_truth'])} Samples")
     
-    # Model laden für Feature Importance
+    # Load model for feature importance
     model_path = Path("models/performance_scorer.joblib")
     if model_path.exists():
         data['model'] = joblib.load(model_path)
@@ -217,7 +217,7 @@ def plot_workflow_status(data):
     """Plot 4: Workflow-Status Verteilung."""
     print("📈 Erstelle Workflow-Status...")
     
-    # Beispiel-Data für typischen Helpdesk-Workflow
+    # Example data for typical helpdesk workflow
     status_data = {
         'Status': ['Open', 'In Progress', 'Waiting Feedback', 'Verification', 'Resolved', 'Closed'],
         'Anteil': [5, 15, 10, 8, 12, 50]
@@ -475,7 +475,7 @@ def plot_workflow_diagram():
     
     for name, (x, y, color) in boxes.items():
         if name == 'Valid?':
-            # Diamant für Entscheidung
+            # Diamond for decision
             diamond = plt.Polygon([(x, y+0.06), (x+0.06, y), (x, y-0.06), (x-0.06, y)], 
                                   facecolor=color, edgecolor='black', linewidth=2)
             ax.add_patch(diamond)

@@ -101,7 +101,7 @@ def train_model(X, y, test_size=0.2):
     scaler = StandardScaler()
     
     for target in targets:
-        print(f"\n📊 Training für {target}...")
+        print(f"\n📊 Training for {target}...")
         
         # Target vorbereiten (Scores 1-5 -> 0-4)
         y_target = y[target].values - 1
