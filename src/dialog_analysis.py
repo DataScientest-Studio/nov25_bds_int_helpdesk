@@ -1,5 +1,5 @@
 """
-Dialog-Analyse - Klassifiziert Kommentare nach Kommunikationstyp
+Dialog Analysis - Classifies comments by communication type
 """
 
 import pandas as pd
@@ -7,23 +7,23 @@ import re
 from pathlib import Path
 
 
-# Dialog Act Kategorien
+# Dialog Act Categories
 DIALOG_ACTS = {
-    'QUESTION': 'Frage',
-    'ANSWER': 'Antwort',
-    'GREETING': 'Begrüßung',
-    'COMPLAINT': 'Beschwerde',
-    'THANKS': 'Dank',
-    'APOLOGY': 'Entschuldigung',
-    'REQUEST': 'Anfrage',
+    'QUESTION': 'Question',
+    'ANSWER': 'Answer',
+    'GREETING': 'Greeting',
+    'COMPLAINT': 'Complaint',
+    'THANKS': 'Thanks',
+    'APOLOGY': 'Apology',
+    'REQUEST': 'Request',
     'INFORM': 'Information',
-    'CONFIRM': 'Bestätigung',
-    'REJECT': 'Ablehnung',
-    'PROMISE': 'Zusage',
-    'OTHER': 'Sonstiges'
+    'CONFIRM': 'Confirmation',
+    'REJECT': 'Rejection',
+    'PROMISE': 'Promise',
+    'OTHER': 'Other'
 }
 
-# Regex-Patterns für Klassifikation
+# Regex patterns for classification
 PATTERNS = {
     'QUESTION': [
         r'\?$',
@@ -73,21 +73,21 @@ PATTERNS = {
 
 def classify_text(text):
     """
-    Klassifiziert einen Text als Dialog Act.
+    Classify a text as Dialog Act.
     
     Args:
-        text: Zu klassifizierender Text
+        text: Text to classify
         
     Returns:
-        dict: Dialog Act und Konfidenz
+        dict: Dialog Act and confidence
     """
     if not text or not isinstance(text, str) or len(text.strip()) < 3:
-        return {'act': 'OTHER', 'name': 'Sonstiges', 'confidence': 0.0}
+        return {'act': 'OTHER', 'name': 'Other', 'confidence': 0.0}
     
     text = text.strip()
     matches = {}
     
-    # Prüfe alle Patterns
+    # Check all patterns
     for act, patterns in PATTERNS.items():
         match_count = 0
         for pattern in patterns:
@@ -96,11 +96,11 @@ def classify_text(text):
         if match_count > 0:
             matches[act] = match_count
     
-    # Keine Matches -> OTHER
+    # No matches -> OTHER
     if not matches:
-        return {'act': 'OTHER', 'name': 'Sonstiges', 'confidence': 0.3}
+        return {'act': 'OTHER', 'name': 'Other', 'confidence': 0.3}
     
-    # Bester Match
+    # Best match
     best_act = max(matches, key=matches.get)
     confidence = min(matches[best_act] / len(PATTERNS[best_act]), 1.0)
     
@@ -113,17 +113,17 @@ def classify_text(text):
 
 def process_comments(utterances_df):
     """
-    Klassifiziert alle Kommentare.
+    Classify all comments.
     
     Args:
-        utterances_df: DataFrame mit Kommentaren
+        utterances_df: DataFrame with comments
         
     Returns:
-        DataFrame mit Dialog Act Klassifikation
+        DataFrame with Dialog Act classification
     """
-    print("💬 Klassifiziere Kommentare...")
+    print("💬 Classifying comments...")
     
-    # Text-Spalte finden
+    # Find text column
     text_col = 'actionbody' if 'actionbody' in utterances_df.columns else 'body'
     
     results = []
@@ -132,7 +132,7 @@ def process_comments(utterances_df):
     for idx, row in utterances_df.iterrows():
         text = row.get(text_col, "")
         
-        # Klassifizieren
+        # Classify
         result = classify_text(str(text) if pd.notna(text) else "")
         
         results.append({
@@ -146,17 +146,17 @@ def process_comments(utterances_df):
         })
         
         if (idx + 1) % 5000 == 0:
-            print(f"   {idx+1:,}/{total:,} klassifiziert...")
+            print(f"   {idx+1:,}/{total:,} classified...")
     
-    print(f"✅ {len(results):,} Kommentare klassifiziert")
+    print(f"✅ {len(results):,} comments classified")
     return pd.DataFrame(results)
 
 
 def get_distribution(dialog_df):
-    """Berechnet die Verteilung der Dialog Acts."""
+    """Calculate the distribution of Dialog Acts."""
     distribution = dialog_df['dialog_act'].value_counts()
     
-    print("\n📊 Dialog Act Verteilung:")
+    print("\n📊 Dialog Act Distribution:")
     for act, count in distribution.items():
         pct = count / len(dialog_df) * 100
         name = DIALOG_ACTS.get(act, act)
@@ -167,26 +167,26 @@ def get_distribution(dialog_df):
 
 if __name__ == "__main__":
     print("="*50)
-    print("💬 DIALOG-ANALYSE")
+    print("💬 DIALOG ANALYSIS")
     print("="*50)
     
-    # Utterances laden
+    # Load utterances
     data_path = Path("data/raw/sample_utterances.csv")
     
     if data_path.exists():
         utterances = pd.read_csv(data_path)
-        print(f"📁 Geladen: {len(utterances):,} Kommentare")
+        print(f"📁 Loaded: {len(utterances):,} comments")
         
-        # Klassifizieren
+        # Classify
         dialog_df = process_comments(utterances)
         
-        # Verteilung anzeigen
+        # Show distribution
         get_distribution(dialog_df)
         
-        # Speichern
+        # Save
         output_path = Path("data/processed/dialog_acts.csv")
         output_path.parent.mkdir(parents=True, exist_ok=True)
         dialog_df.to_csv(output_path, index=False)
-        print(f"\n💾 Gespeichert: {output_path}")
+        print(f"\n💾 Saved: {output_path}")
     else:
-        print("❌ Utterances-Datei nicht gefunden!")
+        print("❌ Utterances file not found!")

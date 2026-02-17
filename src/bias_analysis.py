@@ -1,5 +1,5 @@
 """
-Bias-Analyse - Erkennt Verzerrungen in Manager-Bewertungen
+Bias Analysis - Detects biases in manager ratings
 """
 
 import pandas as pd
@@ -10,10 +10,10 @@ from pathlib import Path
 
 def analyze_score_distribution(scored_df, score_cols=['Q1', 'Q2', 'Q3']):
     """
-    Analysiert die Verteilung der Scores.
+    Analyze the distribution of scores.
     
     Returns:
-        dict: Statistiken pro Score
+        dict: Statistics per score
     """
     results = {}
     
@@ -34,21 +34,21 @@ def analyze_score_distribution(scored_df, score_cols=['Q1', 'Q2', 'Q3']):
 
 def check_halo_effect(scored_df, score_cols=['Q1', 'Q2', 'Q3']):
     """
-    Prüft auf Halo-Effekt (zu hohe Korrelation zwischen Scores).
+    Check for Halo Effect (too high correlation between scores).
     
-    Der Halo-Effekt tritt auf, wenn Manager alle Dimensionen
-    basierend auf einem Gesamteindruck bewerten, anstatt
-    jede Dimension einzeln zu bewerten.
+    The Halo Effect occurs when managers rate all dimensions
+    based on an overall impression, instead of
+    rating each dimension individually.
     
     Returns:
-        dict: Halo-Effekt Analyse
+        dict: Halo Effect analysis
     """
     valid_df = scored_df[scored_df[score_cols[0]] > 0].copy()
     
-    # Korrelationsmatrix
+    # Correlation matrix
     corr_matrix = valid_df[score_cols].corr()
     
-    # Durchschnittliche Inter-Korrelation (ohne Diagonale)
+    # Average inter-correlation (without diagonal)
     n = len(score_cols)
     corr_values = []
     for i in range(n):
@@ -57,15 +57,15 @@ def check_halo_effect(scored_df, score_cols=['Q1', 'Q2', 'Q3']):
     
     avg_correlation = np.mean(corr_values)
     
-    # Halo-Effekt Warnung wenn > 0.8
+    # Halo Effect warning if > 0.8
     is_halo = avg_correlation > 0.8
     
     if avg_correlation > 0.9:
-        severity = 'HOCH'
+        severity = 'HIGH'
     elif avg_correlation > 0.8:
-        severity = 'MITTEL'
+        severity = 'MEDIUM'
     else:
-        severity = 'NIEDRIG'
+        severity = 'LOW'
     
     return {
         'avg_inter_correlation': round(avg_correlation, 3),
@@ -77,10 +77,10 @@ def check_halo_effect(scored_df, score_cols=['Q1', 'Q2', 'Q3']):
 
 def check_leniency_bias(scored_df, score_cols=['Q1', 'Q2', 'Q3'], expected_mean=3.0):
     """
-    Prüft auf Leniency-Bias (zu milde Bewertung) oder Severity-Bias (zu streng).
+    Check for Leniency Bias (too mild rating) or Severity Bias (too strict).
     
     Returns:
-        dict: Leniency/Severity Analyse pro Score
+        dict: Leniency/Severity analysis per score
     """
     results = {}
     
@@ -88,11 +88,11 @@ def check_leniency_bias(scored_df, score_cols=['Q1', 'Q2', 'Q3'], expected_mean=
         valid_scores = scored_df[scored_df[col] > 0][col]
         mean = valid_scores.mean()
         
-        # Bias-Typ bestimmen
+        # Determine bias type
         if mean > 3.5:
-            bias_type = 'LENIENCY'  # Zu mild
+            bias_type = 'LENIENCY'  # Too mild
         elif mean < 2.5:
-            bias_type = 'SEVERITY'  # Zu streng
+            bias_type = 'SEVERITY'  # Too strict
         else:
             bias_type = None  # OK
         
@@ -109,10 +109,10 @@ def check_leniency_bias(scored_df, score_cols=['Q1', 'Q2', 'Q3'], expected_mean=
 
 def check_central_tendency(scored_df, score_cols=['Q1', 'Q2', 'Q3']):
     """
-    Prüft auf Central Tendency Bias (Vermeidung extremer Bewertungen).
+    Check for Central Tendency Bias (avoidance of extreme ratings).
     
     Returns:
-        dict: Central Tendency Analyse
+        dict: Central Tendency analysis
     """
     results = {}
     
@@ -120,10 +120,10 @@ def check_central_tendency(scored_df, score_cols=['Q1', 'Q2', 'Q3']):
         valid_scores = scored_df[scored_df[col] > 0][col]
         std = valid_scores.std()
         
-        # Anteil extremer Bewertungen (1 oder 5)
+        # Proportion of extreme ratings (1 or 5)
         extreme_ratio = ((valid_scores == 1) | (valid_scores == 5)).mean()
         
-        # Central Tendency wenn Std < 0.8
+        # Central Tendency if Std < 0.8
         is_central = std < 0.8
         
         results[col] = {
@@ -137,12 +137,12 @@ def check_central_tendency(scored_df, score_cols=['Q1', 'Q2', 'Q3']):
 
 def run_full_analysis(scored_df):
     """
-    Führt die vollständige Bias-Analyse durch.
+    Run the complete bias analysis.
     
     Returns:
-        dict: Alle Analyse-Ergebnisse
+        dict: All analysis results
     """
-    print("🔬 Führe Bias-Analyse durch...")
+    print("🔬 Running bias analysis...")
     
     score_cols = ['Q1', 'Q2', 'Q3']
     
@@ -153,7 +153,7 @@ def run_full_analysis(scored_df):
         'central_tendency': check_central_tendency(scored_df, score_cols)
     }
     
-    # Zusammenfassung der gefundenen Bias-Typen
+    # Summary of found bias types
     bias_flags = []
     
     if results['halo_effect']['is_halo_effect']:
@@ -169,30 +169,30 @@ def run_full_analysis(scored_df):
     
     results['bias_flags'] = bias_flags
     
-    print(f"✅ Analyse abgeschlossen. Gefundene Bias-Typen: {len(bias_flags)}")
+    print(f"✅ Analysis complete. Found bias types: {len(bias_flags)}")
     
     return results
 
 
 def print_report(results):
-    """Druckt einen lesbaren Report."""
+    """Print a readable report."""
     print("\n" + "="*60)
-    print("📋 BIAS-ANALYSE REPORT")
+    print("📋 BIAS ANALYSIS REPORT")
     print("="*60)
     
-    # Halo-Effekt
+    # Halo Effect
     halo = results['halo_effect']
-    print(f"\n🔍 HALO-EFFEKT:")
-    print(f"   Inter-Korrelation: {halo['avg_inter_correlation']}")
+    print(f"\n🔍 HALO EFFECT:")
+    print(f"   Inter-correlation: {halo['avg_inter_correlation']}")
     print(f"   Severity: {halo['severity']}")
     if halo['is_halo_effect']:
-        print("   ⚠️ WARNUNG: Starker Halo-Effekt erkannt!")
+        print("   ⚠️ WARNING: Strong Halo Effect detected!")
     
     # Leniency/Severity
     print(f"\n📊 LENIENCY/SEVERITY:")
     for col, data in results['leniency'].items():
         status = data['bias_type'] if data['bias_type'] else "OK"
-        print(f"   {col}: Ø {data['mean']} ({status})")
+        print(f"   {col}: Avg {data['mean']} ({status})")
     
     # Central Tendency
     print(f"\n🎯 CENTRAL TENDENCY:")
@@ -200,33 +200,33 @@ def print_report(results):
         status = "CENTRAL" if data['is_central_tendency'] else "OK"
         print(f"   {col}: Std={data['std']} ({status})")
     
-    # Zusammenfassung
-    print(f"\n🚨 GEFUNDENE BIAS-TYPEN: {len(results['bias_flags'])}")
+    # Summary
+    print(f"\n🚨 FOUND BIAS TYPES: {len(results['bias_flags'])}")
     for flag in results['bias_flags']:
         print(f"   ⚠️ {flag}")
     
     if not results['bias_flags']:
-        print("   ✅ Keine signifikanten Bias-Typen erkannt")
+        print("   ✅ No significant bias types detected")
     
     print("\n" + "="*60)
 
 
 if __name__ == "__main__":
     print("="*50)
-    print("🔬 BIAS-ANALYSE")
+    print("🔬 BIAS ANALYSIS")
     print("="*50)
     
-    # Bewertete Samples laden
+    # Load rated samples
     data_path = Path("data/raw/issues_snapshot_sample.xlsx")
     
     if data_path.exists():
         scored_df = pd.read_excel(data_path)
-        print(f"📁 Geladen: {len(scored_df)} bewertete Samples")
+        print(f"📁 Loaded: {len(scored_df)} rated samples")
         
-        # Analyse
+        # Analysis
         results = run_full_analysis(scored_df)
         
         # Report
         print_report(results)
     else:
-        print("❌ Bewertete Samples nicht gefunden!")
+        print("❌ Rated samples not found!")

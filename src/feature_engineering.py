@@ -1,5 +1,5 @@
 """
-Feature Engineering - Erstellt Features für das ML-Modell
+Feature Engineering - Creates features for the ML model
 """
 
 import pandas as pd
@@ -8,16 +8,16 @@ from pathlib import Path
 
 
 def create_time_features(df):
-    """Erstellt zeitbasierte Features."""
+    """Create time-based features."""
     result = df.copy()
     
-    # Workflow-Zeit-Ratios
+    # Workflow time ratios
     if 'wf_total_time' in df.columns:
         total_time = df['wf_total_time'].replace(0, np.nan)
         result['total_hours'] = df['wf_total_time'] / 3600
         result['total_days'] = df['wf_total_time'] / 86400
     
-    # Spent hours (falls vorhanden)
+    # Spent hours (if available)
     if 'spent hours' in df.columns:
         result['spent_hours'] = df['spent hours']
     
@@ -25,10 +25,10 @@ def create_time_features(df):
 
 
 def create_process_features(df):
-    """Erstellt Prozess-bezogene Features."""
+    """Create process-related features."""
     result = df.copy()
     
-    # Statuswechsel zählen (wfe_ Spalten)
+    # Count status changes (wfe_ columns)
     wfe_cols = [col for col in df.columns if col.startswith('wfe_')]
     if wfe_cols:
         result['total_status_changes'] = df[wfe_cols].sum(axis=1)
@@ -42,10 +42,10 @@ def create_process_features(df):
 
 
 def create_communication_features(df):
-    """Erstellt Kommunikations-Features."""
+    """Create communication features."""
     result = df.copy()
     
-    # Kommentare zählen
+    # Count comments
     if 'issue_comments_count' in df.columns:
         result['comments_count'] = df['issue_comments_count']
     elif 'comments count' in df.columns:
@@ -55,14 +55,14 @@ def create_communication_features(df):
 
 
 def create_priority_features(df):
-    """Erstellt Priority-Features."""
+    """Create priority features."""
     result = df.copy()
     
-    # Finde Priority-Spalte
+    # Find priority column
     priority_col = 'issue_priority' if 'issue_priority' in df.columns else 'priority'
     
     if priority_col in df.columns:
-        # Priority als Zahl (höher = dringender)
+        # Priority as number (higher = more urgent)
         priority_map = {
             'Critical': 4, 'Kritisch': 4,
             'High': 3, 'Hoch': 3,
@@ -76,31 +76,31 @@ def create_priority_features(df):
 
 def prepare_ml_dataset(scored_df):
     """
-    Bereitet den ML-Datensatz vor.
+    Prepare the ML dataset.
     
     Args:
-        scored_df: DataFrame mit bewerteten Samples
+        scored_df: DataFrame with rated samples
     
     Returns:
         X: Features
         y: Targets (Q1, Q2, Q3)
-        feature_names: Liste der Feature-Namen
+        feature_names: List of feature names
     """
-    print("🔧 Erstelle ML-Datensatz...")
+    print("🔧 Creating ML dataset...")
     
-    # Kopie erstellen
+    # Create copy
     df = scored_df.copy()
     
-    # Features anwenden
+    # Apply features
     df = create_time_features(df)
     df = create_process_features(df)
     df = create_communication_features(df)
     df = create_priority_features(df)
     
-    # Target-Variablen
+    # Target variables
     target_cols = ['Q1', 'Q2', 'Q3']
     
-    # Spalten die wir NICHT als Features nutzen
+    # Columns we do NOT use as features
     exclude_cols = [
         'id', 'no', 'project', 'reporter', 'assignee',
         'started', 'ended', 'Notes', 'valid',
@@ -109,44 +109,44 @@ def prepare_ml_dataset(scored_df):
         'type', 'issue_type', 'issue_priority', 'priority'
     ] + target_cols
     
-    # Nur numerische Spalten als Features
+    # Only numeric columns as features
     feature_cols = []
     for col in df.columns:
         if col not in exclude_cols:
             if df[col].dtype in ['int64', 'float64', 'int32', 'float32', 'bool']:
                 feature_cols.append(col)
     
-    # Filtere gültige Samples (Score > 0)
+    # Filter valid samples (Score > 0)
     valid_mask = (df['Q1'] > 0) & (df['Q2'] > 0) & (df['Q3'] > 0)
     df_valid = df[valid_mask].copy()
     
-    print(f"   Gültige Samples: {len(df_valid)}")
+    print(f"   Valid samples: {len(df_valid)}")
     print(f"   Features: {len(feature_cols)}")
     
     X = df_valid[feature_cols].copy()
     y = df_valid[target_cols].copy()
     
-    # Fehlende Werte mit Median ersetzen
+    # Replace missing values with median
     X = X.fillna(X.median())
     
     return X, y, feature_cols
 
 
 def save_ml_dataset(X, y, feature_cols, output_dir="data/processed"):
-    """Speichert den ML-Datensatz."""
+    """Save the ML dataset."""
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
     
-    # Kombiniere X und y
+    # Combine X and y
     combined = pd.concat([X.reset_index(drop=True), y.reset_index(drop=True)], axis=1)
     combined.to_csv(output_path / "ml_dataset.csv", index=False)
     
-    # Feature-Liste speichern
+    # Save feature list
     with open(output_path / "feature_columns.txt", 'w') as f:
         for col in feature_cols:
             f.write(f"{col}\n")
     
-    print(f"💾 Gespeichert: {output_path}")
+    print(f"💾 Saved: {output_path}")
 
 
 if __name__ == "__main__":
@@ -154,18 +154,18 @@ if __name__ == "__main__":
     print("🔧 FEATURE ENGINEERING")
     print("="*50)
     
-    # Daten laden
+    # Load data
     data_path = Path("data/raw/issues_snapshot_sample.xlsx")
     if data_path.exists():
         scored_df = pd.read_excel(data_path)
-        print(f"📁 Geladen: {len(scored_df)} bewertete Samples")
+        print(f"📁 Loaded: {len(scored_df)} rated samples")
         
-        # Features erstellen
+        # Create features
         X, y, features = prepare_ml_dataset(scored_df)
         
-        # Speichern
+        # Save
         save_ml_dataset(X, y, features)
         
-        print("\n✅ Feature Engineering abgeschlossen!")
+        print("\n✅ Feature Engineering completed!")
     else:
-        print("❌ Datei nicht gefunden!")
+        print("❌ File not found!")

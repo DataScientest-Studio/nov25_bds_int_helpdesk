@@ -1,5 +1,5 @@
 """
-ML-Modell - Trainiert ein Ensemble-Modell für Score-Vorhersage
+ML Model - Trains an ensemble model for score prediction
 """
 
 import pandas as pd
@@ -28,19 +28,19 @@ except ImportError:
 
 def create_model():
     """
-    Erstellt das ML-Ensemble.
+    Create ML ensemble.
     
-    Besteht aus:
-    - XGBoost (falls verfügbar)
-    - LightGBM (falls verfügbar)
-    - RandomForest (immer verfügbar)
+    Consists of:
+    - XGBoost (if available)
+    - LightGBM (if available)
+    - RandomForest (always available)
     """
     estimators = []
     
     # RandomForest (Basis)
     rf = RandomForestClassifier(
         n_estimators=100,
-        max_depth=6,  # Optimiert für Balance zwischen Bias und Varianz
+        max_depth=6,  # Optimized for balance between bias and variance
         random_state=42,
         n_jobs=-1
     )
@@ -50,7 +50,7 @@ def create_model():
     if XGBOOST_AVAILABLE:
         xgb_model = xgb.XGBClassifier(
             n_estimators=100,
-            max_depth=6,  # Einheitlich mit anderen Modellen
+            max_depth=6,  # Consistent with other models
             learning_rate=0.1,
             random_state=42,
             verbosity=0
@@ -61,7 +61,7 @@ def create_model():
     if LIGHTGBM_AVAILABLE:
         lgb_model = lgb.LGBMClassifier(
             n_estimators=100,
-            max_depth=6,  # Einheitlich mit anderen Modellen
+            max_depth=6,  # Consistent with other models
             learning_rate=0.1,
             random_state=42,
             verbose=-1
@@ -79,7 +79,7 @@ def create_model():
 
 def train_model(X, y, test_size=0.2):
     """
-    Trainiert das Modell.
+    Train the model.
     
     Args:
         X: Features DataFrame
@@ -87,7 +87,7 @@ def train_model(X, y, test_size=0.2):
         test_size: Anteil Test-Daten
         
     Returns:
-        dict: Trainierte Modelle und Metriken
+        dict: Trained models and metrics
     """
     print("\n🤖 MODELL-TRAINING")
     print("="*50)
@@ -168,16 +168,16 @@ def train_model(X, y, test_size=0.2):
 
 
 def save_model(model_data, output_path="models/performance_scorer.joblib"):
-    """Speichert das trainierte Modell."""
+    """Save the trained model."""
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
     joblib.dump(model_data, output_path)
-    print(f"\n💾 Modell gespeichert: {output_path}")
+    print(f"\n💾 Model saved: {output_path}")
 
 
 def load_model(model_path="models/performance_scorer.joblib"):
-    """Lädt ein gespeichertes Modell."""
+    """Load a saved model."""
     model_path = Path(model_path)
     if model_path.exists():
         return joblib.load(model_path)
@@ -185,9 +185,9 @@ def load_model(model_path="models/performance_scorer.joblib"):
 
 
 def print_summary(metrics):
-    """Druckt eine Zusammenfassung."""
+    """Print summary."""
     print("\n" + "="*50)
-    print("📊 MODELL-ZUSAMMENFASSUNG")
+    print("📊 MODEL SUMMARY")
     print("="*50)
     
     for target, m in metrics.items():
@@ -196,11 +196,11 @@ def print_summary(metrics):
         print(f"   Kappa: {m['kappa']}")
         print(f"   CV: {m['cv_mean']} ± {m['cv_std']}")
     
-    # Durchschnitt
+    # Average
     avg_acc = np.mean([m['accuracy'] for m in metrics.values()])
     avg_kappa = np.mean([m['kappa'] for m in metrics.values()])
     
-    print(f"\n🎯 GESAMT:")
+    print(f"\n🎯 TOTAL:")
     print(f"   Ø Accuracy: {avg_acc:.3f}")
     print(f"   Ø Kappa: {avg_kappa:.3f}")
 
@@ -215,7 +215,7 @@ if __name__ == "__main__":
     
     if data_path.exists():
         df = pd.read_csv(data_path)
-        print(f"📁 Geladen: {len(df)} Samples")
+        print(f"📁 Loaded: {len(df)} Samples")
         
         # Features und Targets trennen
         target_cols = ['Q1', 'Q2', 'Q3']
@@ -241,5 +241,5 @@ if __name__ == "__main__":
             for _, row in model_data['feature_importance']['Q1'].head(5).iterrows():
                 print(f"   {row['feature']}: {row['importance']:.4f}")
     else:
-        print("❌ ML-Datensatz nicht gefunden!")
-        print("   Bitte zuerst feature_engineering.py ausführen.")
+        print("❌ ML-Datensatz not found!")
+        print("   Please run feature_engineering.py first.")
