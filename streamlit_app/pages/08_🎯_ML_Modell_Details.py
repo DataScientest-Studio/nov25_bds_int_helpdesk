@@ -173,10 +173,11 @@ def render_o_score_details(model_data, model_type):
         classifier_metrics = metrics.get('classifier', {})
         regressor_metrics = metrics.get('regressor', {})
         
+        st.markdown("### Classifier Metrics")
+        
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            st.markdown("### Classifier")
             acc = classifier_metrics.get('accuracy', 0)
             st.metric(get_text('accuracy'), f"{acc*100:.1f}%")
         
@@ -194,15 +195,18 @@ def render_o_score_details(model_data, model_type):
         
         st.markdown("---")
         
-        # Summary metrics
+        st.markdown("### Regressor Metrics")
+        
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric(e("📈 ") + "Test Accuracy", f"{classifier_metrics.get('accuracy', 0)*100:.1f}%")
-        with col2:
-            st.metric(e("🔄 ") + "Cross-Validation", f"{classifier_metrics.get('cv_mean', 0)*100:.1f}%")
-        with col3:
             reg_mae = regressor_metrics.get('mae', 0)
-            st.metric(e("📊 ") + "Regressor MAE", f"{reg_mae:.3f}")
+            st.metric(e("📊 ") + "MAE", f"{reg_mae:.3f}")
+        with col2:
+            reg_r2 = regressor_metrics.get('r2', 0)
+            st.metric(e("📈 ") + "R²", f"{reg_r2:.3f}")
+        with col3:
+            reg_rmse = regressor_metrics.get('rmse', 0)
+            st.metric(e("📉 ") + "RMSE", f"{reg_rmse:.3f}")
     
     st.markdown("---")
     
