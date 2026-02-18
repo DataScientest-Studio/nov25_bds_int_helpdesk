@@ -171,15 +171,34 @@ with col1:
     section_header(e("📈 ") + get_text('priority_distribution'), 'priority_dist')
     
     if not data['priority_distribution'].empty:
+        # Map both numeric and string priority values
         priority_names = {
-            1: e('🔴 ') + get_text('critical'), 
-            2: e('🟠 ') + get_text('high'), 
-            3: e('🟡 ') + get_text('medium'), 
-            4: e('🟢 ') + get_text('low'), 
-            5: e('⚪ ') + get_text('minimal')
+            # Numeric
+            1: '🔴 ' + get_text('critical'), 
+            2: '🟠 ' + get_text('high'), 
+            3: '🟡 ' + get_text('medium'), 
+            4: '🟢 ' + get_text('low'), 
+            5: '⚪ ' + get_text('minimal'),
+            # String values from database
+            'Blocker': '🔴 ' + get_text('critical'),
+            'blocker': '🔴 ' + get_text('critical'),
+            'pblocker': '🔴 ' + get_text('critical'),
+            'High': '🟠 ' + get_text('high'),
+            'high': '🟠 ' + get_text('high'),
+            'phigh': '🟠 ' + get_text('high'),
+            'Medium': '🟡 ' + get_text('medium'),
+            'medium': '🟡 ' + get_text('medium'),
+            'pmedium': '🟡 ' + get_text('medium'),
+            'Low': '🟢 ' + get_text('low'),
+            'low': '🟢 ' + get_text('low'),
+            'plow': '🟢 ' + get_text('low'),
+            'Minimal': '⚪ ' + get_text('minimal'),
+            'minimal': '⚪ ' + get_text('minimal'),
+            'unknown': '❓ ' + get_text('unknown'),
+            'punknown': '❓ ' + get_text('unknown'),
         }
         data['priority_distribution']['priority_name'] = data['priority_distribution']['priority'].map(
-            lambda x: priority_names.get(x, f'P{x}')
+            lambda x: priority_names.get(x, priority_names.get(str(x), f'❓ {x}'))
         )
         
         fig = px.bar(
