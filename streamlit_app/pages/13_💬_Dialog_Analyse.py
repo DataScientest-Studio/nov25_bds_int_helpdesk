@@ -100,28 +100,25 @@ with tab1:
     # Calculate distribution
     distribution = df['dialog_act'].value_counts()
     
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        # Pie Chart
-        fig = px.pie(
-            values=distribution.values,
-            names=[DIALOG_ACTS.get(act, ('', act, ''))[1] for act in distribution.index],
-            title=get_text('communication_types_dist'),
-            hole=0.4
+    # Pie Chart (full width, no separate legend)
+    fig = px.pie(
+        values=distribution.values,
+        names=[DIALOG_ACTS.get(act, ('', act, ''))[1] for act in distribution.index],
+        title=get_text('communication_types_dist'),
+        hole=0.4
+    )
+    fig.update_layout(
+        height=450,
+        showlegend=True,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.3,
+            xanchor="center",
+            x=0.5
         )
-        fig.update_layout(height=500)
-        st.plotly_chart(fig, use_container_width=True)
-    
-    with col2:
-        st.markdown(f"### {get_text('legend')}")
-        for act in distribution.index:
-            emoji, name, desc = DIALOG_ACTS.get(act, (e('📄'), act, ''))
-            count = distribution[act]
-            pct = count / len(df) * 100
-            st.markdown(f"{emoji} **{name}**: {count:,} ({pct:.1f}%)")
-            st.caption(desc)
-            st.markdown("---")
+    )
+    st.plotly_chart(fig, use_container_width=True)
     
     # Bar Chart
     section_header(e("📊 ") + get_text('detailed_distribution'))
