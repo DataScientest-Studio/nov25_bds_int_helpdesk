@@ -70,6 +70,7 @@ TRANSLATIONS = {
         'nav_export': 'Export Center',
         'nav_dialog': 'Dialog-Analyse',
         'nav_score_compare': 'Score-Vergleich',
+        'nav_presentation': 'Präsentation',
         'nav_settings': 'Einstellungen',
         
         # Dashboard / Main App
@@ -738,6 +739,7 @@ TRANSLATIONS = {
         'nav_export': 'Export Center',
         'nav_dialog': 'Dialog Analysis',
         'nav_score_compare': 'Score Comparison',
+        'nav_presentation': 'Presentation',
         'nav_settings': 'Settings',
         
         # Dashboard / Main App
@@ -1529,23 +1531,30 @@ def init_session_state():
         st.session_state.show_emojis = False  # Default: Emojis off
     if 'active_model' not in st.session_state:
         st.session_state.active_model = 'q_score'  # Default: Q-Score (Manager)
+    # All pages visible by default (except Settings which is always visible)
+    default_visible = {
+        'nav_data_inventory': True,
+        'nav_dashboard': True,
+        'nav_tickets': True,
+        'nav_employees': True,
+        'nav_training': True,
+        'nav_bias': True,
+        'nav_nlp': True,
+        'nav_compliance': True,
+        'nav_model': True,
+        'nav_trends': True,
+        'nav_export': True,
+        'nav_dialog': True,
+        'nav_score_compare': True,
+        'nav_presentation': True,
+    }
     if 'visible_pages' not in st.session_state:
-        # All pages visible by default (except Settings which is always visible)
-        st.session_state.visible_pages = {
-            'nav_data_inventory': True,
-            'nav_dashboard': True,
-            'nav_tickets': True,
-            'nav_employees': True,
-            'nav_training': True,
-            'nav_bias': True,
-            'nav_nlp': True,
-            'nav_compliance': True,
-            'nav_model': True,
-            'nav_trends': True,
-            'nav_export': True,
-            'nav_dialog': True,
-            'nav_score_compare': True,
-        }
+        st.session_state.visible_pages = default_visible
+    else:
+        # Ensure new pages are added to existing session state
+        for key, value in default_visible.items():
+            if key not in st.session_state.visible_pages:
+                st.session_state.visible_pages[key] = value
 
 
 def get_text(key: str) -> str:
@@ -1607,6 +1616,7 @@ def get_nav_items():
         ("pages/11_📥_Export_Center.py", "nav_export", "📥"),
         ("pages/13_💬_Dialog_Analyse.py", "nav_dialog", "💬"),
         ("pages/15_🔬_Score_Vergleich.py", "nav_score_compare", "🔬"),
+        ("pages/16_🎬_Präsentation.py", "nav_presentation", "🎬"),
         ("pages/14_⚙️_Settings.py", "nav_settings", "⚙️"),
     ]
 
@@ -1644,14 +1654,14 @@ def render_settings_sidebar():
     col1, col2, col3 = st.sidebar.columns([1, 1, 1])
     
     with col1:
-        if st.button("DE", use_container_width=True, 
+        if st.button("DE", width="stretch", 
                     type="primary" if st.session_state.language == 'de' else "secondary",
                     key='lang_de_btn'):
             st.session_state.language = 'de'
             st.rerun()
     
     with col2:
-        if st.button("EN", use_container_width=True,
+        if st.button("EN", width="stretch",
                     type="primary" if st.session_state.language == 'en' else "secondary",
                     key='lang_en_btn'):
             st.session_state.language = 'en'
@@ -1661,7 +1671,7 @@ def render_settings_sidebar():
         # Emoji toggle as button
         emoji_label = "😀" if st.session_state.show_emojis else "Aa"
         emoji_type = "primary" if st.session_state.show_emojis else "secondary"
-        if st.button(emoji_label, use_container_width=True, type=emoji_type, key='emoji_btn'):
+        if st.button(emoji_label, width="stretch", type=emoji_type, key='emoji_btn'):
             st.session_state.show_emojis = not st.session_state.show_emojis
             st.rerun()
     

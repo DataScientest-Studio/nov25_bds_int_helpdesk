@@ -118,7 +118,7 @@ with tab1:
             x=0.5
         )
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
     
     # Bar Chart
     section_header(e("📊 ") + get_text('detailed_distribution'))
@@ -140,7 +140,7 @@ with tab1:
     )
     fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
     fig.update_layout(height=400)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 with tab2:
     section_header(e("🔍 ") + get_text('examples_per_dialog_act'), 'dialog_examples')

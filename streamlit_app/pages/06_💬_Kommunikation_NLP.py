@@ -99,7 +99,7 @@ with col1:
         yaxis_title=get_text('issues_count'),
         height=350
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
     
     # Interpretation
     complaints_label = "Complaints" if st.session_state.get('language') == 'en' else "Beschwerden"
@@ -133,7 +133,7 @@ with col2:
         yaxis_title=get_text('avg_score_per_issue'),
         height=350
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 st.markdown("---")
 
@@ -185,7 +185,7 @@ if scored_df is not None and 'id' in scored_df.columns:
             height=450,
             legend_title="Q1 Score"
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     else:
         st.info(get_text('no_overlap'))
 else:
@@ -202,13 +202,13 @@ with col1:
     st.markdown(f"**{e('🔝')} {get_text('most_positive')}:**")
     top_positive = nlp_df.nlargest(5, 'sentiment_compound_mean')[['issueid', 'sentiment_compound_mean']]
     top_positive.columns = ['Issue ID', get_text('sentiment')]
-    st.dataframe(top_positive, use_container_width=True)
+    st.dataframe(top_positive, width="stretch")
 
 with col2:
     st.markdown(f"**{e('🔻')} {get_text('most_negative')}:**")
     top_negative = nlp_df.nsmallest(5, 'sentiment_compound_mean')[['issueid', 'sentiment_compound_mean']]
     top_negative.columns = ['Issue ID', get_text('sentiment')]
-    st.dataframe(top_negative, use_container_width=True)
+    st.dataframe(top_negative, width="stretch")
 
 # Footer
 render_footer()

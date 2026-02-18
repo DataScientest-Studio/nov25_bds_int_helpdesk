@@ -91,7 +91,7 @@ with col1:
         yaxis_title=get_text('issues_count'),
         height=350
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 with col2:
     section_header(e("🔄 ") + get_text('reopens_per_issue'), 'reopens')
@@ -109,7 +109,7 @@ with col2:
         yaxis_title=get_text('issues_count'),
         height=350
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 st.markdown("---")
 
@@ -179,7 +179,7 @@ if len(problem_issues) > 0:
     
     st.dataframe(
         display_df,
-        use_container_width=True,
+        width="stretch",
         column_config={
             'issue_id': st.column_config.TextColumn("Issue ID"),
             'total_steps': st.column_config.NumberColumn(get_text('steps')),

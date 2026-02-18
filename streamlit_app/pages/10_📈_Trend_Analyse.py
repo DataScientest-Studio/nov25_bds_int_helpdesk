@@ -99,7 +99,7 @@ with tab1:
                 color=risk_counts.index,
                 color_discrete_map={'GREEN': '#4CAF50', 'YELLOW': '#FF9800', 'RED': '#f44336'}
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
         
         with col2:
             # Score distribution by Risk Level
@@ -111,7 +111,7 @@ with tab1:
                 color='Risk Level',
                 color_discrete_map={'GREEN': '#4CAF50', 'YELLOW': '#FF9800', 'RED': '#f44336'}
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
         
         # Top & Bottom Performers
         st.markdown(f"### {e('🏆')} Top & Bottom Performer")
@@ -121,12 +121,12 @@ with tab1:
         with col1:
             st.markdown(f"**{e('🥇')} {get_text('top_10_highest')}**")
             top10 = employee_df.nlargest(10, 'Avg Score')[['Employee', 'Q1', 'Q2', 'Q3', 'Avg Score', 'Tickets', 'Risk Level']]
-            st.dataframe(top10, use_container_width=True, hide_index=True)
+            st.dataframe(top10, width="stretch", hide_index=True)
         
         with col2:
             st.markdown(f"**{e('⚠️')} {get_text('bottom_10_lowest')}**")
             bottom10 = employee_df.nsmallest(10, 'Avg Score')[['Employee', 'Q1', 'Q2', 'Q3', 'Avg Score', 'Tickets', 'Risk Level']]
-            st.dataframe(bottom10, use_container_width=True, hide_index=True)
+            st.dataframe(bottom10, width="stretch", hide_index=True)
         
         # Ticket Volume vs Score
         section_header(e("📊 ") + get_text('ticket_volume_vs_performance'))
@@ -142,7 +142,7 @@ with tab1:
             color_discrete_map={'GREEN': '#4CAF50', 'YELLOW': '#FF9800', 'RED': '#f44336'}
         )
         fig.update_layout(height=500)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
         
         # Calculate correlation
         corr = employee_df['Tickets'].corr(employee_df['Avg Score'])
@@ -190,7 +190,7 @@ with tab2:
                 color_discrete_sequence=['#2196F3']
             )
             fig.update_layout(bargap=0.1)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
             st.metric(t("Ø Q1", "Avg Q1"), f"{employee_df['Q1'].mean():.2f}")
         
         with col2:
@@ -200,7 +200,7 @@ with tab2:
                 color_discrete_sequence=['#9C27B0']
             )
             fig.update_layout(bargap=0.1)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
             st.metric(t("Ø Q2", "Avg Q2"), f"{employee_df['Q2'].mean():.2f}")
         
         with col3:
@@ -210,7 +210,7 @@ with tab2:
                 color_discrete_sequence=['#FF9800']
             )
             fig.update_layout(bargap=0.1)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
             st.metric(t("Ø Q3", "Avg Q3"), f"{employee_df['Q3'].mean():.2f}")
         
         # Q-Score Correlation Matrix
@@ -227,7 +227,7 @@ with tab2:
             color_continuous_scale='RdBu_r',
             title=corr_chart_title
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
         
         # Q-Score vs O-Score Comparison
         if 'o_score' in employee_df.columns:
@@ -259,7 +259,7 @@ with tab2:
                 name='Ideal (Q=O)'
             ))
             fig.update_layout(height=500)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
             
             # Bias indicator
             avg_diff = employee_df['score_diff'].mean()
@@ -387,7 +387,7 @@ with tab3:
             barmode='group',
             height=400
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
         
         # Recommendations
         st.markdown(f"### {e('💡')} {get_text('recommendations')}")

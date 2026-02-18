@@ -166,7 +166,7 @@ with tab1:
             'ticket_count': st.column_config.NumberColumn(get_text('tickets')),
             'risk_level': st.column_config.TextColumn(get_text('risk_level')),
         },
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
         height=500
     )
@@ -202,7 +202,7 @@ with tab3:
                 hole=0.4
             )
             fig.update_layout(height=350)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
     
     with col2:
         section_header(e("📈 ") + get_text('score_distribution'))
@@ -213,7 +213,7 @@ with tab3:
             color_discrete_sequence=['#2196F3']
         )
         fig.update_layout(height=350)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     
     # Scatter: Tickets vs Score
     section_header(e("📊 ") + get_text('tickets_vs_score'))
@@ -233,7 +233,7 @@ with tab3:
                 color_discrete_map={'GREEN': '#4CAF50', 'YELLOW': '#FF9800', 'RED': '#f44336'}
             )
             fig.update_layout(height=400)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
         else:
             st.info(get_text('no_data'))
 

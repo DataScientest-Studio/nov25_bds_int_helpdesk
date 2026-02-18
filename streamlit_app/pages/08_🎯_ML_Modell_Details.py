@@ -138,7 +138,7 @@ def render_metrics_interpretation(avg_acc, avg_mae, avg_cv, avg_f1_macro, avg_f1
     # Display as styled table
     st.dataframe(
         df,
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
         column_config={
             t('Metrik', 'Metric'): st.column_config.TextColumn(width="medium"),
@@ -418,7 +418,7 @@ def render_feature_importance_chart(importance_df, title):
             color_continuous_scale='Blues'
         )
         fig.update_layout(height=500, yaxis={'categoryorder': 'total ascending'})
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     
     with col2:
         st.markdown(f"**{get_text('top_10_features')}:**")
@@ -452,7 +452,7 @@ def render_confusion_matrix(cm, title):
         yaxis_title=get_text('actual'),
         height=400
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
     
     st.markdown(f"""
     **{get_text('reading_hint')}:**

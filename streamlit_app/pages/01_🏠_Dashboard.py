@@ -159,7 +159,7 @@ with col1:
             color_discrete_sequence=px.colors.qualitative.Set3
         )
         fig.update_layout(height=300, margin=dict(t=20, b=20, l=20, r=20))
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
 with col2:
     section_header(e("📈 ") + get_text('priority_distribution'), 'priority_dist')
@@ -202,7 +202,7 @@ with col2:
         )
         fig.update_traces(marker_color='#3498db')
         fig.update_layout(height=300, margin=dict(t=20, b=20), showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
 # Newest Tickets
 section_header(e("🎫 ") + get_text('newest_tickets'), 'ticket_list')
@@ -222,7 +222,7 @@ if not data['recent_tickets'].empty:
             'assignee': st.column_config.TextColumn(get_text('assignee')),
             'created_at': st.column_config.DatetimeColumn(get_text('created'), format="DD.MM.YY HH:mm"),
         },
-        use_container_width=True,
+        width="stretch",
         hide_index=True
     )
 

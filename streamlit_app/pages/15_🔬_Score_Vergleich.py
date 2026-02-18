@@ -200,7 +200,7 @@ def main():
                 height=400
             )
             
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
             
             legend_text = t(
                 "🔴 = Überbewertet (Q > O+1) | 🟢 = Unterbewertet (O > Q+1) | 🔵 = OK",
@@ -235,7 +235,7 @@ def main():
                 height=400
             )
             
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
             
             # Statistics table
             stats_df = pd.DataFrame({
@@ -255,7 +255,7 @@ def main():
                     f"{comparison['o_score'].max():.1f}"
                 ]
             })
-            st.dataframe(stats_df, use_container_width=True, hide_index=True)
+            st.dataframe(stats_df, width="stretch", hide_index=True)
     
     # === TAB 2: EMPLOYEE DETAILS ===
     with tab2:
@@ -316,7 +316,7 @@ def main():
         else:  # Difference large
             display_df = display_df.sort_values(difference_label, key=abs, ascending=False)
         
-        st.dataframe(display_df, use_container_width=True, hide_index=True, height=400)
+        st.dataframe(display_df, width="stretch", hide_index=True, height=400)
     
     # === TAB 3: BIAS ANALYSIS ===
     with tab3:
@@ -336,7 +336,7 @@ def main():
             )])
             
             fig.update_layout(height=350)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
             
             overrated_key = t('ÜBERBEWERTET', 'OVERRATED')
             underrated_key = t('UNTERBEWERTET', 'UNDERRATED')
@@ -392,7 +392,7 @@ def main():
                     legend=dict(orientation='h', yanchor='bottom', y=1.02)
                 )
                 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
         
         st.markdown("---")
         histogram_title = t("Score-Differenz Histogramm", "Score Difference Histogram")
@@ -420,7 +420,7 @@ def main():
             height=300
         )
         
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     
     # === TAB 4: O-SCORE COMPONENTS ===
     with tab4:
@@ -480,7 +480,7 @@ def main():
                 height=400
             )
             
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
         
         with col2:
             corr_title = t("Komponenten-Korrelation", "Component Correlation")
@@ -503,7 +503,7 @@ def main():
             ))
             
             fig.update_layout(height=400)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
         
         st.markdown("---")
         dist_title = t("O-Score Verteilung (alle Mitarbeiter)", "O-Score Distribution (all employees)")
@@ -527,7 +527,7 @@ def main():
             height=300
         )
         
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
         
         employees_oscore = t("Mitarbeiter mit O-Score bewertet (min. 10 Tickets)", "employees with O-Score (min. 10 tickets)")
         st.success(f"**{len(o_scores)} {employees_oscore}**")

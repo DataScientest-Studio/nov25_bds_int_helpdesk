@@ -114,7 +114,7 @@ with col1:
         textfont={"size": 16}
     ))
     fig.update_layout(height=350)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 with col2:
     section_header(e("📈 ") + get_text('score_distribution'))
@@ -134,7 +134,7 @@ with col2:
         yaxis_title=get_text('count'),
         height=350
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 st.markdown("---")
 
@@ -150,7 +150,7 @@ with col1:
     fig.add_trace(go.Scatter(x=[1,5], y=[1,5], mode='lines', 
                              name=get_text('perfect_correlation'), 
                              line=dict(dash='dash', color='gray')))
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 with col2:
     # Box-Plot per Score
@@ -159,7 +159,7 @@ with col2:
         fig.add_trace(go.Box(y=df[q], name=q))
     per_dimension = "per Dimension" if st.session_state.get('language') == 'en' else "pro Dimension"
     fig.update_layout(title=get_text('score_distribution') + " " + per_dimension, yaxis_title="Score")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 st.markdown("---")
 
@@ -205,7 +205,7 @@ stats = pd.DataFrame({
     'Q3': [len(df), df['Q3'].mean(), df['Q3'].std(), df['Q3'].median(), df['Q3'].min(), df['Q3'].max()],
 }).round(2)
 
-st.dataframe(stats, use_container_width=True)
+st.dataframe(stats, width="stretch")
 
 # Footer
 render_footer()

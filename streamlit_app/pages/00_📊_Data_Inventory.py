@@ -216,11 +216,11 @@ def main():
                 })
             
             columns_df = pd.DataFrame(columns_info)
-            st.dataframe(columns_df, use_container_width=True, hide_index=True)
+            st.dataframe(columns_df, width="stretch", hide_index=True)
             
             # Preview
             st.markdown(f"**{get_text('preview')}:**")
-            st.dataframe(df.head(5), use_container_width=True)
+            st.dataframe(df.head(5), width="stretch")
             
             # Key Columns
             st.markdown(f"**{get_text('important_columns')}:** `{'`, `'.join(info['key_columns'])}`")
@@ -258,7 +258,7 @@ def main():
         })
         fig = px.bar(dtype_df, x=get_text('type'), y=get_text('count'), color=get_text('type'),
                      title=get_text('columns_by_type'))
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     
     with col2:
         st.markdown(f"**{get_text('summary')}:**")

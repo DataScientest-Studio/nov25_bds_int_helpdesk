@@ -134,7 +134,7 @@ with col1:
         marker_colors=['#28a745', '#ffc107', '#dc3545']
     )])
     fig.update_layout(height=300)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 with col2:
     section_header(e("📈 ") + get_text('score_by_risk'))
@@ -148,7 +148,7 @@ with col2:
         title=""
     )
     fig.update_layout(height=300, showlegend=False)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 st.markdown("---")
 
@@ -223,7 +223,7 @@ with tab2:
                 labels={'x': get_text('count'), 'y': get_text('training_areas')}
             )
             fig.update_layout(yaxis_title=get_text('training_areas'), xaxis_title=get_text('count'))
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
         
         # Translate training areas in dataframe
         display_df = yellow_employees[['Employee', 'Avg Score', 'Tickets', 'Training Areas']].copy()
@@ -232,7 +232,7 @@ with tab2:
                 lambda x: ', '.join([translate_training_area(a.strip(), 'en') for a in str(x).split(',')]) if pd.notna(x) else x
             )
         
-        st.dataframe(display_df, use_container_width=True)
+        st.dataframe(display_df, width="stretch")
 
 with tab3:
     section_header(e("📋 ") + get_text('all_employees'))
@@ -254,7 +254,7 @@ with tab3:
         (report_df['Tickets'] >= min_tickets)
     ]
     
-    st.dataframe(filtered_df, use_container_width=True, hide_index=True)
+    st.dataframe(filtered_df, width="stretch", hide_index=True)
 
 with tab4:
     section_header(e("📖 ") + get_text('risk_level_def'))
@@ -358,7 +358,7 @@ with tab4:
                        'RED', 'RED', 'RED', 'RED']
     })
     
-    st.dataframe(thresholds_df, use_container_width=True, hide_index=True)
+    st.dataframe(thresholds_df, width="stretch", hide_index=True)
 
 st.markdown("---")
 

@@ -119,7 +119,7 @@ def train_model(X, y, test_size=0.2):
     Returns:
         dict: Trained models and metrics
     """
-    print("\n🤖 MODEL TRAINING")
+    print("\n MODEL TRAINING")
     print("="*50)
     
     targets = ['Q1', 'Q2', 'Q3']
@@ -217,7 +217,7 @@ def save_model(model_data, output_path="models/q_score_model.joblib"):
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
     joblib.dump(model_data, output_path)
-    print(f"\n💾 Model saved: {output_path}")
+    print(f"\n Model saved: {output_path}")
 
 
 def load_model(model_path="models/q_score_model.joblib"):
@@ -231,7 +231,7 @@ def load_model(model_path="models/q_score_model.joblib"):
 def print_summary(metrics):
     """Print summary."""
     print("\n" + "="*50)
-    print("📊 MODEL SUMMARY")
+    print(" MODEL SUMMARY")
     print("="*50)
     
     for target, m in metrics.items():
@@ -244,14 +244,14 @@ def print_summary(metrics):
     avg_acc = np.mean([m['accuracy'] for m in metrics.values()])
     avg_kappa = np.mean([m['kappa'] for m in metrics.values()])
     
-    print(f"\n🎯 TOTAL:")
+    print(f"\n TOTAL:")
     print(f"   Avg Accuracy: {avg_acc:.3f}")
     print(f"   Avg Kappa: {avg_kappa:.3f}")
 
 
 if __name__ == "__main__":
     print("="*50)
-    print("🤖 ML MODEL TRAINING")
+    print(" ML MODEL TRAINING")
     print("="*50)
     
     # Load ML dataset
@@ -259,7 +259,7 @@ if __name__ == "__main__":
     
     if data_path.exists():
         df = pd.read_csv(data_path)
-        print(f"📁 Loaded: {len(df)} samples")
+        print(f" Loaded: {len(df)} samples")
         
         # Separate features and targets
         target_cols = ['Q1', 'Q2', 'Q3']
@@ -280,10 +280,10 @@ if __name__ == "__main__":
         save_model(model_data)
         
         # Show top features
-        print("\n📈 Top 5 Features (Q1):")
+        print("\n Top 5 Features (Q1):")
         if 'Q1' in model_data['feature_importance']:
             for _, row in model_data['feature_importance']['Q1'].head(5).iterrows():
                 print(f"   {row['feature']}: {row['importance']:.4f}")
     else:
-        print("❌ ML dataset not found!")
+        print(" ML dataset not found!")
         print("   Please run feature_engineering.py first.")

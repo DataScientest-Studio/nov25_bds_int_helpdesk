@@ -125,7 +125,7 @@ if not IS_CLOUD:
     with col1:
         st.markdown(f"**{get_text('database_simulator')}**")
         
-        if st.button(e("🔄 ") + get_text('simulation_reset'), type="primary", use_container_width=True):
+        if st.button(e("🔄 ") + get_text('simulation_reset'), type="primary", width="stretch"):
             with st.spinner(get_text('resetting_database')):
                 # Clear Streamlit cache
                 st.cache_data.clear()
@@ -144,11 +144,11 @@ if not IS_CLOUD:
         
         col2a, col2b = st.columns(2)
         with col2a:
-            if st.button(e("▶️ ") + get_text('start'), use_container_width=True):
+            if st.button(e("▶️ ") + get_text('start'), width="stretch"):
                 subprocess.run(["systemctl", "--user", "start", "helpdesk-simulator"])
                 st.success(get_text('started'))
         with col2b:
-            if st.button(e("⏹️ ") + get_text('stop'), use_container_width=True):
+            if st.button(e("⏹️ ") + get_text('stop'), width="stretch"):
                 subprocess.run(["systemctl", "--user", "stop", "helpdesk-simulator"])
                 st.warning(get_text('stopped'))
 

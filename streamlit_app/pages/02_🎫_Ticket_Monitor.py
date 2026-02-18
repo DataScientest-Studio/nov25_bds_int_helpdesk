@@ -207,7 +207,7 @@ with tab1:
             'comments_count': st.column_config.NumberColumn(e("💬"), width="small"),
             'created_at': st.column_config.DatetimeColumn(get_text('created'), format="DD.MM.YY HH:mm"),
         },
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
         height=500
     )
@@ -221,7 +221,7 @@ with tab2:
         status_counts = tickets['status'].value_counts()
         fig = px.pie(values=status_counts.values, names=status_counts.index, hole=0.4)
         fig.update_layout(height=300)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     
     with col2:
         section_header(e("📈 ") + get_text('priority_distribution'))
@@ -241,14 +241,14 @@ with tab2:
             color_continuous_scale='RdYlGn_r'
         )
         fig.update_layout(height=300, showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     
     # Top assignees
     section_header(e("👥 ") + get_text('top_assignees'))
     top_assignees = tickets['assignee'].value_counts().head(10)
     fig = px.bar(x=top_assignees.index, y=top_assignees.values)
     fig.update_layout(height=300)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 with tab3:
     # Ticket details
