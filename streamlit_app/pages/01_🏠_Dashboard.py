@@ -144,13 +144,6 @@ with col6:
 
 st.markdown("---")
 
-# Alerts
-if not data['alerts'].empty:
-    section_header(e("🚨 ") + get_text('active_alerts'), 'alerts_overview')
-    for _, alert in data['alerts'].iterrows():
-        severity_color = e("🔴") if alert['severity'] == 'HIGH' else e("🟡")
-        st.warning(f"{severity_color} **{alert['alert_type']}**: {alert['message']}")
-
 # Charts
 col1, col2 = st.columns(2)
 
