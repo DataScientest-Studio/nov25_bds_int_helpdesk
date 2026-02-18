@@ -12,21 +12,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Import settings
-try:
-    from components.settings import (
-        render_navigation,
-        init_session_state, render_settings_sidebar, render_footer,
-        get_text, section_header, page_header, e
-    )
-except ImportError:
-    # Fallback
-    def init_session_state(): pass
-    def render_settings_sidebar(): pass
-    def render_footer(): pass
-    def get_text(key): return key
-    def section_header(text, key=None): st.subheader(text)
-    def page_header(text, subtitle=None, help_key=None): st.title(text)
-    def e(text): return text
+from components.settings import (
+    render_navigation,
+    init_session_state, render_settings_sidebar, render_footer,
+    get_text, section_header, page_header, e
+)
 
 # Page Config
 st.set_page_config(
