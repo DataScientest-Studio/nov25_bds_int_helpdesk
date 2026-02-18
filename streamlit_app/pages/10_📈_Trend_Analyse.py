@@ -27,6 +27,12 @@ init_session_state()
 # Render settings sidebar
 render_settings_sidebar()
 
+
+def t(de_text, en_text):
+    """Simple translation helper."""
+    return en_text if st.session_state.get('language') == 'en' else de_text
+
+
 # Page header
 page_header(
     e("📈 ") + get_text('trend_analysis'),
@@ -151,65 +157,89 @@ with tab1:
         st.info(get_text('no_data'))
 
 with tab2:
-    section_header(e("📊 ") + "Q-Score Dimensions")
+    q_score_dimensions = t("Q-Score Dimensionen", "Q-Score Dimensions")
+    section_header(e("📊 ") + q_score_dimensions)
     
     if not employee_df.empty:
-        st.markdown("""
-        **Q-Score Dimensionen (Manager-Bewertung 1-5):**
-        - **Q1** = Accuracy/Precision (Genauigkeit)
-        - **Q2** = Thoroughness (Gründlichkeit)
-        - **Q3** = Responsiveness (Reaktionsfähigkeit)
-        """)
+        dimensions_desc = t(
+            """
+            **Q-Score Dimensionen (Manager-Bewertung 1-5):**
+            - **Q1** = Genauigkeit, Präzision
+            - **Q2** = Gründlichkeit, Vollständigkeit
+            - **Q3** = Reaktionsfähigkeit, Verbindlichkeit
+            """,
+            """
+            **Q-Score Dimensions (Manager Rating 1-5):**
+            - **Q1** = Accuracy, Precision
+            - **Q2** = Thoroughness, Completeness
+            - **Q3** = Responsiveness, Reliability
+            """
+        )
+        st.markdown(dimensions_desc)
         
         col1, col2, col3 = st.columns(3)
+        
+        q1_title = t("Q1: Genauigkeit Verteilung", "Q1: Accuracy Distribution")
+        q2_title = t("Q2: Gründlichkeit Verteilung", "Q2: Thoroughness Distribution")
+        q3_title = t("Q3: Reaktionsfähigkeit Verteilung", "Q3: Responsiveness Distribution")
         
         with col1:
             fig = px.histogram(
                 employee_df, x='Q1', nbins=5,
-                title="Q1: Accuracy Distribution",
+                title=q1_title,
                 color_discrete_sequence=['#2196F3']
             )
             fig.update_layout(bargap=0.1)
             st.plotly_chart(fig, use_container_width=True)
-            st.metric("Ø Q1", f"{employee_df['Q1'].mean():.2f}")
+            st.metric(t("Ø Q1", "Avg Q1"), f"{employee_df['Q1'].mean():.2f}")
         
         with col2:
             fig = px.histogram(
                 employee_df, x='Q2', nbins=5,
-                title="Q2: Thoroughness Distribution",
+                title=q2_title,
                 color_discrete_sequence=['#9C27B0']
             )
             fig.update_layout(bargap=0.1)
             st.plotly_chart(fig, use_container_width=True)
-            st.metric("Ø Q2", f"{employee_df['Q2'].mean():.2f}")
+            st.metric(t("Ø Q2", "Avg Q2"), f"{employee_df['Q2'].mean():.2f}")
         
         with col3:
             fig = px.histogram(
                 employee_df, x='Q3', nbins=5,
-                title="Q3: Responsiveness Distribution",
+                title=q3_title,
                 color_discrete_sequence=['#FF9800']
             )
             fig.update_layout(bargap=0.1)
             st.plotly_chart(fig, use_container_width=True)
-            st.metric("Ø Q3", f"{employee_df['Q3'].mean():.2f}")
+            st.metric(t("Ø Q3", "Avg Q3"), f"{employee_df['Q3'].mean():.2f}")
         
         # Q-Score Correlation Matrix
-        section_header(e("🔗 ") + "Q-Score Korrelationen")
+        corr_title = t("Q-Score Korrelationen", "Q-Score Correlations")
+        section_header(e("🔗 ") + corr_title)
         
         q_cols = ['Q1', 'Q2', 'Q3', 'Avg Score', 'Tickets']
         corr_matrix = employee_df[q_cols].corr()
         
+        corr_chart_title = t("Korrelation zwischen Q-Scores", "Correlation between Q-Scores")
         fig = px.imshow(
             corr_matrix,
             text_auto='.2f',
             color_continuous_scale='RdBu_r',
-            title="Korrelation zwischen Q-Scores"
+            title=corr_chart_title
         )
         st.plotly_chart(fig, use_container_width=True)
         
         # Q-Score vs O-Score Comparison
         if 'o_score' in employee_df.columns:
-            section_header(e("⚖️ ") + "Q-Score vs O-Score")
+            qo_title = t("Q-Score vs O-Score", "Q-Score vs O-Score")
+            section_header(e("⚖️ ") + qo_title)
+            
+            scatter_title = t(
+                "Manager-Bewertung (Q) vs Objektive Metriken (O)",
+                "Manager Rating (Q) vs Objective Metrics (O)"
+            )
+            q_label = t("Q-Score (Manager)", "Q-Score (Manager)")
+            o_label = t("O-Score (Objektiv)", "O-Score (Objective)")
             
             fig = px.scatter(
                 employee_df,
@@ -217,8 +247,8 @@ with tab2:
                 y='o_score',
                 color='Risk Level',
                 hover_data=['Employee'],
-                title="Manager-Bewertung (Q) vs Objektive Metriken (O)",
-                labels={'q_score_avg': 'Q-Score (Manager)', 'o_score': 'O-Score (Objektiv)'},
+                title=scatter_title,
+                labels={'q_score_avg': q_label, 'o_score': o_label},
                 color_discrete_map={'GREEN': '#4CAF50', 'YELLOW': '#FF9800', 'RED': '#f44336'}
             )
             # Add diagonal reference line
@@ -234,11 +264,23 @@ with tab2:
             # Bias indicator
             avg_diff = employee_df['score_diff'].mean()
             if avg_diff < -0.5:
-                st.warning(f"⚠️ **Leniency Bias erkannt:** Manager bewerten im Schnitt {abs(avg_diff):.1f} Punkte höher als objektive Metriken")
+                leniency_msg = t(
+                    f"**Leniency Bias erkannt:** Manager bewerten im Schnitt {abs(avg_diff):.1f} Punkte höher als objektive Metriken",
+                    f"**Leniency Bias detected:** Managers rate on average {abs(avg_diff):.1f} points higher than objective metrics"
+                )
+                st.warning(e("⚠️ ") + leniency_msg)
             elif avg_diff > 0.5:
-                st.warning(f"⚠️ **Severity Bias erkannt:** Manager bewerten im Schnitt {avg_diff:.1f} Punkte niedriger als objektive Metriken")
+                severity_msg = t(
+                    f"**Severity Bias erkannt:** Manager bewerten im Schnitt {avg_diff:.1f} Punkte niedriger als objektive Metriken",
+                    f"**Severity Bias detected:** Managers rate on average {avg_diff:.1f} points lower than objective metrics"
+                )
+                st.warning(e("⚠️ ") + severity_msg)
             else:
-                st.success(f"✅ Geringe Abweichung zwischen Q-Score und O-Score ({avg_diff:.2f})")
+                low_diff_msg = t(
+                    f"Geringe Abweichung zwischen Q-Score und O-Score ({avg_diff:.2f})",
+                    f"Low deviation between Q-Score and O-Score ({avg_diff:.2f})"
+                )
+                st.success(e("✅ ") + low_diff_msg)
     else:
         st.info(get_text('no_data'))
 

@@ -63,7 +63,7 @@ tab1, tab2 = st.tabs([
 ])
 
 with tab1:
-    section_header(e("📊 ") + "Excel & CSV Downloads", 'export_data')
+    section_header(e("📊 ") + get_text('excel_csv') + " Downloads", 'export_data')
     
     col1, col2 = st.columns(2)
     
