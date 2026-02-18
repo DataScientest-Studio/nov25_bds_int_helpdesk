@@ -49,3 +49,11 @@ Thumbs.db
 *.temp
 .cache/
 data/external/
+
+# Reflex
+reflex_app/.web/
+reflex_app/__pycache__/
+reflex_app/helpdesk/__pycache__/
+reflex_app/helpdesk/pages/__pycache__/
+reflex_app/helpdesk/components/__pycache__/
+*.pyc
