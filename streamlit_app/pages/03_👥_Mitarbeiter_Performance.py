@@ -115,13 +115,13 @@ with col1:
     st.metric(e("👥 ") + get_text('employees'), len(employees))
 with col2:
     green = len(employees[employees['risk_level'] == 'GREEN'])
-    st.metric(e("🟢 ") + "GREEN", green)
+    st.metric("🟢 GREEN", green)
 with col3:
     yellow = len(employees[employees['risk_level'] == 'YELLOW'])
-    st.metric(e("🟡 ") + "YELLOW", yellow, delta="Training" if yellow > 0 else None)
+    st.metric("🟡 YELLOW", yellow, delta="Training" if yellow > 0 else None)
 with col4:
     red = len(employees[employees['risk_level'] == 'RED'])
-    st.metric(e("🔴 ") + "RED", red, delta=get_text('critical') if red > 0 else None, delta_color="inverse")
+    st.metric("🔴 RED", red, delta=get_text('critical') if red > 0 else None, delta_color="inverse")
 with col5:
     avg_score = employees['avg_score'].mean()
     st.metric(e("📊 ") + f"Ø Score", f"{avg_score:.2f}")
