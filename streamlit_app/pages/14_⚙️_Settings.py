@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from components.settings import (
     render_navigation,
     render_settings_sidebar, section_header, page_header, render_footer,
-    get_text, get_help, init_session_state, e
+    get_text, get_help, init_session_state, e, get_nav_items
 )
 
 st.set_page_config(page_title="Settings", page_icon="⚙️", layout="wide")
@@ -78,6 +78,38 @@ if DB_PATH.exists():
         st.warning(f"Database read error: {ex}")
 else:
     st.warning(e("⚠️ ") + get_text('database_not_found'))
+
+st.markdown("---")
+
+# Page Visibility Settings
+section_header(e("👁️ ") + get_text('page_visibility'))
+
+nav_items = get_nav_items()
+visible_pages = st.session_state.get('visible_pages', {})
+
+# Create columns for toggles
+col1, col2 = st.columns(2)
+
+for i, (page_file, trans_key, emoji) in enumerate(nav_items):
+    # Skip Settings page (always visible)
+    if trans_key == 'nav_settings':
+        continue
+    
+    page_name = get_text(trans_key)
+    current_state = visible_pages.get(trans_key, True)
+    
+    with col1 if i % 2 == 0 else col2:
+        new_state = st.toggle(
+            f"{emoji} {page_name}",
+            value=current_state,
+            key=f"vis_{trans_key}"
+        )
+        
+        if new_state != current_state:
+            st.session_state.visible_pages[trans_key] = new_state
+            st.rerun()
+
+st.caption(get_text('page_visibility_hint'))
 
 st.markdown("---")
 

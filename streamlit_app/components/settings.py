@@ -650,6 +650,8 @@ TRANSLATIONS = {
         'simulator_stopped': 'Simulator gestoppt',
         'database': 'Datenbank',
         'database_not_found': 'Datenbank nicht gefunden!',
+        'page_visibility': 'Seiten-Sichtbarkeit',
+        'page_visibility_hint': 'Ausgeblendete Seiten werden in der Navigation nicht angezeigt.',
         'status_changes': 'Status-Änderungen',
         'file_size': 'Dateigröße',
         'services': 'Services',
@@ -1316,6 +1318,8 @@ TRANSLATIONS = {
         'simulator_stopped': 'Simulator stopped',
         'database': 'Database',
         'database_not_found': 'Database not found!',
+        'page_visibility': 'Page Visibility',
+        'page_visibility_hint': 'Hidden pages will not appear in the navigation.',
         'status_changes': 'Status Changes',
         'file_size': 'File Size',
         'services': 'Services',
@@ -1523,6 +1527,23 @@ def init_session_state():
         st.session_state.show_emojis = False  # Default: Emojis off
     if 'active_model' not in st.session_state:
         st.session_state.active_model = 'q_score'  # Default: Q-Score (Manager)
+    if 'visible_pages' not in st.session_state:
+        # All pages visible by default (except Settings which is always visible)
+        st.session_state.visible_pages = {
+            'nav_data_inventory': True,
+            'nav_dashboard': True,
+            'nav_tickets': True,
+            'nav_employees': True,
+            'nav_training': True,
+            'nav_bias': True,
+            'nav_nlp': True,
+            'nav_compliance': True,
+            'nav_model': True,
+            'nav_trends': True,
+            'nav_export': True,
+            'nav_dialog': True,
+            'nav_score_compare': True,
+        }
 
 
 def get_text(key: str) -> str:
@@ -1568,12 +1589,9 @@ def get_help(key: str) -> str:
 # UI COMPONENTS
 # ============================================================================
 
-def render_navigation():
-    """Render custom navigation with translations."""
-    init_session_state()
-    
-    # Navigation items: (page_file, translation_key, emoji)
-    nav_items = [
+def get_nav_items():
+    """Get list of navigation items."""
+    return [
         ("pages/00_📊_Data_Inventory.py", "nav_data_inventory", "📊"),
         ("pages/01_🏠_Dashboard.py", "nav_dashboard", "🏠"),
         ("pages/02_🎫_Ticket_Monitor.py", "nav_tickets", "🎫"),
@@ -1589,10 +1607,22 @@ def render_navigation():
         ("pages/15_🔬_Score_Vergleich.py", "nav_score_compare", "🔬"),
         ("pages/14_⚙️_Settings.py", "nav_settings", "⚙️"),
     ]
+
+
+def render_navigation():
+    """Render custom navigation with translations."""
+    init_session_state()
+    
+    nav_items = get_nav_items()
+    visible_pages = st.session_state.get('visible_pages', {})
     
     st.sidebar.markdown("### " + get_text('navigation'))
     
     for page_file, trans_key, emoji in nav_items:
+        # Settings page is always visible
+        if trans_key != 'nav_settings' and not visible_pages.get(trans_key, True):
+            continue
+            
         label = get_text(trans_key)
         if st.session_state.get('show_emojis', False):
             label = f"{emoji} {label}"
