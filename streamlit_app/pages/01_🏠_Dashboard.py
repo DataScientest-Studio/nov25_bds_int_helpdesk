@@ -204,10 +204,9 @@ with col1:
         fig = px.bar(
             data['priority_distribution'],
             x='priority_name',
-            y='count',
-            color='count',
-            color_continuous_scale='RdYlGn_r'
+            y='count'
         )
+        fig.update_traces(marker_color='#3498db')
         fig.update_layout(height=250, margin=dict(t=20, b=20), showlegend=False)
         st.plotly_chart(fig, use_container_width=True)
 
