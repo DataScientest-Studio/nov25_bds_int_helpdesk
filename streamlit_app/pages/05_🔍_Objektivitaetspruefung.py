@@ -29,8 +29,7 @@ render_settings_sidebar()
 # Page header
 page_header(
     e("🔍 ") + get_text('nav_bias'),
-    "Analysis of fairness and objectivity of manager ratings" if st.session_state.language == 'en' else 
-    "Analyse der Fairness und Objektivität der Manager-Bewertungen",
+    get_text('objectivity_subtitle'),
     help_key='bias'
 )
 
@@ -50,7 +49,7 @@ if df is None:
     st.stop()
 
 # Bias Overview
-section_header(e("🚨 ") + "Detected Bias Types" if st.session_state.language == 'en' else "Erkannte Bias-Typen")
+section_header(e("🚨 ") + get_text('detected_bias_types'))
 
 col1, col2 = st.columns(2)
 
@@ -69,30 +68,29 @@ with col1:
     
     **{get_text('bias_severity')}:** :{severity_color}[{severity}]
     
-    > {"The manager rates all three dimensions (Q1, Q2, Q3) almost identically. This indicates that the overall impression dominates the individual ratings." if st.session_state.language == 'en' else "Der Manager bewertet alle drei Dimensionen (Q1, Q2, Q3) fast identisch. Dies deutet darauf hin, dass der Gesamteindruck die Einzelbewertungen dominiert."}
+    > {get_text('manager_rates_identical')}
     """)
 
 with col2:
     # Leniency/Severity
     avg_q1 = df['Q1'].mean()
     
-    bias_type = get_text('bias_leniency') if avg_q1 > 3.5 else "Severity" if avg_q1 < 2.5 else get_text('neutral')
+    bias_type = get_text('bias_leniency') if avg_q1 > 3.5 else get_text('severity') if avg_q1 < 2.5 else get_text('neutral')
     bias_color = "orange" if avg_q1 > 3.5 else "blue" if avg_q1 < 2.5 else "green"
     
-    interpretation = (
-        "The manager rates systematically too mild." if st.session_state.language == 'en' else "Der Manager bewertet systematisch zu mild."
-    ) if avg_q1 > 3.5 else (
-        "The manager rates systematically too strict." if st.session_state.language == 'en' else "Der Manager bewertet systematisch zu streng."
-    ) if avg_q1 < 2.5 else (
-        "The rating is balanced." if st.session_state.language == 'en' else "Die Bewertung ist ausgeglichen."
-    )
+    if avg_q1 > 3.5:
+        interpretation = get_text('manager_rates_mild')
+    elif avg_q1 < 2.5:
+        interpretation = get_text('manager_rates_strict')
+    else:
+        interpretation = get_text('rating_balanced')
     
     st.markdown(f"""
-    ### {e('📊')} {get_text('bias_leniency')}/Severity Bias
+    ### {e('📊')} {get_text('bias_leniency')}/{get_text('severity')} Bias
     
-    **{get_text('average')} Score:** `{avg_q1:.2f}` (expected: 3.0)
+    **{get_text('average')} Score:** `{avg_q1:.2f}` ({get_text('average')}: 3.0)
     
-    **Type:** :{bias_color}[{bias_type}]
+    **{get_text('type')}:** :{bias_color}[{bias_type}]
     
     > {interpretation}
     """)
@@ -170,23 +168,21 @@ section_header(e("💡 ") + get_text('recommendations'))
 col1, col2 = st.columns(2)
 
 with col1:
-    against_halo = "Against Halo Effect" if st.session_state.language == 'en' else "Gegen Halo-Effekt"
     st.markdown(f"""
-    ### {against_halo}:
-    1. **Separate rating rounds** for each dimension
-    2. **Time gap** between ratings
-    3. **Structured rating forms** with concrete criteria
-    4. **Anonymization** of employee names during rating
+    ### {get_text('against_halo')}:
+    1. **{get_text('separate_rating_rounds')}**
+    2. **{get_text('time_gap')}**
+    3. **{get_text('structured_forms')}**
+    4. **{get_text('anonymization')}**
     """)
 
 with col2:
-    against_leniency = "Against Leniency Bias" if st.session_state.language == 'en' else "Gegen Leniency Bias"
     st.markdown(f"""
-    ### {against_leniency}:
-    1. **Calibration sessions** with multiple managers
-    2. **Concrete benchmarks** for each score level (1-5)
-    3. Consider **forced distribution**
-    4. Introduce **peer reviews** as second opinion
+    ### {get_text('against_leniency')}:
+    1. **{get_text('calibration_sessions')}**
+    2. **{get_text('concrete_benchmarks')}**
+    3. **{get_text('forced_distribution')}**
+    4. **{get_text('peer_reviews')}**
     """)
 
 st.markdown("---")

@@ -40,7 +40,7 @@ page_header(
 
 # Show environment info
 if IS_CLOUD:
-    st.info("☁️ Running on Streamlit Cloud - Some local features are disabled")
+    st.info(e("☁️ ") + get_text('cloud_info'))
 
 st.markdown("---")
 
@@ -159,20 +159,22 @@ if not IS_CLOUD:
 
 # App Info (always visible)
 st.markdown("---")
-section_header(e("ℹ️ ") + "App Info")
+section_header(e("ℹ️ ") + get_text('app_info'))
 
 col1, col2 = st.columns(2)
 with col1:
+    env_label = get_text('cloud') if IS_CLOUD else get_text('local')
+    env_icon = "☁️" if IS_CLOUD else "🖥️"
     st.markdown(f"""
     - **Python:** {sys.version.split()[0]}
     - **Streamlit:** {st.__version__}
-    - **Environment:** {'☁️ Cloud' if IS_CLOUD else '🖥️ Local'}
+    - **{get_text('environment')}:** {env_icon} {env_label}
     """)
 with col2:
     st.markdown(f"""
-    - **Project:** Employee Performance
-    - **Version:** 2.0
-    - **Last Update:** Feb 2026
+    - **{get_text('project')}:** Employee Performance
+    - **{get_text('version')}:** 2.0
+    - **{get_text('last_updated')}:** Feb 2026
     """)
 
 # Footer

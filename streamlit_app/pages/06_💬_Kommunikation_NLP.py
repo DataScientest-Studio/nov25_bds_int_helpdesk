@@ -51,7 +51,7 @@ nlp_df = load_nlp_data()
 scored_df = load_scored_data()
 
 if nlp_df is None:
-    st.warning(e("⚠️ ") + "NLP Features not found. Please run `nlp_features.py` first.")
+    st.warning(e("⚠️ ") + get_text('nlp_not_found'))
     st.stop()
 
 # KPIs
@@ -104,9 +104,9 @@ with col1:
     interpretation_title = get_text('interpretation') + ":"
     st.markdown(f"""
     **{interpretation_title}**
-    - **< -0.1**: {get_text('negative')} (frustration, complaints)
-    - **-0.1 to 0.1**: {get_text('neutral')} (factual)
-    - **> 0.1**: {get_text('positive')} (friendly, solution-oriented)
+    - **< -0.1**: {get_text('negative')} (Frustration, {get_text('complaints')})
+    - **-0.1 to 0.1**: {get_text('neutral')} (Factual / Sachlich)
+    - **> 0.1**: {get_text('positive')} (Friendly / Freundlich, {get_text('solution_oriented')})
     """)
 
 with col2:
@@ -178,19 +178,19 @@ if scored_df is not None and 'id' in scored_df.columns:
         fig.update_layout(
             title=get_text('sentiment_density'),
             xaxis_title=get_text('sentiment') + " (-1 to +1)",
-            yaxis_title="Density" if st.session_state.language == 'en' else "Dichte",
+            yaxis_title=get_text('density'),
             height=450,
             legend_title="Q1 Score"
         )
         st.plotly_chart(fig, use_container_width=True)
         
         st.markdown(f"""
-        **{get_text('interpretation')}:** {"The further right the curve, the more positive the communication." if st.session_state.language == 'en' else "Je weiter rechts die Kurve, desto positiver die Kommunikation."}
+        **{get_text('interpretation')}:** {get_text('curve_interpretation')}
         """)
     else:
-        st.info("No overlapping issues between NLP data and scored samples.")
+        st.info(get_text('no_overlap'))
 else:
-    st.info("Scored data not available for correlation analysis.")
+    st.info(get_text('scored_not_available'))
 
 st.markdown("---")
 

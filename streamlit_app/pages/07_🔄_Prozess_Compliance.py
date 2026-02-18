@@ -43,7 +43,7 @@ def load_workflow_data():
 workflow_df = load_workflow_data()
 
 if workflow_df is None:
-    st.warning(e("⚠️ ") + "Workflow analysis not found. Please run `workflow_analysis.py` first.")
+    st.warning(e("⚠️ ") + get_text('workflow_not_found'))
     st.stop()
 
 # KPIs
@@ -138,8 +138,8 @@ st.markdown(f"""
 2. Open → In Progress → Waiting → Resolved → Closed {e('✅')}
 
 **{problematic}:**
-- Multiple reopens (> 2) {e('⚠️')}
-- Direct jump from Open to Closed (without In Progress) {e('⚠️')}
+- {get_text('multiple_reopens')} {e('⚠️')}
+- {get_text('direct_jump')} {e('⚠️')}
 """)
 
 st.markdown("---")
@@ -201,19 +201,19 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown(f"""
     ### {get_text('high_reopen_rate')}:
-    1. **Root Cause Analysis** - identify patterns
-    2. **Quality checks** before closing
-    3. **Customer feedback** - actively collect
-    4. **Definition of Done** - define clearly
+    1. **{get_text('root_cause_patterns')}**
+    2. **{get_text('quality_checks')}**
+    3. **{get_text('customer_feedback')}**
+    4. **{get_text('definition_of_done')}**
     """)
 
 with col2:
     st.markdown(f"""
     ### {get_text('low_compliance')}:
-    1. **Process training** for affected employees
-    2. **Automatic validation** of status transitions
-    3. **Regular audits** of ticket workflows
-    4. **Gamification** for correct process flow
+    1. **{get_text('process_training')}**
+    2. **{get_text('automatic_validation')}**
+    3. **{get_text('regular_audits')}**
+    4. **{get_text('gamification')}**
     """)
 
 # Footer

@@ -71,7 +71,7 @@ with tab1:
         st.markdown(f"### {e('📋')} {get_text('training_report')}")
         if 'training' in data:
             df = data['training']
-            st.write(f"**{len(df)} {get_text('employees')}** | {get_text('last_update')}: today")
+            st.write(f"**{len(df)} {get_text('employees')}** | {get_text('last_update')}: {get_text('today') if st.session_state.get('language') == 'de' else 'today'}")
             
             # CSV
             csv = df.to_csv(index=False).encode('utf-8')
@@ -82,8 +82,8 @@ with tab1:
                 mime="text/csv"
             )
             
-            # Excel Export (deaktiviert - Modul entfernt)
-            st.info("Excel-Export wurde in der vereinfachten Version entfernt.")
+            # Excel Export (disabled - module removed)
+            st.info(get_text('excel_removed'))
         else:
             st.info(get_text('training_report') + " " + get_text('not_available'))
     
@@ -175,11 +175,12 @@ with tab2:
         
         st.markdown("---")
         
-        # PDF Reports - bereits generiert
+        # PDF Reports - already generated
         st.markdown(f"### {e('🆕')} PDF Reports")
-        st.info("Die PDF-Dokumentation wurde bereits erstellt und liegt im reports/ Ordner.")
+        pdf_info = "PDF documentation has been created and is located in the reports/ folder." if st.session_state.get('language') == 'en' else "Die PDF-Dokumentation wurde bereits erstellt und liegt im reports/ Ordner."
+        st.info(pdf_info)
     else:
-        st.info("Export directory not found.")
+        st.info(get_text('export_dir_not_found'))
 
 # Bulk Export
 st.markdown("---")
