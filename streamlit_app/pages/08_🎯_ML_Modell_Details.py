@@ -71,84 +71,82 @@ def load_o_score_model():
 
 
 def render_metrics_interpretation(avg_acc, avg_mae, avg_cv, avg_f1_macro, avg_f1_weighted, avg_kappa, avg_qwk):
-    """Render metrics interpretation section with full translation."""
+    """Render metrics interpretation as a clean table."""
     
-    # Labels based on language
-    is_en = st.session_state.get('language') == 'en'
+    # Build metrics data
+    def get_rating(value, thresholds, labels_de, labels_en):
+        """Get rating based on thresholds."""
+        for i, thresh in enumerate(thresholds):
+            if value >= thresh if i == 0 else value < thresh:
+                return t(labels_de[i], labels_en[i])
+        return t(labels_de[-1], labels_en[-1])
     
-    col1, col2 = st.columns(2)
+    metrics_data = [
+        {
+            'metric': 'Accuracy',
+            'value': f"{avg_acc*100:.1f}%",
+            'rating': "🟢 " + t("Gut", "Good") if avg_acc >= 0.7 else "🟡 " + t("Akzeptabel", "Acceptable") if avg_acc >= 0.5 else "🔴 " + t("Verbesserungsbedarf", "Needs Improvement"),
+            'description': t("Anteil korrekt klassifizierter Samples", "Proportion of correctly classified samples")
+        },
+        {
+            'metric': 'MAE',
+            'value': f"{avg_mae:.3f}",
+            'rating': "🟢 " + t("Sehr gut", "Very Good") if avg_mae < 0.5 else "🟡 " + t("Akzeptabel", "Acceptable") if avg_mae < 0.8 else "🔴 " + t("Hoch", "High"),
+            'description': t("Mittlerer Fehler in Klassen", "Mean error in classes")
+        },
+        {
+            'metric': 'CV Score',
+            'value': f"{avg_cv*100:.1f}%",
+            'rating': "🟢 " + t("Stabil", "Stable") if avg_cv >= 0.6 else "🟡 " + t("Moderat", "Moderate") if avg_cv >= 0.5 else "🔴 " + t("Instabil", "Unstable"),
+            'description': t("Cross-Validation Generalisierung", "Cross-validation generalization")
+        },
+        {
+            'metric': 'Macro-F1',
+            'value': f"{avg_f1_macro:.3f}",
+            'rating': "🟢 " + t("Gut", "Good") if avg_f1_macro >= 0.5 else "🟡 " + t("Moderat", "Moderate") if avg_f1_macro >= 0.3 else "🔴 " + t("Schwach", "Weak"),
+            'description': t("Ungewichteter Ø aller Klassen", "Unweighted avg across classes")
+        },
+        {
+            'metric': 'Weighted-F1',
+            'value': f"{avg_f1_weighted:.3f}",
+            'rating': "🟢 " + t("Gut", "Good") if avg_f1_weighted >= 0.6 else "🟡 " + t("Moderat", "Moderate") if avg_f1_weighted >= 0.5 else "🔴 " + t("Schwach", "Weak"),
+            'description': t("Nach Klassengröße gewichtet", "Weighted by class size")
+        },
+        {
+            'metric': "Cohen's Kappa",
+            'value': f"{avg_kappa:.3f}",
+            'rating': "🟢 " + t("Substanziell", "Substantial") if avg_kappa >= 0.5 else "🟡 " + t("Moderat", "Moderate") if avg_kappa >= 0.3 else "🔴 " + t("Schwach", "Weak"),
+            'description': t("Übereinstimmung über Zufall hinaus", "Agreement beyond chance")
+        },
+        {
+            'metric': 'QWK',
+            'value': f"{avg_qwk:.3f}",
+            'rating': "🟢 " + t("Sehr gut", "Very Good") if avg_qwk >= 0.6 else "🟡 " + t("Gut", "Good") if avg_qwk >= 0.4 else "🔴 " + t("Moderat", "Moderate"),
+            'description': t("Bestraft große Fehler stärker", "Penalizes larger errors more")
+        }
+    ]
     
-    with col1:
-        acc_rating = t("🟢 Gut", "🟢 Good") if avg_acc >= 0.7 else t("🟡 Akzeptabel", "🟡 Acceptable") if avg_acc >= 0.5 else t("🔴 Verbesserungsbedarf", "🔴 Needs Improvement")
-        acc_desc = t(
-            "Anteil korrekt klassifizierter Samples. Bei 5 Klassen wäre Zufall 20%.",
-            "Proportion of correctly classified samples. With 5 classes, random would be 20%."
-        )
-        st.markdown(f"""
-        **Accuracy ({avg_acc*100:.1f}%)** {acc_rating}
-        > {acc_desc}
-        """)
-        
-        mae_rating = t("🟢 Sehr gut", "🟢 Very Good") if avg_mae < 0.5 else t("🟡 Akzeptabel", "🟡 Acceptable") if avg_mae < 0.8 else t("🔴 Hoch", "🔴 High")
-        mae_desc = t(
-            "Mittlerer Fehler in Klassen. <0.5 = Fehler meist nur ±1 Klasse.",
-            "Mean error in classes. <0.5 = errors usually only ±1 class."
-        )
-        st.markdown(f"""
-        **MAE ({avg_mae:.3f})** {mae_rating}
-        > {mae_desc}
-        """)
-        
-        cv_rating = t("🟢 Stabil", "🟢 Stable") if avg_cv >= 0.6 else t("🟡 Moderat", "🟡 Moderate") if avg_cv >= 0.5 else t("🔴 Instabil", "🔴 Unstable")
-        cv_desc = t(
-            "Cross-Validation zeigt Generalisierungsfähigkeit.",
-            "Cross-validation shows generalization capability."
-        )
-        st.markdown(f"""
-        **CV Score ({avg_cv*100:.1f}%)** {cv_rating}
-        > {cv_desc}
-        """)
-        
-        f1m_rating = t("🟢 Gut", "🟢 Good") if avg_f1_macro >= 0.5 else t("🟡 Moderat", "🟡 Moderate") if avg_f1_macro >= 0.3 else t("🔴 Schwach", "🔴 Weak")
-        f1m_desc = t(
-            "Ungewichteter Durchschnitt über alle Klassen.",
-            "Unweighted average across all classes."
-        )
-        st.markdown(f"""
-        **Macro-F1 ({avg_f1_macro:.3f})** {f1m_rating}
-        > {f1m_desc}
-        """)
+    # Create DataFrame
+    df = pd.DataFrame(metrics_data)
+    df.columns = [
+        t('Metrik', 'Metric'),
+        t('Wert', 'Value'),
+        t('Bewertung', 'Rating'),
+        t('Beschreibung', 'Description')
+    ]
     
-    with col2:
-        f1w_rating = t("🟢 Gut", "🟢 Good") if avg_f1_weighted >= 0.6 else t("🟡 Moderat", "🟡 Moderate") if avg_f1_weighted >= 0.5 else t("🔴 Schwach", "🔴 Weak")
-        f1w_desc = t(
-            "Nach Klassengröße gewichtet.",
-            "Weighted by class size."
-        )
-        st.markdown(f"""
-        **Weighted-F1 ({avg_f1_weighted:.3f})** {f1w_rating}
-        > {f1w_desc}
-        """)
-        
-        kappa_rating = t("🟢 Substanziell", "🟢 Substantial") if avg_kappa >= 0.5 else t("🟡 Moderat", "🟡 Moderate") if avg_kappa >= 0.3 else t("🔴 Schwach", "🔴 Weak")
-        kappa_desc = t(
-            "Übereinstimmung über Zufall hinaus.",
-            "Agreement beyond chance."
-        )
-        st.markdown(f"""
-        **Cohen's Kappa ({avg_kappa:.3f})** {kappa_rating}
-        > {kappa_desc}
-        """)
-        
-        qwk_rating = t("🟢 Sehr gut", "🟢 Very Good") if avg_qwk >= 0.6 else t("🟡 Gut", "🟡 Good") if avg_qwk >= 0.4 else t("🔴 Moderat", "🔴 Moderate")
-        qwk_desc = t(
-            "Quadratic Weighted Kappa - bestraft große Fehler stärker.",
-            "Quadratic Weighted Kappa - penalizes larger errors more."
-        )
-        st.markdown(f"""
-        **QWK ({avg_qwk:.3f})** {qwk_rating}
-        > {qwk_desc}
-        """)
+    # Display as styled table
+    st.dataframe(
+        df,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            t('Metrik', 'Metric'): st.column_config.TextColumn(width="medium"),
+            t('Wert', 'Value'): st.column_config.TextColumn(width="small"),
+            t('Bewertung', 'Rating'): st.column_config.TextColumn(width="medium"),
+            t('Beschreibung', 'Description'): st.column_config.TextColumn(width="large")
+        }
+    )
 
 
 def render_overall_assessment(good_metrics):
