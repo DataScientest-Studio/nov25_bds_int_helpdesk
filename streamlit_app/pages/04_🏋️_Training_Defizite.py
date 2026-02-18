@@ -108,16 +108,16 @@ red_count = len(report_df[report_df['Risk Level'] == 'RED'])
 total = len(report_df)
 
 with col1:
-    st.metric(e("👥 ") + get_text('total_employees'), total)
+    st.metric("👥 " + get_text('total_employees'), total)
     
 with col2:
-    st.metric(e("🟢 ") + get_text('ok_green'), green_count, f"{green_count/total*100:.0f}%")
+    st.metric("🟢 " + get_text('ok_green'), green_count, f"{green_count/total*100:.0f}%")
     
 with col3:
-    st.metric(e("🟡 ") + get_text('training_yellow'), yellow_count, f"{yellow_count/total*100:.0f}%")
+    st.metric("🟡 " + get_text('training_yellow'), yellow_count, f"{yellow_count/total*100:.0f}%")
     
 with col4:
-    st.metric(e("🔴 ") + get_text('disciplinary') + " (RED)", red_count, f"{red_count/total*100:.0f}%")
+    st.metric("🔴 " + get_text('disciplinary') + " (RED)", red_count, f"{red_count/total*100:.0f}%")
 
 st.markdown("---")
 
@@ -154,14 +154,14 @@ st.markdown("---")
 
 # Tabs for different views
 tab1, tab2, tab3, tab4 = st.tabs([
-    e("🔴 ") + get_text('urgent'), 
-    e("🟡 ") + get_text('training_recommended'), 
-    e("📋 ") + get_text('all_employees'),
-    e("📖 ") + get_text('risk_level_def')
+    "🔴 " + get_text('urgent'), 
+    "🟡 " + get_text('training_recommended'), 
+    "📋 " + get_text('all_employees'),
+    "📖 " + get_text('risk_level_def')
 ])
 
 with tab1:
-    section_header(e("🔴 ") + get_text('immediate_action'))
+    section_header("🔴 " + get_text('immediate_action'))
     
     red_employees = report_df[report_df['Risk Level'] == 'RED'].copy()
     
@@ -194,7 +194,7 @@ with tab1:
                 """)
 
 with tab2:
-    section_header(e("🟡 ") + get_text('training_recommended'))
+    section_header("🟡 " + get_text('training_recommended'))
     
     yellow_employees = report_df[report_df['Risk Level'] == 'YELLOW'].copy()
     
