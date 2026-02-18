@@ -26,12 +26,9 @@ init_session_state()
 # Render settings sidebar
 render_settings_sidebar()
 
-# Page header
-page_header(
-    e("🔍 ") + get_text('nav_bias'),
-    get_text('objectivity_subtitle'),
-    help_key='bias'
-)
+# Page header (without subtitle)
+st.title(e("🔍 ") + get_text('nav_bias'))
+st.markdown("---")
 
 # Load data
 @st.cache_data
@@ -48,8 +45,9 @@ if df is None:
     st.error(get_text('no_data'))
     st.stop()
 
-# Bias Overview
-section_header(e("🚨 ") + get_text('detected_bias_types'))
+# Bias Overview (section header without "detected_bias_types")
+bias_title = "Bias Types" if st.session_state.get('language') == 'en' else "Bias-Typen"
+section_header(e("🚨 ") + bias_title)
 
 col1, col2 = st.columns(2)
 
@@ -85,10 +83,12 @@ with col2:
     else:
         interpretation = get_text('rating_balanced')
     
+    expected_label = "expected" if st.session_state.get('language') == 'en' else "erwartet"
+    
     st.markdown(f"""
     ### {e('📊')} {get_text('bias_leniency')}/{get_text('severity')} Bias
     
-    **{get_text('average')} Score:** `{avg_q1:.2f}` ({get_text('average')}: 3.0)
+    **{get_text('average')} Score:** `{avg_q1:.2f}` ({expected_label}: 3.0)
     
     **{get_text('type')}:** :{bias_color}[{bias_type}]
     
@@ -157,7 +157,8 @@ with col2:
     fig = go.Figure()
     for q in ['Q1', 'Q2', 'Q3']:
         fig.add_trace(go.Box(y=df[q], name=q))
-    fig.update_layout(title=get_text('score_distribution') + " per Dimension", yaxis_title="Score")
+    per_dimension = "per Dimension" if st.session_state.get('language') == 'en' else "pro Dimension"
+    fig.update_layout(title=get_text('score_distribution') + " " + per_dimension, yaxis_title="Score")
     st.plotly_chart(fig, use_container_width=True)
 
 st.markdown("---")

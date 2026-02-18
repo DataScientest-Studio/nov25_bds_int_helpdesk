@@ -101,12 +101,15 @@ with col1:
     )
     st.plotly_chart(fig, use_container_width=True)
     
-    interpretation_title = get_text('interpretation') + ":"
+    # Interpretation
+    complaints_label = "Complaints" if st.session_state.get('language') == 'en' else "Beschwerden"
+    factual_label = "Factual" if st.session_state.get('language') == 'en' else "Sachlich"
+    friendly_label = "Friendly" if st.session_state.get('language') == 'en' else "Freundlich"
+    
     st.markdown(f"""
-    **{interpretation_title}**
-    - **< -0.1**: {get_text('negative')} (Frustration, {get_text('complaints')})
-    - **-0.1 to 0.1**: {get_text('neutral')} (Factual / Sachlich)
-    - **> 0.1**: {get_text('positive')} (Friendly / Freundlich, {get_text('solution_oriented')})
+    - **< -0.1**: {get_text('negative')} ({complaints_label})
+    - **-0.1 to 0.1**: {get_text('neutral')} ({factual_label})
+    - **> 0.1**: {get_text('positive')} ({friendly_label}, {get_text('solution_oriented')})
     """)
 
 with col2:
@@ -183,10 +186,6 @@ if scored_df is not None and 'id' in scored_df.columns:
             legend_title="Q1 Score"
         )
         st.plotly_chart(fig, use_container_width=True)
-        
-        st.markdown(f"""
-        **{get_text('interpretation')}:** {get_text('curve_interpretation')}
-        """)
     else:
         st.info(get_text('no_overlap'))
 else:

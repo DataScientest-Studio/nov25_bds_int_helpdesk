@@ -28,6 +28,37 @@ init_session_state()
 # Render settings sidebar
 render_settings_sidebar()
 
+# Training area translations
+TRAINING_AREA_TRANSLATIONS = {
+    'Qualität': 'Quality',
+    'Effizienz': 'Efficiency', 
+    'Kommunikation': 'Communication',
+    'Prozess': 'Process',
+    'Genauigkeit': 'Accuracy',
+    'Gründlichkeit': 'Thoroughness',
+    'Reaktionszeit': 'Response Time',
+    'Kundenzufriedenheit': 'Customer Satisfaction',
+    'Problemlösung': 'Problem Solving',
+    'Dokumentation': 'Documentation',
+    'Quality': 'Quality',
+    'Efficiency': 'Efficiency',
+    'Communication': 'Communication',
+    'Process': 'Process',
+    'Accuracy': 'Accuracy',
+    'Thoroughness': 'Thoroughness',
+    'Response Time': 'Response Time',
+    'Customer Satisfaction': 'Customer Satisfaction',
+    'Problem Solving': 'Problem Solving',
+    'Documentation': 'Documentation'
+}
+
+def translate_training_area(area, lang='en'):
+    """Translate training area names."""
+    area = area.strip()
+    if lang == 'en':
+        return TRAINING_AREA_TRANSLATIONS.get(area, area)
+    return area
+
 # Page header
 page_header(
     e("🏋️ ") + get_text('training_deficits'),
@@ -65,7 +96,7 @@ report_df = load_training_report()
 scored_df = load_scored_data()
 
 if report_df is None:
-    st.warning(e("⚠️ ") + "Training Report not found. Please run `training_deficits.py` first.")
+    st.warning(e("⚠️ ") + get_text('training_report_not_found'))
     st.stop()
 
 # KPI Cards
@@ -80,13 +111,13 @@ with col1:
     st.metric(e("👥 ") + get_text('total_employees'), total)
     
 with col2:
-    st.metric(e("🟢 ") + f"OK (GREEN)", green_count, f"{green_count/total*100:.0f}%")
+    st.metric(e("🟢 ") + get_text('ok_green'), green_count, f"{green_count/total*100:.0f}%")
     
 with col3:
-    st.metric(e("🟡 ") + f"Training (YELLOW)", yellow_count, f"{yellow_count/total*100:.0f}%")
+    st.metric(e("🟡 ") + get_text('training_yellow'), yellow_count, f"{yellow_count/total*100:.0f}%")
     
 with col4:
-    st.metric(e("🔴 ") + f"{get_text('disciplinary')} (RED)", red_count, f"{red_count/total*100:.0f}%")
+    st.metric(e("🔴 ") + get_text('disciplinary') + " (RED)", red_count, f"{red_count/total*100:.0f}%")
 
 st.markdown("---")
 
@@ -97,7 +128,7 @@ with col1:
     section_header(e("📊 ") + get_text('risk_overview'))
     
     fig = go.Figure(data=[go.Pie(
-        labels=[e('🟢') + ' GREEN', e('🟡') + ' YELLOW', e('🔴') + ' RED'],
+        labels=['GREEN', 'YELLOW', 'RED'],
         values=[green_count, yellow_count, red_count],
         hole=0.4,
         marker_colors=['#28a745', '#ffc107', '#dc3545']
@@ -141,15 +172,25 @@ with tab1:
         
         for _, row in red_employees.iterrows():
             with st.expander(f"{e('👤')} {row['Employee']} - Score: {row['Avg Score']:.2f}"):
+                # Translate training areas
+                training_areas = row['Training Areas']
+                if pd.notna(training_areas) and st.session_state.get('language') == 'en':
+                    areas = [translate_training_area(a.strip(), 'en') for a in str(training_areas).split(',')]
+                    training_areas = ', '.join(areas)
+                
+                rec_text = (
+                    "- Personal conversation with the employee\n- Root cause analysis of low scores\n- Create individual development plan"
+                    if st.session_state.get('language') == 'en' else
+                    "- Persönliches Gespräch mit dem Mitarbeiter\n- Ursachenanalyse der niedrigen Scores\n- Individuellen Entwicklungsplan erstellen"
+                )
+                
                 st.markdown(f"""
                 **{get_text('flags')}:** {row['Flags']}
                 
-                **{get_text('training_areas')}:** {row['Training Areas']}
+                **{get_text('training_areas')}:** {training_areas}
                 
                 **{get_text('recommendations')}:**
-                - Personal conversation with the employee
-                - Root cause analysis of low scores
-                - Create individual development plan
+                {rec_text}
                 """)
 
 with tab2:
@@ -165,7 +206,11 @@ with tab2:
         # Group by training areas
         training_areas_all = []
         for areas in yellow_employees['Training Areas'].dropna():
-            training_areas_all.extend([a.strip() for a in areas.split(',')])
+            for a in str(areas).split(','):
+                area = a.strip()
+                if st.session_state.get('language') == 'en':
+                    area = translate_training_area(area, 'en')
+                training_areas_all.append(area)
         
         if training_areas_all:
             area_counts = pd.Series(training_areas_all).value_counts()
@@ -174,12 +219,20 @@ with tab2:
                 x=area_counts.values,
                 y=area_counts.index,
                 orientation='h',
-                title=get_text('common_training_needs')
+                title=get_text('common_training_needs'),
+                labels={'x': get_text('count'), 'y': get_text('training_areas')}
             )
+            fig.update_layout(yaxis_title=get_text('training_areas'), xaxis_title=get_text('count'))
             st.plotly_chart(fig, use_container_width=True)
         
-        st.dataframe(yellow_employees[['Employee', 'Avg Score', 'Tickets', 'Training Areas']], 
-                     use_container_width=True)
+        # Translate training areas in dataframe
+        display_df = yellow_employees[['Employee', 'Avg Score', 'Tickets', 'Training Areas']].copy()
+        if st.session_state.get('language') == 'en':
+            display_df['Training Areas'] = display_df['Training Areas'].apply(
+                lambda x: ', '.join([translate_training_area(a.strip(), 'en') for a in str(x).split(',')]) if pd.notna(x) else x
+            )
+        
+        st.dataframe(display_df, use_container_width=True)
 
 with tab3:
     section_header(e("📋 ") + get_text('all_employees'))
@@ -215,43 +268,88 @@ with tab3:
 with tab4:
     section_header(e("📖 ") + get_text('risk_level_def'))
     
-    st.markdown(get_text('interpretation') if st.session_state.language == 'en' else 
-                "Die Risk Level Klassifikation basiert auf objektiven Kriterien.")
+    intro_text = (
+        "The Risk Level classification is based on objective criteria."
+        if st.session_state.get('language') == 'en' else
+        "Die Risk Level Klassifikation basiert auf objektiven Kriterien."
+    )
+    st.markdown(intro_text)
     
     # RED Definition
     st.markdown(f"### {e('🔴')} RED - {get_text('critical')}")
-    st.error(f"""
+    
+    red_table = (
+        f"""
     **RED** classification when **at least one** condition is met:
     
     | {get_text('criterion')} | {get_text('threshold')} | {get_text('meaning')} |
     |-----------|---------------|-----------|
-    | **Critical low score** | Ø < **1.5** | Performance extremely poor |
-    | **Critical reopen rate** | > **30%** | Every 3rd ticket reopened |
-    | **Repeated violations** | > **5** in 30 days | Constant process violations |
-    | **Consecutively low** | **3x** in a row < 2 | Persistently poor performance |
-    """)
+    | Critical low score | Ø < **1.5** | Performance extremely poor |
+    | Critical reopen rate | > **30%** | Every 3rd ticket reopened |
+    | Repeated violations | > **5** in 30 days | Constant process violations |
+    | Consecutively low | **3x** in a row < 2 | Persistently poor performance |
+    """
+        if st.session_state.get('language') == 'en' else
+        f"""
+    **RED** Klassifikation wenn **mindestens eine** Bedingung erfüllt ist:
+    
+    | {get_text('criterion')} | {get_text('threshold')} | {get_text('meaning')} |
+    |-----------|---------------|-----------|
+    | Kritisch niedriger Score | Ø < **1.5** | Performance extrem schlecht |
+    | Kritische Reopen-Rate | > **30%** | Jedes 3. Ticket wiedereröffnet |
+    | Wiederholte Verstöße | > **5** in 30 Tagen | Ständige Prozessverstöße |
+    | Konsekutiv niedrig | **3x** hintereinander < 2 | Anhaltend schlechte Performance |
+    """
+    )
+    st.error(red_table)
     
     # YELLOW Definition
     st.markdown(f"### {e('🟡')} YELLOW - {get_text('training_recommended')}")
-    st.warning(f"""
+    
+    yellow_table = (
+        f"""
     **YELLOW** classification when **at least one** condition is met (but no RED):
     
     | {get_text('criterion')} | {get_text('threshold')} | Training |
     |-----------|---------------|---------------------|
-    | **Low score** | Ø < **2.5** | General quality training |
-    | **High reopen rate** | > **15%** | Quality assurance training |
-    | **Low compliance** | < **70%** | Process training |
-    | **Slow processing** | > **2x** team avg | Efficiency training |
-    | **Weak communication** | Score < **2.0** | Communication training |
-    """)
+    | Low score | Ø < **2.5** | General quality training |
+    | High reopen rate | > **15%** | Quality assurance training |
+    | Low compliance | < **70%** | Process training |
+    | Slow processing | > **2x** team avg | Efficiency training |
+    | Weak communication | Score < **2.0** | Communication training |
+    """
+        if st.session_state.get('language') == 'en' else
+        f"""
+    **YELLOW** Klassifikation wenn **mindestens eine** Bedingung erfüllt ist (aber keine RED):
+    
+    | {get_text('criterion')} | {get_text('threshold')} | Training |
+    |-----------|---------------|---------------------|
+    | Niedriger Score | Ø < **2.5** | Allgemeines Qualitätstraining |
+    | Hohe Reopen-Rate | > **15%** | Qualitätssicherungstraining |
+    | Niedrige Compliance | < **70%** | Prozesstraining |
+    | Langsame Bearbeitung | > **2x** Team-Durchschnitt | Effizienztraining |
+    | Schwache Kommunikation | Score < **2.0** | Kommunikationstraining |
+    """
+    )
+    st.warning(yellow_table)
     
     # GREEN Definition
     st.markdown(f"### {e('🟢')} GREEN - {get_text('all_ok')}")
-    st.success("""
+    
+    green_text = (
+        """
     **GREEN** classification when:
     - **No** YELLOW conditions are met
     - **No** RED conditions are met
-    """)
+    """
+        if st.session_state.get('language') == 'en' else
+        """
+    **GREEN** Klassifikation wenn:
+    - **Keine** YELLOW Bedingungen erfüllt sind
+    - **Keine** RED Bedingungen erfüllt sind
+    """
+    )
+    st.success(green_text)
     
     # Threshold table
     st.markdown(f"### {e('📊')} {get_text('all_thresholds')}")
@@ -265,9 +363,8 @@ with tab4:
                      'Repeated Violations', 'Consecutively Low'],
         get_text('threshold'): ['< 2.5', '> 15%', '< 70%', '> 2x Team Avg', '< 2.0',
                          '< 1.5', '> 30%', '> 5 in 30 days', '3x < 2'],
-        get_text('risk_level'): [e('🟡') + ' YELLOW', e('🟡') + ' YELLOW', e('🟡') + ' YELLOW', 
-                       e('🟡') + ' YELLOW', e('🟡') + ' YELLOW',
-                       e('🔴') + ' RED', e('🔴') + ' RED', e('🔴') + ' RED', e('🔴') + ' RED']
+        get_text('risk_level'): ['YELLOW', 'YELLOW', 'YELLOW', 'YELLOW', 'YELLOW',
+                       'RED', 'RED', 'RED', 'RED']
     })
     
     st.dataframe(thresholds_df, use_container_width=True, hide_index=True)
@@ -277,7 +374,8 @@ st.markdown("---")
 # Recommendations
 section_header(e("💡 ") + get_text('management_recommendations'))
 
-st.markdown(f"""
+recommendations_text = (
+    f"""
 ### {get_text('immediate_action')} ({e('🔴')} RED):
 1. **Personal meeting** within 5 business days
 2. **Root cause analysis** - External factors involved?
@@ -292,7 +390,26 @@ st.markdown(f"""
 1. Regular **feedback sessions** (monthly)
 2. **Peer review** for critical tickets
 3. **Automated alerts** on score deterioration
-""")
+"""
+    if st.session_state.get('language') == 'en' else
+    f"""
+### {get_text('immediate_action')} ({e('🔴')} RED):
+1. **Persönliches Gespräch** innerhalb von 5 Werktagen
+2. **Ursachenanalyse** - Sind externe Faktoren beteiligt?
+3. **Schriftlicher Entwicklungsplan** mit klaren Zielen
+
+### Training Programme ({e('🟡')} YELLOW):
+1. **Workshop: Problemanalyse** - Systematischer Ansatz
+2. **Mentoring-Programm** - Zusammenarbeit mit erfahrenen Kollegen
+3. **Prozess-Training** - Workflow-Compliance verbessern
+
+### Präventive Maßnahmen:
+1. Regelmäßige **Feedback-Sitzungen** (monatlich)
+2. **Peer Review** für kritische Tickets
+3. **Automatische Alerts** bei Score-Verschlechterung
+"""
+)
+st.markdown(recommendations_text)
 
 # Footer
 render_footer()

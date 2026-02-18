@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from components.settings import (
     render_settings_sidebar, init_session_state, get_text, e, 
-    page_header, section_header, render_footer
+    section_header, render_footer
 )
 
 st.set_page_config(page_title="Score Comparison", page_icon="🔬", layout="wide")
@@ -28,6 +28,11 @@ render_settings_sidebar()
 
 # Paths - from pages: parent = streamlit_app, parent.parent = project root
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
+
+
+def t(de_text, en_text):
+    """Simple translation helper."""
+    return en_text if st.session_state.get('language') == 'en' else de_text
 
 
 @st.cache_data
@@ -49,8 +54,11 @@ def load_comparison_data():
             data['comparison']['q_score'] = data['comparison']['q_score_avg']
         # Calculate bias
         data['comparison']['score_diff'] = data['comparison']['o_score'] - data['comparison']['q_score']
+        
+        overrated_label = t('ÜBERBEWERTET', 'OVERRATED')
+        underrated_label = t('UNTERBEWERTET', 'UNDERRATED')
         data['comparison']['bias_type'] = data['comparison']['score_diff'].apply(
-            lambda x: get_text('overrated').upper() if x < -1 else (get_text('underrated').upper() if x > 1 else 'OK')
+            lambda x: overrated_label if x < -1 else (underrated_label if x > 1 else 'OK')
         )
     
     # Q-Scores Original
@@ -62,69 +70,83 @@ def load_comparison_data():
 
 
 def main():
-    # Page header
-    page_header(
-        e("🔬 ") + get_text('score_comparison'),
-        get_text('score_comparison_subtitle'),
-        help_key='bias'
-    )
+    # Page header (simple title without subtitle)
+    title = t("Score-Vergleich", "Score Comparison")
+    st.title(e("🔬 ") + title)
+    st.markdown("---")
     
     # Load data
     data = load_comparison_data()
     
     if 'comparison' not in data or 'o_scores' not in data:
-        st.error(get_text('comparison_data_not_found'))
-        st.code(get_text('run_o_score'))
+        error_msg = t(
+            "Vergleichsdaten nicht gefunden. Bitte zuerst O-Score berechnen.",
+            "Comparison data not found. Please calculate O-Score first."
+        )
+        st.error(error_msg)
+        st.code("python src/o_score.py")
         return
     
     comparison = data['comparison']
     o_scores = data['o_scores']
     
-    st.markdown("---")
-    
     # === KPI CARDS ===
     col1, col2, col3, col4 = st.columns(4)
     
+    subjective_label = t("Subjektiv", "Subjective")
+    difference_label = t("Differenz", "Difference")
+    correlation_label = t("Korrelation", "Correlation")
+    moderate_label = t("Moderat", "Moderate")
+    weak_label = t("Schwach", "Weak")
+    overrated_label = t("Überbewertet", "Overrated")
+    
     with col1:
         st.metric(
-            get_text('q_score_manager'),
+            "Q-Score (Manager)",
             f"{comparison['q_score'].mean():.2f}",
-            delta=get_text('subjective'),
+            delta=subjective_label,
             delta_color="off"
         )
     
     with col2:
+        objective_label = t("O-Score (Objektiv)", "O-Score (Objective)")
         st.metric(
-            get_text('o_score_objective'),
+            objective_label,
             f"{comparison['o_score'].mean():.2f}",
-            delta=f"{comparison['score_diff'].mean():.2f} {get_text('difference')}"
+            delta=f"{comparison['score_diff'].mean():.2f} {difference_label}"
         )
     
     with col3:
         corr = comparison['o_score'].corr(comparison['q_score'])
         st.metric(
-            get_text('correlation'),
+            correlation_label,
             f"{corr:.2f}",
-            delta=get_text('moderate') if corr > 0.5 else get_text('weak')
+            delta=moderate_label if corr > 0.5 else weak_label
         )
     
     with col4:
-        overrated = (comparison['bias_type'] == get_text('overrated').upper()).sum()
+        overrated_key = t('ÜBERBEWERTET', 'OVERRATED')
+        overrated_count = (comparison['bias_type'] == overrated_key).sum()
         st.metric(
-            get_text('overrated'),
-            f"{overrated} / {len(comparison)}",
-            delta=f"{overrated/len(comparison)*100:.0f}%",
+            overrated_label,
+            f"{overrated_count} / {len(comparison)}",
+            delta=f"{overrated_count/len(comparison)*100:.0f}%",
             delta_color="inverse"
         )
     
     st.markdown("---")
     
     # === TABS ===
+    overview_label = t("Vergleich", "Comparison")
+    details_label = t("Mitarbeiter-Detail", "Employee Details")
+    bias_label = t("Bias-Analyse", "Bias Analysis")
+    components_label = t("O-Score Komponenten", "O-Score Components")
+    
     tab1, tab2, tab3, tab4 = st.tabs([
-        e("📊 ") + get_text('overview'), 
-        e("👥 ") + get_text('details'), 
-        e("🔍 ") + get_text('bias_analysis'),
-        e("📈 ") + get_text('o_score_components')
+        e("📊 ") + overview_label, 
+        e("👥 ") + details_label, 
+        e("🔍 ") + bias_label,
+        e("📈 ") + components_label
     ])
     
     # === TAB 1: COMPARISON ===
@@ -132,14 +154,18 @@ def main():
         col1, col2 = st.columns(2)
         
         with col1:
-            section_header(e("📊 ") + get_text('q_vs_o_score'))
+            chart_title = t("Q-Score vs O-Score", "Q-Score vs O-Score")
+            section_header(e("📊 ") + chart_title)
             
             fig = go.Figure()
             
             # Scatter with colors by bias
+            overrated_key = t('ÜBERBEWERTET', 'OVERRATED')
+            underrated_key = t('UNTERBEWERTET', 'UNDERRATED')
+            
             colors = comparison['bias_type'].map({
-                get_text('overrated').upper(): 'red',
-                get_text('underrated').upper(): 'green',
+                overrated_key: 'red',
+                underrated_key: 'green',
                 'OK': 'blue'
             })
             
@@ -157,16 +183,17 @@ def main():
             ))
             
             # Perfect correlation line
+            perfect_label = t("Perfekte Korrelation", "Perfect Correlation")
             fig.add_trace(go.Scatter(
                 x=[1, 5], y=[1, 5],
                 mode='lines',
                 line=dict(color='gray', dash='dash'),
-                name=get_text('perfect_correlation')
+                name=perfect_label
             ))
             
             fig.update_layout(
-                xaxis_title=get_text('q_score_manager'),
-                yaxis_title=get_text('o_score_objective'),
+                xaxis_title="Q-Score (Manager)",
+                yaxis_title=t("O-Score (Objektiv)", "O-Score (Objective)"),
                 xaxis=dict(range=[0.5, 5.5]),
                 yaxis=dict(range=[0.5, 5.5]),
                 showlegend=False,
@@ -175,29 +202,28 @@ def main():
             
             st.plotly_chart(fig, use_container_width=True)
             
-            legend_overrated = get_text('overrated')
-            legend_underrated = get_text('underrated')
-            st.caption(f"""
-            🔴 {get_text('critical')} = {legend_overrated} (Q > O+1) | 
-            🟢 {get_text('success')} = {legend_underrated} (O > Q+1) | 
-            🔵 OK
-            """)
+            legend_text = t(
+                "🔴 = Überbewertet (Q > O+1) | 🟢 = Unterbewertet (O > Q+1) | 🔵 = OK",
+                "🔴 = Overrated (Q > O+1) | 🟢 = Underrated (O > Q+1) | 🔵 = OK"
+            )
+            st.caption(legend_text)
         
         with col2:
-            section_header(e("📈 ") + get_text('score_distributions'))
+            dist_title = t("Score-Verteilungen", "Score Distributions")
+            section_header(e("📈 ") + dist_title)
             
             fig = go.Figure()
             
             fig.add_trace(go.Histogram(
                 x=comparison['q_score'],
-                name=get_text('q_score_manager'),
+                name='Q-Score (Manager)',
                 opacity=0.6,
                 marker_color='#ff6b6b'
             ))
             
             fig.add_trace(go.Histogram(
                 x=comparison['o_score'],
-                name=get_text('o_score_objective'),
+                name=t('O-Score (Objektiv)', 'O-Score (Objective)'),
                 opacity=0.6,
                 marker_color='#4ecdc4'
             ))
@@ -233,10 +259,12 @@ def main():
     
     # === TAB 2: EMPLOYEE DETAILS ===
     with tab2:
-        section_header(e("🔍 ") + get_text('employee_search'))
+        search_title = t("Mitarbeiter-Suche", "Employee Search")
+        section_header(e("🔍 ") + search_title)
         
         # Search field
-        search = st.text_input(get_text('search_employee') + ":", "")
+        search_label = t("Mitarbeiter-ID suchen", "Search Employee ID")
+        search = st.text_input(search_label + ":", "")
         
         if search:
             matches = comparison[comparison['employee'].str.contains(search, case=False)]
@@ -250,33 +278,43 @@ def main():
                             st.metric("O-Score", f"{row['o_score']:.2f}")
                         with col3:
                             diff = row['score_diff']
-                            st.metric(get_text('difference'), f"{diff:+.2f}", 
+                            st.metric(difference_label, f"{diff:+.2f}", 
                                      delta=row['bias_type'])
             else:
-                st.warning(get_text('no_employee_found'))
+                not_found = t("Kein Mitarbeiter gefunden", "No employee found")
+                st.warning(not_found)
         
         st.markdown("---")
         
         # Ranking table
-        section_header(e("📋 ") + get_text('complete_ranking'))
+        ranking_title = t("Vollständiges Ranking", "Complete Ranking")
+        section_header(e("📋 ") + ranking_title)
         
-        sort_options = {
-            get_text('o_score_high'): ('O-Score', False),
-            get_text('o_score_low'): ('O-Score', True),
-            get_text('q_score_high'): ('Q-Score', False),
-            get_text('difference_large'): (get_text('difference'), True)
-        }
+        sort_label = t("Sortieren nach", "Sort by")
+        sort_options = [
+            t('O-Score (hoch)', 'O-Score (high)'),
+            t('O-Score (niedrig)', 'O-Score (low)'),
+            t('Q-Score (hoch)', 'Q-Score (high)'),
+            t('Differenz (groß)', 'Difference (large)')
+        ]
         
-        sort_by = st.selectbox(get_text('sort_by') + ":", list(sort_options.keys()))
+        sort_by = st.selectbox(sort_label + ":", sort_options)
+        
+        employees_label = t("Mitarbeiter", "Employee")
+        bias_col_label = "Bias"
+        tickets_label = get_text('tickets')
         
         display_df = comparison[['employee', 'q_score', 'o_score', 'score_diff', 'bias_type', 'ticket_count']].copy()
-        display_df.columns = [get_text('employees'), 'Q-Score', 'O-Score', get_text('difference'), get_text('bias'), get_text('tickets')]
+        display_df.columns = [employees_label, 'Q-Score', 'O-Score', difference_label, bias_col_label, tickets_label]
         
-        sort_col, ascending = sort_options[sort_by]
-        if sort_col == get_text('difference'):
-            display_df = display_df.sort_values(get_text('difference'), key=abs, ascending=ascending)
-        else:
-            display_df = display_df.sort_values(sort_col, ascending=ascending)
+        if sort_by == sort_options[0]:  # O-Score high
+            display_df = display_df.sort_values('O-Score', ascending=False)
+        elif sort_by == sort_options[1]:  # O-Score low
+            display_df = display_df.sort_values('O-Score', ascending=True)
+        elif sort_by == sort_options[2]:  # Q-Score high
+            display_df = display_df.sort_values('Q-Score', ascending=False)
+        else:  # Difference large
+            display_df = display_df.sort_values(difference_label, key=abs, ascending=False)
         
         st.dataframe(display_df, use_container_width=True, hide_index=True, height=400)
     
@@ -285,7 +323,8 @@ def main():
         col1, col2 = st.columns(2)
         
         with col1:
-            section_header(e("📊 ") + get_text('bias_distribution'))
+            bias_dist_title = t("Bias-Verteilung", "Bias Distribution")
+            section_header(e("📊 ") + bias_dist_title)
             
             bias_counts = comparison['bias_type'].value_counts()
             
@@ -299,22 +338,32 @@ def main():
             fig.update_layout(height=350)
             st.plotly_chart(fig, use_container_width=True)
             
-            overrated_count = bias_counts.get(get_text('overrated').upper(), 0)
-            underrated_count = bias_counts.get(get_text('underrated').upper(), 0)
+            overrated_key = t('ÜBERBEWERTET', 'OVERRATED')
+            underrated_key = t('UNTERBEWERTET', 'UNDERRATED')
+            
+            overrated_count = bias_counts.get(overrated_key, 0)
+            underrated_count = bias_counts.get(underrated_key, 0)
             ok_count = bias_counts.get('OK', 0)
+            
+            employees_word = t("Mitarbeiter", "employees")
+            overrated_word = t("überbewertet", "overrated")
+            underrated_word = t("unterbewertet", "underrated")
+            fair_word = t("fair bewertet", "fairly rated")
             
             interpretation_text = f"""
             **{get_text('interpretation')}:**
-            - {overrated_count} {get_text('employees')} {get_text('overrated').lower()}
-            - {underrated_count} {get_text('employees')} {get_text('underrated').lower()}
-            - {ok_count} {get_text('employees')} {get_text('all_ok').lower()} (+/- 1 {get_text('steps')})
+            - {overrated_count} {employees_word} {overrated_word}
+            - {underrated_count} {employees_word} {underrated_word}
+            - {ok_count} {employees_word} {fair_word} (±1)
             """
             st.info(interpretation_text)
         
         with col2:
-            section_header(e("⚠️ ") + get_text('top_10_overrated'))
+            top10_title = t("Top 10 Überbewertete", "Top 10 Overrated")
+            section_header(e("⚠️ ") + top10_title)
             
-            overrated_df = comparison[comparison['bias_type'] == get_text('overrated').upper()].nsmallest(10, 'score_diff')
+            overrated_key = t('ÜBERBEWERTET', 'OVERRATED')
+            overrated_df = comparison[comparison['bias_type'] == overrated_key].nsmallest(10, 'score_diff')
             
             if len(overrated_df) > 0:
                 fig = go.Figure()
@@ -346,7 +395,8 @@ def main():
                 st.plotly_chart(fig, use_container_width=True)
         
         st.markdown("---")
-        section_header(e("📈 ") + get_text('score_diff_histogram'))
+        histogram_title = t("Score-Differenz Histogramm", "Score Difference Histogram")
+        section_header(e("📈 ") + histogram_title)
         
         fig = go.Figure()
         fig.add_trace(go.Histogram(
@@ -356,14 +406,16 @@ def main():
             opacity=0.7
         ))
         
+        no_diff_label = t("Keine Differenz", "No Difference")
         fig.add_vline(x=0, line_dash="dash", line_color="red", 
-                      annotation_text=get_text('no_difference'))
+                      annotation_text=no_diff_label)
         fig.add_vline(x=comparison['score_diff'].mean(), line_dash="solid", 
                       line_color="orange",
                       annotation_text=f"{get_text('mean')}: {comparison['score_diff'].mean():.2f}")
         
+        negative_means = t("negativ = überbewertet", "negative = overrated")
         fig.update_layout(
-            xaxis_title=f"O-Score - Q-Score ({get_text('negative').lower()} = {get_text('overrated').lower()})",
+            xaxis_title=f"O-Score - Q-Score ({negative_means})",
             yaxis_title=get_text('count'),
             height=300
         )
@@ -372,32 +424,46 @@ def main():
     
     # === TAB 4: O-SCORE COMPONENTS ===
     with tab4:
-        section_header(e("📊 ") + get_text('o_score_composition'))
+        composition_title = t("O-Score Zusammensetzung", "O-Score Composition")
+        section_header(e("📊 ") + composition_title)
+        
+        quality_label = t("Qualität", "Quality")
+        efficiency_label = t("Effizienz", "Efficiency")
+        productivity_label = t("Produktivität", "Productivity")
+        communication_label = t("Kommunikation", "Communication")
+        weight_label = t("Gewicht", "Weight")
+        description_label = t("Beschreibung", "Description")
+        
+        quality_desc = t("Reopen-Rate (niedrig = gut), Success-Rate", "Reopen rate (low = good), success rate")
+        efficiency_desc = t("Bearbeitungszeit (schnell = gut)", "Processing time (fast = good)")
+        productivity_desc = t("Ticket-Volumen, Processing Steps", "Ticket volume, processing steps")
+        communication_desc = t("First-Touch-Rate, Kommentar-Aktivität", "First-touch rate, comment activity")
         
         component_table = f"""
-        | {get_text('o_score_components')} | {get_text('weight')} | {get_text('description')} |
+        | {t('Komponente', 'Component')} | {weight_label} | {description_label} |
         |------------|---------|--------------|
-        | **{get_text('quality')}** | 35% | {get_text('reopen_rate_success')} |
-        | **{get_text('efficiency')}** | 25% | {get_text('processing_time')} |
-        | **{get_text('productivity')}** | 20% | {get_text('ticket_volume_steps')} |
-        | **{get_text('communication')}** | 20% | {get_text('first_touch_comments')} |
+        | **{quality_label}** | 35% | {quality_desc} |
+        | **{efficiency_label}** | 25% | {efficiency_desc} |
+        | **{productivity_label}** | 20% | {productivity_desc} |
+        | **{communication_label}** | 20% | {communication_desc} |
         """
         st.markdown(component_table)
         
         col1, col2 = st.columns(2)
         
         with col1:
-            section_header(e("📊 ") + get_text('component_averages'))
+            averages_title = t("Komponenten-Durchschnitte", "Component Averages")
+            section_header(e("📊 ") + averages_title)
             
             components = ['quality_score', 'efficiency_score', 
                          'productivity_score', 'communication_score']
             comp_means = o_scores[components].mean()
             
             labels = [
-                f"{get_text('quality')}\n(35%)", 
-                f"{get_text('efficiency')}\n(25%)", 
-                f"{get_text('productivity')}\n(20%)", 
-                f"{get_text('communication')}\n(20%)"
+                f"{quality_label}\n(35%)", 
+                f"{efficiency_label}\n(25%)", 
+                f"{productivity_label}\n(20%)", 
+                f"{communication_label}\n(20%)"
             ]
             
             fig = go.Figure(data=[go.Bar(
@@ -417,12 +483,13 @@ def main():
             st.plotly_chart(fig, use_container_width=True)
         
         with col2:
-            section_header(e("🔗 ") + get_text('component_correlation'))
+            corr_title = t("Komponenten-Korrelation", "Component Correlation")
+            section_header(e("🔗 ") + corr_title)
             
             corr_matrix = o_scores[components + ['o_score']].corr()
             
-            labels_short = [get_text('quality'), get_text('efficiency'), 
-                          get_text('productivity'), get_text('communication'), 'O-Score']
+            labels_short = [quality_label, efficiency_label, 
+                          productivity_label, communication_label, 'O-Score']
             
             fig = go.Figure(data=go.Heatmap(
                 z=corr_matrix.values,
@@ -439,7 +506,8 @@ def main():
             st.plotly_chart(fig, use_container_width=True)
         
         st.markdown("---")
-        section_header(e("📈 ") + get_text('o_score_distribution'))
+        dist_title = t("O-Score Verteilung (alle Mitarbeiter)", "O-Score Distribution (all employees)")
+        section_header(e("📈 ") + dist_title)
         
         fig = go.Figure()
         fig.add_trace(go.Histogram(
@@ -461,11 +529,17 @@ def main():
         
         st.plotly_chart(fig, use_container_width=True)
         
-        st.success(f"**{len(o_scores)} {get_text('employees_with_oscore')}**")
+        employees_oscore = t("Mitarbeiter mit O-Score bewertet (min. 10 Tickets)", "employees with O-Score (min. 10 tickets)")
+        st.success(f"**{len(o_scores)} {employees_oscore}**")
     
     # === FOOTER ===
     st.markdown("---")
-    st.caption(get_text('score_legend'))
+    
+    legend_text = t(
+        "**Legende:** Q-Score = Subjektive Manager-Bewertung (Q1, Q2, Q3 gemittelt). O-Score = Objektive Bewertung basierend auf messbaren Metriken. Bias = Differenz > 1 Punkt gilt als signifikante Über-/Unterbewertung.",
+        "**Legend:** Q-Score = Subjective manager rating (Q1, Q2, Q3 averaged). O-Score = Objective rating based on measurable metrics. Bias = Difference > 1 point is considered significant over-/underrating."
+    )
+    st.caption(legend_text)
     
     render_footer()
 
