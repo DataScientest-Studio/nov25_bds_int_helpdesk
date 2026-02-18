@@ -151,8 +151,8 @@ if not data['alerts'].empty:
         severity_color = e("🔴") if alert['severity'] == 'HIGH' else e("🟡")
         st.warning(f"{severity_color} **{alert['alert_type']}**: {alert['message']}")
 
-# Two columns: Charts + Activity
-col1, col2 = st.columns([2, 1])
+# Charts
+col1, col2 = st.columns(2)
 
 with col1:
     section_header(e("📊 ") + get_text('status_distribution'), 'status_dist')
@@ -167,7 +167,8 @@ with col1:
         )
         fig.update_layout(height=300, margin=dict(t=20, b=20, l=20, r=20))
         st.plotly_chart(fig, use_container_width=True)
-    
+
+with col2:
     section_header(e("📈 ") + get_text('priority_distribution'), 'priority_dist')
     
     if not data['priority_distribution'].empty:
@@ -207,19 +208,8 @@ with col1:
             y='count'
         )
         fig.update_traces(marker_color='#3498db')
-        fig.update_layout(height=250, margin=dict(t=20, b=20), showlegend=False)
+        fig.update_layout(height=300, margin=dict(t=20, b=20), showlegend=False)
         st.plotly_chart(fig, use_container_width=True)
-
-with col2:
-    section_header(e("⚡ ") + get_text('live_activity'))
-    
-    if not data['recent_activity'].empty:
-        for _, activity in data['recent_activity'].head(8).iterrows():
-            st.markdown(f"**{activity['ticket_num']}**")
-            st.caption(f"{activity['detail']}")
-            st.markdown("---")
-    else:
-        st.info(get_text('no_current_activity'))
 
 # Newest Tickets
 section_header(e("🎫 ") + get_text('newest_tickets'), 'ticket_list')
