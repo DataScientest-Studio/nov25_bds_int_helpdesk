@@ -254,16 +254,7 @@ with tab3:
         (report_df['Tickets'] >= min_tickets)
     ]
     
-    st.dataframe(
-        filtered_df.style.apply(
-            lambda x: ['background-color: #d4edda' if v == 'GREEN' 
-                      else 'background-color: #fff3cd' if v == 'YELLOW'
-                      else 'background-color: #f8d7da' if v == 'RED'
-                      else '' for v in x],
-            subset=['Risk Level']
-        ),
-        use_container_width=True
-    )
+    st.dataframe(filtered_df, use_container_width=True, hide_index=True)
 
 with tab4:
     section_header(e("📖 ") + get_text('risk_level_def'))
