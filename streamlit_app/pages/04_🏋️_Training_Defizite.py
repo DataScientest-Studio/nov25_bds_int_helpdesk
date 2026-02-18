@@ -111,13 +111,13 @@ with col1:
     st.metric(e("👥 ") + get_text('total_employees'), total)
     
 with col2:
-    st.metric(e("🟢 ") + get_text('ok'), green_count, f"{green_count/total*100:.0f}%")
+    st.metric(e("🟢 ") + get_text('ok_green'), green_count, f"{green_count/total*100:.0f}%")
     
 with col3:
-    st.metric(e("🟡 ") + get_text('training'), yellow_count, f"{yellow_count/total*100:.0f}%")
+    st.metric(e("🟡 ") + get_text('training_yellow'), yellow_count, f"{yellow_count/total*100:.0f}%")
     
 with col4:
-    st.metric(e("🔴 ") + get_text('disciplinary'), red_count, f"{red_count/total*100:.0f}%")
+    st.metric(e("🔴 ") + get_text('disciplinary') + " (RED)", red_count, f"{red_count/total*100:.0f}%")
 
 st.markdown("---")
 
