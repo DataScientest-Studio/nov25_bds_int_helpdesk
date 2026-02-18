@@ -128,8 +128,8 @@ def main():
     
     # Header
     page_header(
-        e("📊 ") + get_text('data_inventory'),
-        get_text('data_inventory_subtitle'),
+        e("📊 ") + get_text('Data Inventory'),
+        get_text(''),
         help_key='overview'
     )
     
@@ -137,7 +137,7 @@ def main():
     DATASETS = get_dataset_definitions()
     
     # === OVERVIEW ===
-    section_header(e("📋 ") + get_text('dataset_overview'), 'overview')
+    section_header(e("📋 ") + get_text('Dataset overview'), 'overview')
     
     # Summary Cards
     col1, col2, col3, col4, col5 = st.columns(5)
@@ -153,41 +153,41 @@ def main():
     
     with col1:
         st.metric(
-            label=get_text('datasets'),
+            label=get_text('Datasets'),
             value=f"{len(loaded_datasets)}/5"
         )
     
     with col2:
         if 'issues' in loaded_datasets:
             st.metric(
-                label=get_text('issues'),
+                label=get_text('Issues'),
                 value=f"{len(loaded_datasets['issues']):,}"
             )
     
     with col3:
         if 'scored' in loaded_datasets:
             st.metric(
-                label=get_text('scored_samples'),
+                label=get_text('Scored Samples'),
                 value=f"{len(loaded_datasets['scored']):,}"
             )
     
     with col4:
         if 'utterances' in loaded_datasets:
             st.metric(
-                label=get_text('comments'),
+                label=get_text('Comments'),
                 value=f"{len(loaded_datasets['utterances']):,}"
             )
     
     with col5:
         st.metric(
-            label=get_text('total_rows'),
+            label=get_text('Total rows'),
             value=f"{total_rows:,}"
         )
     
     st.markdown("---")
     
     # === DETAILS PER DATASET ===
-    section_header(e("🔍 ") + get_text('dataset_details'), 'details')
+    section_header(e("🔍 ") + get_text('Dataset Details'), 'details')
     
     for key, info in DATASETS.items():
         with st.expander(f"📁 **{info['name']}** - {info['file']}", expanded=False):
@@ -212,7 +212,7 @@ def main():
                 st.metric(get_text('memory'), f"{memory_mb:.2f} MB")
             with col4:
                 missing_pct = (df.isnull().sum().sum() / (len(df) * len(df.columns))) * 100
-                st.metric(get_text('missing'), f"{missing_pct:.1f}%")
+                st.metric(get_text('Missing'), f"{missing_pct:.1f}%")
             
             # Columns table
             st.markdown(f"**{get_text('columns')}:**")
@@ -240,7 +240,7 @@ def main():
     st.markdown("---")
     
     # === DATATYPE DISTRIBUTION ===
-    section_header(e("📊 ") + get_text('datatype_distribution'), 'dtypes')
+    section_header(e("📊 ") + get_text('Datatype Distribution'), 'dtypes')
     
     all_dtypes = {'Integer': 0, 'Float': 0, 'Text/Object': 0, 'Boolean': 0, 'Datetime': 0, 'Other': 0}
     
@@ -269,11 +269,11 @@ def main():
             get_text('count'): all_dtypes.values()
         })
         fig = px.bar(dtype_df, x=get_text('type'), y=get_text('count'), color=get_text('type'),
-                     title=get_text('columns_by_type'))
+                     title=get_text('Columns by type'))
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        st.markdown(f"**{get_text('summary')}:**")
+        st.markdown(f"**{get_text('Summary')}:**")
         for typ, count in all_dtypes.items():
             if count > 0:
                 st.write(f"- {typ}: {count} {get_text('columns')}")

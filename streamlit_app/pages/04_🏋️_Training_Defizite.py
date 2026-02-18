@@ -111,13 +111,13 @@ with col1:
     st.metric(e("👥 ") + get_text('total_employees'), total)
     
 with col2:
-    st.metric(e("🟢 ") + get_text('ok_green'), green_count, f"{green_count/total*100:.0f}%")
+    st.metric(e("🟢 ") + get_text('ok'), green_count, f"{green_count/total*100:.0f}%")
     
 with col3:
-    st.metric(e("🟡 ") + get_text('training_yellow'), yellow_count, f"{yellow_count/total*100:.0f}%")
+    st.metric(e("🟡 ") + get_text('training'), yellow_count, f"{yellow_count/total*100:.0f}%")
     
 with col4:
-    st.metric(e("🔴 ") + get_text('disciplinary') + " (RED)", red_count, f"{red_count/total*100:.0f}%")
+    st.metric(e("🔴 ") + get_text('disciplinary'), red_count, f"{red_count/total*100:.0f}%")
 
 st.markdown("---")
 
@@ -376,12 +376,12 @@ section_header(e("💡 ") + get_text('management_recommendations'))
 
 recommendations_text = (
     f"""
-### {get_text('immediate_action')} ({e('🔴')} RED):
+### {get_text('immediate_action')} (RED):
 1. **Personal meeting** within 5 business days
 2. **Root cause analysis** - External factors involved?
 3. **Written development plan** with clear goals
 
-### Training Programs ({e('🟡')} YELLOW):
+### Training Programs (YELLOW):
 1. **Workshop: Problem Analysis** - Systematic approach
 2. **Mentoring Program** - Pair work with experienced colleagues
 3. **Process Training** - Improve workflow compliance
@@ -393,12 +393,12 @@ recommendations_text = (
 """
     if st.session_state.get('language') == 'en' else
     f"""
-### {get_text('immediate_action')} ({e('🔴')} RED):
+### {get_text('immediate_action')} (RED):
 1. **Persönliches Gespräch** innerhalb von 5 Werktagen
 2. **Ursachenanalyse** - Sind externe Faktoren beteiligt?
 3. **Schriftlicher Entwicklungsplan** mit klaren Zielen
 
-### Training Programme ({e('🟡')} YELLOW):
+### Training Programme (YELLOW):
 1. **Workshop: Problemanalyse** - Systematischer Ansatz
 2. **Mentoring-Programm** - Zusammenarbeit mit erfahrenen Kollegen
 3. **Prozess-Training** - Workflow-Compliance verbessern
