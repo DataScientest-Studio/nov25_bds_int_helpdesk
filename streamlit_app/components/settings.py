@@ -1536,7 +1536,14 @@ def get_text(key: str) -> str:
         Translated string, or key if not found
     """
     lang = st.session_state.get('language', 'de')
-    text = TRANSLATIONS.get(lang, TRANSLATIONS['de']).get(key, key)
+    translations_dict = TRANSLATIONS.get(lang, TRANSLATIONS['de'])
+    text = translations_dict.get(key, key)
+    
+    # Debug: Show warning if key not found
+    if text == key and key not in translations_dict:
+        import logging
+        logging.warning(f"Translation key not found: '{key}' for language '{lang}'")
+    
     # Apply emoji stripping if emojis are disabled
     if not st.session_state.get('show_emojis', True):
         text = strip_emoji(text)
