@@ -39,12 +39,12 @@ TEXTS = {
 zur subjektiven Manager-Bewertung (Q-Score) durch ein datenbasiertes Bewertungssystem (O-Score + ML-Modelle).
 
 **Technologie-Stack:**
-- 🐍 Python 3.x — Datenverarbeitung, ML-Training
-- 📊 Streamlit — Web-Dashboard (Port 8501)
-- 🤖 Scikit-learn, XGBoost, LightGBM — ML-Modelle
-- 📁 CSV / Excel → pandas DataFrames — Datenhaltung
-- 💾 Joblib — Modell-Serialisierung
-- 🗄️ SQLite — Simulations-Datenbank (helpdesk.db)
+- Python 3.x — Datenverarbeitung, ML-Training
+- Streamlit — Web-Dashboard (Port 8501)
+- Scikit-learn, XGBoost, LightGBM — ML-Modelle
+- CSV / Excel → pandas DataFrames — Datenhaltung
+- Joblib — Modell-Serialisierung
+- SQLite — Simulations-Datenbank (helpdesk.db)
 
 **Architekturprinzip:** Klassische ML-Pipeline → Offline-Training → Online-Inferenz im Dashboard.
         """,
@@ -80,12 +80,12 @@ zur subjektiven Manager-Bewertung (Q-Score) durch ein datenbasiertes Bewertungss
 the subjective manager rating (Q-Score) with a data-driven rating system (O-Score + ML models).
 
 **Technology Stack:**
-- 🐍 Python 3.x — Data processing, ML training
-- 📊 Streamlit — Web dashboard (port 8501)
-- 🤖 Scikit-learn, XGBoost, LightGBM — ML models
-- 📁 CSV / Excel → pandas DataFrames — Data storage
-- 💾 Joblib — Model serialization
-- 🗄️ SQLite — Simulation database (helpdesk.db)
+- Python 3.x — Data processing, ML training
+- Streamlit — Web dashboard (port 8501)
+- Scikit-learn, XGBoost, LightGBM — ML models
+- CSV / Excel → pandas DataFrames — Data storage
+- Joblib — Model serialization
+- SQLite — Simulation database (helpdesk.db)
 
 **Architecture Principle:** Classic ML pipeline → Offline training → Online inference in the dashboard.
         """,
