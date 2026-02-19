@@ -1688,20 +1688,7 @@ def render_settings_sidebar():
             st.session_state.show_emojis = not st.session_state.show_emojis
             st.rerun()
     
-    st.sidebar.markdown("---")
-    
-    # Additional settings in expander
-    with st.sidebar.expander(e("⚙️ ") + get_text('settings'), expanded=False):
-        # Help Icons Toggle
-        st.markdown(f"**{get_text('show_help')}**")
-        show_help = st.toggle(
-            "ⓘ",
-            value=st.session_state.show_help,
-            key='help_toggle_setting'
-        )
-        if show_help != st.session_state.show_help:
-            st.session_state.show_help = show_help
-            st.rerun()
+
 
 
 def help_icon(help_key: str) -> str:
