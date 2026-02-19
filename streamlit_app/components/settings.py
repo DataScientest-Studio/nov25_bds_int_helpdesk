@@ -58,20 +58,17 @@ TRANSLATIONS = {
         # Navigation & Pages
         'nav_data_inventory': 'Daten-Inventar',
         'nav_dashboard': 'Dashboard',
-        'nav_tickets': 'Ticket Monitor',
-        'nav_employees': 'Mitarbeiter Performance',
-        'nav_training': 'Training & Defizite',
-        'nav_bias': 'Objektivitätsprüfung',
-        'nav_nlp': 'Kommunikation & NLP',
-        'nav_compliance': 'Prozess-Compliance',
+        # Merged navigation keys (A-G structure)
+        'nav_a_overview': 'A) Overview',
+        'nav_b_tickets': 'B) Tickets',
+        'nav_c_people': 'C) People',
+        'nav_d_performance': 'D) Performance Scores',
+        'nav_e_operations': 'E) Operations',
         'nav_model': 'ML-Modell Details',
         'nav_alerts': 'Alerts & Benachrichtigungen',
-        'nav_trends': 'Trend-Analyse',
-        'nav_export': 'Export Center',
-        'nav_dialog': 'Dialog-Analyse',
-        'nav_score_compare': 'Score-Vergleich',
+        'nav_export': 'F) Export',
         'nav_presentation': 'Präsentation',
-        'nav_settings': 'Einstellungen',
+        'nav_settings': 'G) Einstellungen',
         
         # Dashboard / Main App
         'title': 'Help Desk Performance Monitor',
@@ -727,20 +724,17 @@ TRANSLATIONS = {
         # Navigation & Pages
         'nav_data_inventory': 'Data Inventory',
         'nav_dashboard': 'Dashboard',
-        'nav_tickets': 'Ticket Monitor',
-        'nav_employees': 'Employee Performance',
-        'nav_training': 'Training & Deficits',
-        'nav_bias': 'Objectivity Check',
-        'nav_nlp': 'Communication & NLP',
-        'nav_compliance': 'Process Compliance',
+        # Merged navigation keys (A-G structure)
+        'nav_a_overview': 'A) Overview',
+        'nav_b_tickets': 'B) Tickets',
+        'nav_c_people': 'C) People',
+        'nav_d_performance': 'D) Performance Scores',
+        'nav_e_operations': 'E) Operations',
         'nav_model': 'ML Model Details',
         'nav_alerts': 'Alerts & Notifications',
-        'nav_trends': 'Trend Analysis',
-        'nav_export': 'Export Center',
-        'nav_dialog': 'Dialog Analysis',
-        'nav_score_compare': 'Score Comparison',
+        'nav_export': 'F) Export',
         'nav_presentation': 'Presentation',
-        'nav_settings': 'Settings',
+        'nav_settings': 'G) Settings',
         
         # Dashboard / Main App
         'title': 'Help Desk Performance Monitor',
@@ -1533,20 +1527,34 @@ def init_session_state():
         st.session_state.active_model = 'q_score'  # Default: Q-Score (Manager)
     # All pages visible by default (except Settings which is always visible)
     default_visible = {
-        'nav_data_inventory': True,
-        'nav_dashboard': True,
+        # A) Overview
+        'nav_a1_tickets': True,
+        'nav_a2_people': True,
+        # B) Tickets
         'nav_tickets': True,
+        'nav_b2_analytics': True,
+        'nav_b3_detail': True,
+        # C) People
+        'nav_c1_people': True,
         'nav_employees': True,
         'nav_training': True,
-        'nav_bias': True,
-        'nav_nlp': True,
-        'nav_compliance': True,
-        'nav_model': True,
         'nav_trends': True,
-        'nav_export': True,
-        'nav_dialog': True,
+        'nav_c5_detail': True,
+        'nav_c6_risk': True,
+        # D) Performance Scores
+        'nav_d1_score': True,
         'nav_score_compare': True,
-        'nav_presentation': True,
+        'nav_bias': True,
+        'nav_d4_model_q': True,
+        'nav_d5_model_o': True,
+        'nav_d6_components': True,
+        'nav_d7_forecast': True,
+        # E) Operations
+        'nav_nlp': True,
+        'nav_dialog': True,
+        'nav_compliance': True,
+        # F) Export
+        'nav_export': True,
     }
     if 'visible_pages' not in st.session_state:
         st.session_state.visible_pages = default_visible
@@ -1603,21 +1611,19 @@ def get_help(key: str) -> str:
 def get_nav_items():
     """Get list of navigation items."""
     return [
-        ("pages/00_📊_Data_Inventory.py", "nav_data_inventory", "📊"),
-        ("pages/01_🏠_Dashboard.py", "nav_dashboard", "🏠"),
-        ("pages/02_🎫_Ticket_Monitor.py", "nav_tickets", "🎫"),
-        ("pages/03_👥_Mitarbeiter_Performance.py", "nav_employees", "👥"),
-        ("pages/04_🏋️_Training_Defizite.py", "nav_training", "🏋️"),
-        ("pages/05_🔍_Objektivitaetspruefung.py", "nav_bias", "🔍"),
-        ("pages/06_💬_Kommunikation_NLP.py", "nav_nlp", "💬"),
-        ("pages/07_🔄_Prozess_Compliance.py", "nav_compliance", "🔄"),
-        ("pages/08_🎯_ML_Modell_Details.py", "nav_model", "🎯"),
-        ("pages/10_📈_Trend_Analyse.py", "nav_trends", "📈"),
-        ("pages/11_📥_Export_Center.py", "nav_export", "📥"),
-        ("pages/13_💬_Dialog_Analyse.py", "nav_dialog", "💬"),
-        ("pages/15_🔬_Score_Vergleich.py", "nav_score_compare", "🔬"),
-        ("pages/16_🎬_Präsentation.py", "nav_presentation", "🎬"),
-        ("pages/14_⚙️_Settings.py", "nav_settings", "⚙️"),
+        # A) Overview
+        ("pages/01_🏠_A_Overview.py", "nav_a_overview", "🏠"),
+        # B) Tickets
+        ("pages/02_🎫_B_Tickets.py", "nav_b_tickets", "🎫"),
+        # C) People
+        ("pages/03_👥_C_People.py", "nav_c_people", "👥"),
+        # D) Performance Scores
+        ("pages/04_📊_D_Performance_Scores.py", "nav_d_performance", "📊"),
+        # E) Operations
+        ("pages/05_💼_E_Operations.py", "nav_e_operations", "💼"),
+        # F) Export & G) Settings
+        ("pages/22_📥_F_Export.py", "nav_export", "📥"),
+        ("pages/23_⚙️_G_Settings.py", "nav_settings", "⚙️"),
     ]
 
 
