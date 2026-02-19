@@ -82,7 +82,7 @@ def load_q_score_model():
     opt_path = MODELS_DIR / "optimized_scorer.joblib"
     if opt_path.exists():
         return joblib.load(opt_path), "optimized"
-    std_path = MODELS_DIR / "performance_scorer.joblib"
+    std_path = MODELS_DIR / "q_score_model.joblib"
     if std_path.exists():
         return joblib.load(std_path), "standard"
     return None, None
@@ -330,6 +330,27 @@ o_desc = t(
 """
 )
 st.markdown(o_desc)
+
+# O-Score Gewichtungsformel
+st.markdown("---")
+if st.session_state.get('language', 'de') == 'de':
+    st.markdown("#### O-Score Gewichtungsformel")
+else:
+    st.markdown("#### O-Score Weighting Formula")
+
+weights_df = pd.DataFrame({
+    ('Komponente' if st.session_state.get('language','de') == 'de' else 'Component'): [
+        'Qualität (quality)', 'Effizienz (efficiency)', 'Produktivität (productivity)', 'Kommunikation (communication)'
+    ],
+    ('Gewicht' if st.session_state.get('language','de') == 'de' else 'Weight'): ['35%', '25%', '20%', '20%'],
+    ('Sub-Metriken' if st.session_state.get('language','de') == 'de' else 'Sub-Metrics'): [
+        '60% Reopen-Rate (invertiert) + 40% Success-Rate',
+        '100% Bearbeitungszeit (Perzentil, invertiert)',
+        '60% Ticket-Volumen + 40% Bearbeitungsschritte (invertiert)',
+        '50% First-Touch-Rate + 50% Kommentar-Deviation (optimal = Median)',
+    ],
+})
+st.dataframe(weights_df, use_container_width=True, hide_index=True)
 
 st.markdown("---")
 

@@ -230,7 +230,7 @@ def main():
     
     model_path = MODELS_DIR / "optimized_scorer.joblib"
     if not model_path.exists():
-        model_path = MODELS_DIR / "performance_scorer.joblib"
+        model_path = MODELS_DIR / "q_score_model.joblib"
     
     if model_path.exists():
         st.success(e("✅ ") + get_text('model_trained'))
