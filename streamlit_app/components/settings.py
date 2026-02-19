@@ -64,6 +64,7 @@ TRANSLATIONS = {
         'nav_c_people': 'People',
         'nav_d_performance': 'Performance Scores',
         'nav_e_operations': 'Operations',
+        'nav_clustering': 'Mitarbeiter-Clustering',
         'nav_architecture': 'Projektarchitektur',
         'nav_io_docs': 'I/O-Dokumentation',
         'nav_model': 'ML-Modell Details',
@@ -732,6 +733,7 @@ TRANSLATIONS = {
         'nav_c_people': 'People',
         'nav_d_performance': 'Performance Scores',
         'nav_e_operations': 'Operations',
+        'nav_clustering': 'Employee Clustering',
         'nav_architecture': 'Project Architecture',
         'nav_io_docs': 'I/O Documentation',
         'nav_model': 'ML Model Details',
@@ -1625,6 +1627,8 @@ def get_nav_items():
         ("pages/04_📊_Performance_Scores.py", "nav_d_performance", "📊"),
         # Operations
         ("pages/05_💼_Operations.py", "nav_e_operations", "💼"),
+        # Clustering
+        ("pages/06_🔬_Clustering.py", "nav_clustering", "🔬"),
         # Architecture & IO Documentation
         ("pages/10_🏗️_Architecture.py", "nav_architecture", "🏗️"),
         ("pages/11_📋_IO_Documentation.py", "nav_io_docs", "📋"),
