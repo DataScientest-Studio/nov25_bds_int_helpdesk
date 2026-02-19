@@ -1611,19 +1611,19 @@ def get_help(key: str) -> str:
 def get_nav_items():
     """Get list of navigation items."""
     return [
-        # A) Overview
-        ("pages/01_🏠_A_Overview.py", "nav_a_overview", "🏠"),
-        # B) Tickets
-        ("pages/02_🎫_B_Tickets.py", "nav_b_tickets", "🎫"),
-        # C) People
-        ("pages/03_👥_C_People.py", "nav_c_people", "👥"),
-        # D) Performance Scores
-        ("pages/04_📊_D_Performance_Scores.py", "nav_d_performance", "📊"),
-        # E) Operations
-        ("pages/05_💼_E_Operations.py", "nav_e_operations", "💼"),
-        # F) Export & G) Settings
-        ("pages/22_📥_F_Export.py", "nav_export", "📥"),
-        ("pages/23_⚙️_G_Settings.py", "nav_settings", "⚙️"),
+        # Overview
+        ("pages/01_🏠_Overview.py", "nav_a_overview", "🏠"),
+        # Tickets
+        ("pages/02_🎫_Tickets.py", "nav_b_tickets", "🎫"),
+        # People
+        ("pages/03_👥_People.py", "nav_c_people", "👥"),
+        # Performance Scores
+        ("pages/04_📊_Performance_Scores.py", "nav_d_performance", "📊"),
+        # Operations
+        ("pages/05_💼_Operations.py", "nav_e_operations", "💼"),
+        # Export & Settings
+        ("pages/22_📥_Export.py", "nav_export", "📥"),
+        ("pages/23_⚙️_Settings.py", "nav_settings", "⚙️"),
     ]
 
 
