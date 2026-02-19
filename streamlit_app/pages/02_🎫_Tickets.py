@@ -160,7 +160,7 @@ page_header(e("🎫 ") + "Tickets – Monitor, Analytics & Detail", help_key='ti
 # ════════════════════════════════════════════════════════════════════════════
 # B1 – Ticket Monitor
 # ════════════════════════════════════════════════════════════════════════════
-st.header("B1 – " + get_text('ticket_monitor'))
+st.header(get_text('ticket_monitor'))
 
 col1, col2, col3 = st.columns([6, 2, 2])
 with col1:
@@ -246,7 +246,7 @@ else:
 # B2 – Ticket Analytics
 # ════════════════════════════════════════════════════════════════════════════
 st.markdown("---")
-st.header("B2 – Ticket Analytics")
+st.header("Ticket Analytics")
 
 col1, col2, col3 = st.columns([6, 2, 2])
 with col2:
@@ -321,7 +321,7 @@ else:
 # B3 – Ticket Detail
 # ════════════════════════════════════════════════════════════════════════════
 st.markdown("---")
-st.header("B3 – " + get_text('ticket_details'))
+st.header(get_text('ticket_details'))
 
 section_header(e("🔍 ") + get_text('ticket_details'))
 

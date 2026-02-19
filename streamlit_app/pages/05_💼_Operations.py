@@ -74,7 +74,7 @@ page_header(e("💼 ") + "Operations – Communication, Dialog & Compliance", he
 # ════════════════════════════════════════════════════════════════════════════
 # E1 – Communication Analysis
 # ════════════════════════════════════════════════════════════════════════════
-st.header("E1 – " + get_text('communication_analysis'))
+st.header(get_text('communication_analysis'))
 
 section_header(e("💬 ") + get_text('communication_subtitle'))
 
@@ -206,7 +206,7 @@ else:
 # E2 – Dialog Acts
 # ════════════════════════════════════════════════════════════════════════════
 st.markdown("---")
-st.header("E2 – " + get_text('dialog_analysis'))
+st.header(get_text('dialog_analysis'))
 
 section_header(e("💭 ") + get_text('dialog_subtitle'))
 
@@ -370,7 +370,7 @@ else:
 # E3 – Process Compliance
 # ════════════════════════════════════════════════════════════════════════════
 st.markdown("---")
-st.header("E3 – " + get_text('process_compliance'))
+st.header(get_text('process_compliance'))
 
 section_header(e("🔄 ") + get_text('compliance_subtitle'))
 

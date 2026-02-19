@@ -59,16 +59,16 @@ TRANSLATIONS = {
         'nav_data_inventory': 'Daten-Inventar',
         'nav_dashboard': 'Dashboard',
         # Merged navigation keys (A-G structure)
-        'nav_a_overview': 'A) Overview',
-        'nav_b_tickets': 'B) Tickets',
-        'nav_c_people': 'C) People',
-        'nav_d_performance': 'D) Performance Scores',
-        'nav_e_operations': 'E) Operations',
+        'nav_a_overview': 'Overview',
+        'nav_b_tickets': 'Tickets',
+        'nav_c_people': 'People',
+        'nav_d_performance': 'Performance Scores',
+        'nav_e_operations': 'Operations',
         'nav_model': 'ML-Modell Details',
         'nav_alerts': 'Alerts & Benachrichtigungen',
-        'nav_export': 'F) Export',
+        'nav_export': 'Export',
         'nav_presentation': 'Präsentation',
-        'nav_settings': 'G) Einstellungen',
+        'nav_settings': 'Einstellungen',
         
         # Dashboard / Main App
         'title': 'Help Desk Performance Monitor',
@@ -724,17 +724,17 @@ TRANSLATIONS = {
         # Navigation & Pages
         'nav_data_inventory': 'Data Inventory',
         'nav_dashboard': 'Dashboard',
-        # Merged navigation keys (A-G structure)
-        'nav_a_overview': 'A) Overview',
-        'nav_b_tickets': 'B) Tickets',
-        'nav_c_people': 'C) People',
-        'nav_d_performance': 'D) Performance Scores',
-        'nav_e_operations': 'E) Operations',
+        # Merged navigation keys
+        'nav_a_overview': 'Overview',
+        'nav_b_tickets': 'Tickets',
+        'nav_c_people': 'People',
+        'nav_d_performance': 'Performance Scores',
+        'nav_e_operations': 'Operations',
         'nav_model': 'ML Model Details',
         'nav_alerts': 'Alerts & Notifications',
-        'nav_export': 'F) Export',
+        'nav_export': 'Export',
         'nav_presentation': 'Presentation',
-        'nav_settings': 'G) Settings',
+        'nav_settings': 'Settings',
         
         # Dashboard / Main App
         'title': 'Help Desk Performance Monitor',

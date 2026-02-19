@@ -146,7 +146,7 @@ with col3:
 # ════════════════════════════════════════════════════════════════════════════
 # A1 – Tickets Snapshot
 # ════════════════════════════════════════════════════════════════════════════
-st.header("A1 – Tickets Snapshot")
+st.header("Tickets Snapshot")
 
 data_a1 = load_data_a1()
 
@@ -236,7 +236,7 @@ else:
 # A2 – People Snapshot
 # ════════════════════════════════════════════════════════════════════════════
 st.markdown("---")
-st.header("A2 – People Snapshot")
+st.header("People Snapshot")
 
 data_a2 = load_data_a2()
 

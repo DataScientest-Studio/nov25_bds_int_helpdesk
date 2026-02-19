@@ -200,7 +200,7 @@ with col3:
 # ════════════════════════════════════════════════════════════════════════════
 # C1 – People Overview
 # ════════════════════════════════════════════════════════════════════════════
-st.header("C1 – People Overview")
+st.header("People Overview")
 
 data_c1 = load_data_c1()
 
@@ -285,7 +285,7 @@ else:
 # C2 – Performance
 # ════════════════════════════════════════════════════════════════════════════
 st.markdown("---")
-st.header("C2 – Performance")
+st.header("Performance")
 
 data_c2 = load_data_c2()
 
@@ -372,7 +372,7 @@ else:
 # C3 – Training Actions
 # ════════════════════════════════════════════════════════════════════════════
 st.markdown("---")
-st.header("C3 – " + get_text('training_deficits'))
+st.header(get_text('training_deficits'))
 
 section_header(e("🏋️ ") + get_text('training_subtitle'))
 
@@ -535,7 +535,7 @@ else:
 # C4 – Trends
 # ════════════════════════════════════════════════════════════════════════════
 st.markdown("---")
-st.header("C4 – " + get_text('trend_analysis'))
+st.header(get_text('trend_analysis'))
 
 section_header(e("📅 ") + get_text('trend_subtitle'))
 
@@ -644,7 +644,7 @@ else:
 # C5 – Employee Detail
 # ════════════════════════════════════════════════════════════════════════════
 st.markdown("---")
-st.header("C5 – " + get_text('ticket_details'))
+st.header(get_text('ticket_details'))
 
 section_header(e("🔍 ") + get_text('ticket_details'))
 
@@ -732,7 +732,7 @@ else:
 # C6 – Risk Definition
 # ════════════════════════════════════════════════════════════════════════════
 st.markdown("---")
-st.header("C6 – " + get_text('risk_level_def'))
+st.header(get_text('risk_level_def'))
 
 section_header(e("📖 ") + get_text('risk_level_def'))
 

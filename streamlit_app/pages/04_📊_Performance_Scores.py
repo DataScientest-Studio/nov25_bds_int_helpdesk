@@ -253,7 +253,7 @@ page_header(e("📊 ") + "Performance Scores – Score System, Models & Forecast
 # ════════════════════════════════════════════════════════════════════════════
 # D1 – Score System
 # ════════════════════════════════════════════════════════════════════════════
-st.header("D1 – " + t("Score-System", "Score System"))
+st.header(t("Score-System", "Score System"))
 
 # Q-Score Definition
 st.markdown(f"## {e('👔')} Q-Score (Manager Rating)")
@@ -360,7 +360,7 @@ st.info(comparison_text)
 # D2 – Score Agreement Q vs O
 # ════════════════════════════════════════════════════════════════════════════
 st.markdown("---")
-st.header("D2 – " + t("Score-Übereinstimmung Q vs O", "Score Agreement Q vs O"))
+st.header(t("Score-Übereinstimmung Q vs O", "Score Agreement Q vs O"))
 
 data_d2 = load_data_d2()
 
@@ -513,7 +513,7 @@ else:
 # D3 – Bias & Objectivity
 # ════════════════════════════════════════════════════════════════════════════
 st.markdown("---")
-st.header("D3 – " + t("Bias & Objektivität", "Bias & Objectivity"))
+st.header(t("Bias & Objektivität", "Bias & Objectivity"))
 
 df_d3 = load_data_d3_scored()
 comparison_data_d3 = load_data_d2()  # reuse cached data
@@ -712,7 +712,7 @@ if 'comparison' in comparison_data_d3:
 # D4 – Model Performance Q-Score
 # ════════════════════════════════════════════════════════════════════════════
 st.markdown("---")
-st.header("D4 – " + t("Model Performance Q-Score", "Model Performance Q-Score"))
+st.header(t("Model Performance Q-Score", "Model Performance Q-Score"))
 
 section_header(e("🧮 ") + t("Q-Score Metriken, Feature Importance, Konfusionsmatrix",
                               "Q-Score metrics, feature importance, confusion matrix"))
@@ -831,7 +831,7 @@ else:
 # D5 – Model Performance O-Score
 # ════════════════════════════════════════════════════════════════════════════
 st.markdown("---")
-st.header("D5 – " + t("Model Performance O-Score", "Model Performance O-Score"))
+st.header(t("Model Performance O-Score", "Model Performance O-Score"))
 
 section_header(e("🧮 ") + t("O-Score Metriken, Feature Importance, Konfusionsmatrix",
                               "O-Score metrics, feature importance, confusion matrix"))
@@ -937,7 +937,7 @@ else:
 # D6 – O-Score Components
 # ════════════════════════════════════════════════════════════════════════════
 st.markdown("---")
-st.header("D6 – " + t("O-Score Komponenten", "O-Score Components"))
+st.header(t("O-Score Komponenten", "O-Score Components"))
 
 o_scores_d6 = load_data_d6()
 
@@ -1017,7 +1017,7 @@ else:
 # D7 – Forecast & Simulation
 # ════════════════════════════════════════════════════════════════════════════
 st.markdown("---")
-st.header("D7 – " + t("Forecast & Simulation", "Forecast & Simulation"))
+st.header(t("Forecast & Simulation", "Forecast & Simulation"))
 
 section_header(e("🔮 ") + get_text('forecast_recommendations'), 'forecast')
 
