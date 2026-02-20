@@ -1560,8 +1560,13 @@ def init_session_state():
         'nav_nlp': True,
         'nav_dialog': True,
         'nav_compliance': True,
-        # F) Export
-        'nav_export': True,
+        # F) Export (per default ausgeblendet)
+        'nav_export': False,
+        # Architecture & IO Docs (per default ausgeblendet)
+        'nav_architecture': False,
+        'nav_io_docs': False,
+        # Slides
+        'nav_slides': True,
     }
     if 'visible_pages' not in st.session_state:
         st.session_state.visible_pages = default_visible
