@@ -214,4 +214,98 @@ st.markdown("**Feature-Spalten (7):** `ticket_count, median_time_hours, avg_step
 st.markdown("**Diskretisierung:** O-Score → Klassen 1–5 via `pd.cut(bins=[0, 1.8, 2.6, 3.4, 4.2, 5.1])`")
 st.markdown("**Trainings-Split:** 80 % Train / 20 % Test, stratifiziert · 5-Fold Stratified CV")
 
+st.markdown("---")
+
+# ── 2d. kmeans_model.joblib ──────────────────────────────────────────────────
+st.markdown("### 🔬 kmeans_model.joblib — Clustering")
+if lang == 'de':
+    st.info("**kmeans_model.joblib** — K-Means Clustering auf 302 Mitarbeitern · 17 normalisierte Features · 4 semantische Cluster")
+else:
+    st.info("**kmeans_model.joblib** — K-Means clustering on 302 employees · 17 normalized features · 4 semantic clusters")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("**KMeans**")
+    kmeans_params = [
+        ['n_clusters', '4'],
+        ['n_init', '20'],
+        ['random_state', '42'],
+        ['init', 'k-means++'],
+        ['max_iter', '300'],
+        ['tol', '1e-4'],
+        ['algorithm', 'lloyd'],
+        ['Inertia', '6747.69'],
+        ['Silhouette (k=4)', '0.5807'],
+    ]
+    st.dataframe(pd.DataFrame(kmeans_params, columns=[T['param'], T['value']]),
+                 use_container_width=True, hide_index=True)
+
+with col2:
+    st.markdown("**RobustScaler** (models/scaler.joblib)")
+    scaler_params = [
+        ['with_centering', 'True'],
+        ['with_scaling', 'True'],
+        ['quantile_range', '(25.0, 75.0)'],
+        ['unit_variance', 'False'],
+        ['copy', 'True'],
+    ]
+    st.dataframe(pd.DataFrame(scaler_params, columns=[T['param'], T['value']]),
+                 use_container_width=True, hide_index=True)
+    if lang == 'de':
+        st.caption("⚠️ Vor dem Skalieren: Winsorisierung auf 99. Perzentil pro Feature (Schutz vor Ausreißern).")
+    else:
+        st.caption("⚠️ Prior to scaling: winsorizing at the 99th percentile per feature (outlier protection).")
+
+if lang == 'de':
+    st.markdown("""
+**PCA:** `PCA(n_components=2)` → PC1=54,9% · PC2=23,7% · Gesamt=78,6% erklärte Varianz
+
+**Feature-Spalten (17):**
+`median_resolution_days, avg_resolution_days, std_resolution_days, pct_fast_resolved,
+total_tickets, tickets_per_month, active_months, avg_priority, pct_high_priority,
+n_distinct_projects, n_distinct_categories, pct_reopened, resolution_rate,
+avg_comments, pct_sole_resolver, avg_first_response_days, avg_processing_steps`
+
+**Cluster-Ausgabe:**
+
+| Label | Anzahl | resolution_rate | median_resolution_days |
+|-------|--------|-----------------|------------------------|
+| High Performer 🟢 | 273 (90,4%) | ~98% | ~14 Tage |
+| Solid Performer 🟡 | 16 (5,3%) | ~87% | ~45 Tage |
+| Specialist ⚫ | 7 (2,3%) | ~17% | ~120 Tage |
+| Needs Improvement 🔴 | 6 (2,0%) | ~62% | ~455 Tage |
+
+**Vergleichsalgorithmen:** DBSCAN(eps=1.5, min_samples=5) · AgglomerativeClustering(n_clusters=4, linkage='ward')
+
+**Outlier-Erkennung:**
+- Z-Score: Schwellenwert >3,0 pro Feature → 37 Mitarbeiter
+- Mahalanobis: χ²-Test, df=17, p<0,05 → 22 Mitarbeiter · 14 in beiden Methoden
+    """)
+else:
+    st.markdown("""
+**PCA:** `PCA(n_components=2)` → PC1=54.9% · PC2=23.7% · Total=78.6% explained variance
+
+**Feature columns (17):**
+`median_resolution_days, avg_resolution_days, std_resolution_days, pct_fast_resolved,
+total_tickets, tickets_per_month, active_months, avg_priority, pct_high_priority,
+n_distinct_projects, n_distinct_categories, pct_reopened, resolution_rate,
+avg_comments, pct_sole_resolver, avg_first_response_days, avg_processing_steps`
+
+**Cluster output:**
+
+| Label | Count | resolution_rate | median_resolution_days |
+|-------|-------|-----------------|------------------------|
+| High Performer 🟢 | 273 (90.4%) | ~98% | ~14 days |
+| Solid Performer 🟡 | 16 (5.3%) | ~87% | ~45 days |
+| Specialist ⚫ | 7 (2.3%) | ~17% | ~120 days |
+| Needs Improvement 🔴 | 6 (2.0%) | ~62% | ~455 days |
+
+**Comparison algorithms:** DBSCAN(eps=1.5, min_samples=5) · AgglomerativeClustering(n_clusters=4, linkage='ward')
+
+**Outlier detection:**
+- Z-Score: threshold >3.0 per feature → 37 employees
+- Mahalanobis: χ²-test, df=17, p<0.05 → 22 employees · 14 flagged by both methods
+    """)
+
 render_footer()
