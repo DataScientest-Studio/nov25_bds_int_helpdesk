@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Defense Q&amp;A – Employee Performance ML Project</title>
+<style>
+  :root {
+    --primary: #1e3a5f;
+    --accent:  #2980b9;
+    --green:   #27ae60;
+    --orange:  #e67e22;
+    --red:     #c0392b;
+    --bg:      #f4f6f9;
+    --card:    #ffffff;
+    --border:  #dce1e9;
+    --code-bg: #1e2d3d;
+    --code-fg: #a8d8ea;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: #2c3e50; line-height: 1.7; }
+  header {
+    background: var(--primary);
+    color: #fff;
+    padding: 28px 40px;
+    display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  header h1 { font-size: 1.4rem; font-weight: 700; }
+  header p  { font-size: 0.85rem; opacity: 0.75; margin-top: 4px; }
+  .lang-btn {
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.4);
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 24px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .lang-btn:hover { background: rgba(255,255,255,0.3); }
+  .container { max-width: 1000px; margin: 0 auto; padding: 40px 24px 80px; }
+  .intro {
+    background: var(--card);
+    border-left: 5px solid var(--accent);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .intro h2 { color: var(--primary); margin-bottom: 8px; }
+  .category-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 40px 0 12px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--border);
+  }
+  .qa-card {
+    background: var(--card);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .qa-question {
+    background: var(--primary);
+    color: #fff;
+    padding: 16px 24px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .qa-num {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .qa-question-text { font-size: 1rem; font-weight: 600; line-height: 1.4; }
+  .qa-answer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--border);
+  }
+  .qa-answer p { margin-bottom: 10px; }
+  .qa-answer p:last-child { margin-bottom: 0; }
+  .qa-answer ul { margin: 8px 0 10px 20px; }
+  .qa-answer li { margin-bottom: 6px; }
+  .metric-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 12px 0;
+  }
+  .metric-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    text-align: center;
+    min-width: 110px;
+  }
+  .metric-box .val { font-size: 1.3rem; font-weight: 700; color: var(--accent); }
+  .metric-box .lbl { font-size: 0.72rem; color: #666; margin-top: 2px; }
+  code {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.88em;
+  }
+  .highlight {
+    background: #fef9e7;
+    border-left: 4px solid var(--orange);
+    padding: 10px 16px;
+    border-radius: 0 6px 6px 0;
+    margin: 10px 0;
+  }
+  .strength { color: var(--green); font-weight: 600; }
+  .weakness { color: var(--red); font-weight: 600; }
+  footer {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+    font-size: 0.82rem;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+  /* Language toggle */
+  .lang-de, .lang-en { display: none; }
+  body.show-de .lang-de { display: block; }
+  body.show-en .lang-en { display: block; }
+  body.show-de .qa-question .lang-de,
+  body.show-en .qa-question .lang-en { display: flex !important; }
+
+  /* print */
+  @media print {
+    header { position: static; }
+    .lang-btn { display: none; }
+    .lang-de, .lang-en { display: block !important; }
+  }
+</style>
+</head>
+<body class="show-en">
+
+<header>
+  <div>
+    <h1>🎓 Defense Q&amp;A — Employee Performance ML Project</h1>
+    <p>AI-Driven Help Desk Analytics · 18 Questions · Bilingual DE/EN</p>
+  </div>
+  <button class="lang-btn" onclick="toggleLang()">🇩🇪 Deutsch</button>
+</header>
+
+<div class="container">
+
+  <div class="intro">
+    <h2 class="lang-en">Project at a Glance</h2>
+    <h2 class="lang-de">Projekt auf einen Blick</h2>
+    <div class="metric-row">
+      <div class="metric-box"><div class="val">90,963</div><div class="lbl">Tickets</div></div>
+      <div class="metric-box"><div class="val">302</div><div class="lbl">Employees</div></div>
+      <div class="metric-box"><div class="val">65.8%</div><div class="lbl">Q-Score Acc.</div></div>
+      <div class="metric-box"><div class="val">0.618</div><div class="lbl">QWK</div></div>
+      <div class="metric-box"><div class="val">4</div><div class="lbl">Clusters</div></div>
+      <div class="metric-box"><div class="val">0.58</div><div class="lbl">Silhouette</div></div>
+    </div>
+  </div>
+
+  <!-- ── Q1 ── -->
+  <div class="category-title lang-en">Model Quality</div>
+  <div class="category-title lang-de">Modellqualität</div>
+
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">1</div>
+      <div class="qa-question-text">
+        <span class="lang-en">What are the strengths and weaknesses of your model(s)?</span>
+        <span class="lang-de">Was sind die Stärken und Schwächen Ihrer Modelle?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <p><span class="strength">Strengths:</span></p>
+        <ul>
+          <li><strong>Ensemble approach</strong>: VotingClassifier (RandomForest + XGBoost + LightGBM) reduces variance and improves robustness over single models.</li>
+          <li><strong>Dual scoring system</strong>: Q-Score (subjective manager input) and O-Score (objective metrics) provide complementary perspectives — each compensates the other's blind spots.</li>
+          <li><strong>Interpretability</strong>: Feature importances clearly identify <code>spent_hours</code> (45.3%), <code>comments_count</code> (25.3%) as top predictors for Q1, making results actionable.</li>
+          <li><strong>Multi-method validation</strong>: Clustering uses K-Means, DBSCAN, and Agglomerative Clustering for cross-validation of group assignments.</li>
+          <li><strong>Quadratic Weighted Kappa (QWK) = 0.618</strong>: Confirms model learns ordinal structure, not just random guessing.</li>
+        </ul>
+        <p><span class="weakness">Weaknesses:</span></p>
+        <ul>
+          <li><strong>Small labeled dataset</strong>: Only 603 valid samples (from 747 ground-truth rows) for Q-Score training — limited generalization.</li>
+          <li><strong>Macro-F1 = 0.395</strong>: Low performance on minority classes (Q-Score 1 and 5), driven by class imbalance in the ground-truth ratings.</li>
+          <li><strong>Q-Score subjectivity</strong>: Manager bias (Halo effect: inter-Q-correlation avg > 0.85) contaminates training labels.</li>
+          <li><strong>O-Score simplification</strong>: Fixed weight schema (35/25/20/20) does not adapt to ticket type or employee role.</li>
+          <li><strong>Cluster imbalance</strong>: 90.4% of employees in "High Performer" cluster — very little discrimination power for the majority.</li>
+        </ul>
+      </div>
+      <div class="lang-de">
+        <p><span class="strength">Stärken:</span></p>
+        <ul>
+          <li><strong>Ensemble-Ansatz</strong>: VotingClassifier (RandomForest + XGBoost + LightGBM) reduziert Varianz und verbessert Robustheit gegenüber Einzelmodellen.</li>
+          <li><strong>Duales Bewertungssystem</strong>: Q-Score (subjektiv) und O-Score (objektiv) ergänzen sich — jeder kompensiert die Schwächen des anderen.</li>
+          <li><strong>Interpretierbarkeit</strong>: Feature Importances zeigen klar, dass <code>spent_hours</code> (45,3%) und <code>comments_count</code> (25,3%) die wichtigsten Prädiktoren für Q1 sind.</li>
+          <li><strong>Multi-Methoden-Validierung</strong>: Clustering nutzt K-Means, DBSCAN und Agglomerative Clustering zur Kreuzvalidierung.</li>
+          <li><strong>Quadratic Weighted Kappa (QWK) = 0,618</strong>: Belegt, dass das Modell die ordinale Struktur lernt.</li>
+        </ul>
+        <p><span class="weakness">Schwächen:</span></p>
+        <ul>
+          <li><strong>Kleiner gelabelter Datensatz</strong>: Nur 603 valide Samples für Q-Score-Training — begrenzte Generalisierung.</li>
+          <li><strong>Macro-F1 = 0,395</strong>: Schlechte Performance bei Minderheitsklassen (Q-Score 1 und 5), bedingt durch Klassenungleichgewicht.</li>
+          <li><strong>Q-Score-Subjektivität</strong>: Manager-Bias (Halo-Effekt: Inter-Q-Korrelation ≥ 0,85) kontaminiert Trainingslabels.</li>
+          <li><strong>O-Score-Vereinfachung</strong>: Fixes Gewichtungsschema (35/25/20/20) passt sich nicht an Ticket-Typ oder Mitarbeiterrolle an.</li>
+          <li><strong>Cluster-Ungleichgewicht</strong>: 90,4% aller Mitarbeiter im Cluster „High Performer" — kaum Differenzierungskraft.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">2</div>
+      <div class="qa-question-text">
+        <span class="lang-en">What would you do differently if you had more time?</span>
+        <span class="lang-de">Was würden Sie mit mehr Zeit anders machen?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <ul>
+          <li><strong>Expand ground-truth labeling</strong>: 747 manually rated tickets is very limited. Crowdsourcing or active learning could scale labeled data 10×.</li>
+          <li><strong>Ticket complexity normalization</strong>: O-Score currently ignores ticket complexity. A complexity index (priority × project diversity × processing steps) would make comparisons fairer.</li>
+          <li><strong>Time-aware modeling</strong>: Incorporate temporal dynamics — employee performance trends over months, seasonality effects, team changes.</li>
+          <li><strong>SHAP-based model explanation</strong>: Add per-prediction SHAP waterfall plots in the dashboard for full transparency.</li>
+          <li><strong>Adaptive O-Score weights</strong>: Use regression or learned weights per employee category instead of fixed 35/25/20/20.</li>
+          <li><strong>Address class imbalance</strong>: Apply SMOTE or class_weight='balanced' to improve minority class prediction for Q-scores of 1 and 5.</li>
+        </ul>
+      </div>
+      <div class="lang-de">
+        <ul>
+          <li><strong>Ground-Truth erweitern</strong>: 747 bewertete Tickets sind sehr wenig. Active Learning oder Crowdsourcing könnte die gelabelten Daten verzehnfachen.</li>
+          <li><strong>Ticket-Komplexität normalisieren</strong>: O-Score ignoriert aktuell die Ticket-Komplexität. Ein Komplexitätsindex würde Vergleiche fairer machen.</li>
+          <li><strong>Zeitbezogenes Modellieren</strong>: Temporale Dynamiken einbeziehen — Performance-Trends über Monate, Saisonalität, Teamwechsel.</li>
+          <li><strong>SHAP-basierte Erklärbarkeit</strong>: SHAP Waterfall-Plots pro Vorhersage im Dashboard für volle Transparenz.</li>
+          <li><strong>Adaptive O-Score-Gewichte</strong>: Regression oder gelernte Gewichte pro Mitarbeiterkategorie statt fixer 35/25/20/20.</li>
+          <li><strong>Klassenungleichgewicht beheben</strong>: SMOTE oder class_weight='balanced' zur Verbesserung der Minderheitsklassen-Vorhersage.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">3</div>
+      <div class="qa-question-text">
+        <span class="lang-en">How would you improve the model's performance?</span>
+        <span class="lang-de">Wie würden Sie die Modellperformance verbessern?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <ul>
+          <li><strong>More labeled data</strong>: The most impactful improvement. Doubling to ~1,400 labeled tickets would likely raise accuracy by 5–8%.</li>
+          <li><strong>Ordinal classification</strong>: Switch from multiclass to ordinal regression (e.g., <code>OrdinalClassifier</code>) to better exploit the ordered 1–5 scale.</li>
+          <li><strong>NLP features</strong>: Add sentiment scores, urgency, and technicalness from comment text (pipeline already extracts these in <code>nlp_analysis.py</code>) as additional Q-Score features.</li>
+          <li><strong>Hyperparameter tuning</strong>: Optuna-optimized scorer already exists (<code>optimized_scorer.joblib</code>). Extending search space and trials would improve it further.</li>
+          <li><strong>SMOTE for class imbalance</strong>: Classes 1 and 5 are underrepresented. SMOTE oversampling before training would improve Macro-F1 from 0.395 toward 0.55+.</li>
+          <li><strong>Cluster-specific models</strong>: Train separate Q-Score models per K-Means cluster — performance patterns differ significantly between High Performers and Solid Performers.</li>
+        </ul>
+      </div>
+      <div class="lang-de">
+        <ul>
+          <li><strong>Mehr gelabelte Daten</strong>: Die wirkungsvollste Verbesserung. Eine Verdopplung auf ~1.400 bewertete Tickets würde die Accuracy voraussichtlich um 5–8% steigern.</li>
+          <li><strong>Ordinale Klassifikation</strong>: Wechsel zu ordinaler Regression, um die geordnete 1–5-Skala besser auszunutzen.</li>
+          <li><strong>NLP-Features</strong>: Sentiment, Urgency, Technikalität aus Kommentartexten als zusätzliche Q-Score-Features (Pipeline vorhanden in <code>nlp_analysis.py</code>).</li>
+          <li><strong>Hyperparameter-Tuning</strong>: Erweiterter Optuna-Suchraum würde den bereits existierenden <code>optimized_scorer.joblib</code> weiter verbessern.</li>
+          <li><strong>SMOTE gegen Klassenungleichgewicht</strong>: Klassen 1 und 5 sind unterrepräsentiert. SMOTE würde Macro-F1 von 0,395 auf ~0,55+ steigern.</li>
+          <li><strong>Cluster-spezifische Modelle</strong>: Separate Q-Score-Modelle pro K-Means-Cluster, da sich Performance-Muster deutlich unterscheiden.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FEATURE ENGINEERING ── -->
+  <div class="category-title lang-en">Feature Engineering &amp; Dimensionality</div>
+  <div class="category-title lang-de">Feature Engineering &amp; Dimensionsreduktion</div>
+
+  <!-- Q4 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">4</div>
+      <div class="qa-question-text">
+        <span class="lang-en">Did you perform any feature engineering to capture non-linear or interaction effects?</span>
+        <span class="lang-de">Haben Sie Feature Engineering für nicht-lineare oder Interaktionseffekte durchgeführt?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <p>Yes — extensively across all three pipelines:</p>
+        <ul>
+          <li><strong>Composite O-Score</strong>: A manually designed interaction: <code>quality_score = 0.6 × (1−reopen_rate) + 0.4 × success_rate</code>. This captures the non-additive interaction between quality and rework.</li>
+          <li><strong>pct_fast_resolved</strong>: Binary threshold applied to continuous resolution time (below global median → fast). Creates a non-linear boundary.</li>
+          <li><strong>pct_sole_resolver</strong>: Interaction between ticket reassignments and individual ownership — derived from cross-referencing <code>issues_change_history</code> (field='assignee') with each employee's ticket set.</li>
+          <li><strong>comm_optimal</strong>: Communication score based on deviation from median comment count — captures a non-linear "sweet spot" (too few = unresponsive, too many = inefficient).</li>
+          <li><strong>tickets_per_month</strong>: Volume normalized by active months — interaction between total tickets and career duration.</li>
+          <li><strong>is_complex</strong> (Q-Score pipeline): Binary interaction flag combining status change count and total processing time.</li>
+        </ul>
+        <div class="highlight">The VotingClassifier's tree-based components (RF, XGBoost, LightGBM) also implicitly learn interaction effects through split decisions — no explicit polynomial features were needed.</div>
+      </div>
+      <div class="lang-de">
+        <p>Ja — umfangreich in allen drei Pipelines:</p>
+        <ul>
+          <li><strong>Composite O-Score</strong>: Manuell gestaltete Interaktion: <code>quality_score = 0,6 × (1−reopen_rate) + 0,4 × success_rate</code> — erfasst nicht-additiven Zusammenhang zwischen Qualität und Nachbearbeitung.</li>
+          <li><strong>pct_fast_resolved</strong>: Binäre Schwelle auf kontinuierliche Bearbeitungszeit (unter globalem Median → schnell). Erzeugt eine nicht-lineare Grenze.</li>
+          <li><strong>pct_sole_resolver</strong>: Interaktion zwischen Ticket-Weiterleitungen und individuellem Ownership — aus Kreuzreferenzierung von <code>issues_change_history</code> (field='assignee') mit dem jeweiligen Ticket-Set.</li>
+          <li><strong>comm_optimal</strong>: Kommunikationsscore basierend auf Abweichung vom Median-Kommentarcount — erfasst einen nicht-linearen „Sweet Spot".</li>
+          <li><strong>tickets_per_month</strong>: Volumen normalisiert durch aktive Monate — Interaktion zwischen Gesamttickets und Karrieredauer.</li>
+          <li><strong>is_complex</strong> (Q-Score Pipeline): Binäres Interaktions-Flag aus Status-Änderungsanzahl und Gesamtbearbeitungszeit.</li>
+        </ul>
+        <div class="highlight">Die baumbasierten Komponenten des VotingClassifiers (RF, XGBoost, LightGBM) lernen Interaktionseffekte auch implizit durch Split-Entscheidungen — explizite Polynomfeatures waren daher nicht erforderlich.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">5</div>
+      <div class="qa-question-text">
+        <span class="lang-en">Did you perform dimensionality reduction (PCA, t-SNE)? What insights did it reveal?</span>
+        <span class="lang-de">Haben Sie Dimensionsreduktion (PCA, t-SNE) durchgeführt? Welche Erkenntnisse ergaben sich?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <p><strong>PCA</strong> was applied to the 17-feature clustering matrix (302 employees × 17 features):</p>
+        <div class="metric-row">
+          <div class="metric-box"><div class="val">54.9%</div><div class="lbl">PC1 variance</div></div>
+          <div class="metric-box"><div class="val">23.7%</div><div class="lbl">PC2 variance</div></div>
+          <div class="metric-box"><div class="val">78.6%</div><div class="lbl">Total explained</div></div>
+        </div>
+        <p><strong>Key insights from PCA:</strong></p>
+        <ul>
+          <li><strong>PC1 is dominated by <code>resolution_rate</code> (loading 0.994)</strong>: Whether a ticket ever reaches "closed/done" is the primary discriminator — more important than how fast it gets resolved.</li>
+          <li><strong>PC2 is dominated by <code>median_resolution_days</code> (loading 0.826)</strong>: Speed separates the second axis — the "Needs Improvement" cluster (455-day median) is extreme in PC2.</li>
+          <li>The 4 clusters are visually separable in 2D PCA space, confirming that the 78.6% retained variance is sufficient for cluster visualization.</li>
+          <li>The "Specialist" cluster sits far from the others on PC1 (low resolution_rate = 16.7%) — PCA revealed this as a structurally distinct group, not just a performance outlier.</li>
+        </ul>
+        <p>t-SNE was not applied — with 302 samples and clear PCA separation, the additional computation cost was not justified.</p>
+      </div>
+      <div class="lang-de">
+        <p><strong>PCA</strong> wurde auf die 17-Feature-Clustering-Matrix angewendet (302 Mitarbeiter × 17 Features):</p>
+        <div class="metric-row">
+          <div class="metric-box"><div class="val">54,9%</div><div class="lbl">PC1-Varianz</div></div>
+          <div class="metric-box"><div class="val">23,7%</div><div class="lbl">PC2-Varianz</div></div>
+          <div class="metric-box"><div class="val">78,6%</div><div class="lbl">Gesamt erklärt</div></div>
+        </div>
+        <p><strong>Wichtigste PCA-Erkenntnisse:</strong></p>
+        <ul>
+          <li><strong>PC1 wird von <code>resolution_rate</code> dominiert (Loading 0,994)</strong>: Ob ein Ticket jemals „closed/done" erreicht, ist der primäre Differenzierer — wichtiger als die Bearbeitungsgeschwindigkeit.</li>
+          <li><strong>PC2 wird von <code>median_resolution_days</code> dominiert (Loading 0,826)</strong>: Geschwindigkeit trennt die zweite Achse — der Cluster „Needs Improvement" (455 Tage Median) ist in PC2 extrem.</li>
+          <li>Die 4 Cluster sind im 2D-PCA-Raum visuell trennbar, was bestätigt, dass die erhaltenen 78,6% Varianz für die Cluster-Visualisierung ausreichen.</li>
+          <li>Der „Specialist"-Cluster liegt weit von den anderen auf PC1 entfernt (niedrige resolution_rate = 16,7%) — PCA zeigte ihn als strukturell distinkte Gruppe, nicht als Performance-Ausreißer.</li>
+        </ul>
+        <p>t-SNE wurde nicht angewendet — mit 302 Samples und klarer PCA-Trennung war der zusätzliche Rechenaufwand nicht gerechtfertigt.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── METHODOLOGY ── -->
+  <div class="category-title lang-en">Methodology &amp; Validation</div>
+  <div class="category-title lang-de">Methodik &amp; Validierung</div>
+
+  <!-- Q6 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">6</div>
+      <div class="qa-question-text">
+        <span class="lang-en">How do you ensure that your feature selection avoids data leakage?</span>
+        <span class="lang-de">Wie stellen Sie sicher, dass Ihre Feature-Auswahl Data Leakage vermeidet?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <ul>
+          <li><strong>Temporal integrity</strong>: Features for Q-Score prediction are derived only from ticket-level data available <em>during</em> ticket resolution, not from post-resolution outcomes of other tickets.</li>
+          <li><strong>Train-test separation</strong>: StandardScaler is fit exclusively on training data and applied (not refit) to test data. No global statistics from the full dataset are used pre-split.</li>
+          <li><strong>O-Score is computed independently</strong>: The O-Score pipeline runs on the full dataset (<code>issues_snapshot.csv</code>, 90,963 rows) without knowledge of Q-Score labels — the two pipelines are completely isolated.</li>
+          <li><strong>Clustering features ≠ scoring features</strong>: The 17 clustering features (from <code>issues_snapshot.csv</code>) and the 6 Q-Score features (from <code>issues_snapshot_sample.xlsx</code>) come from non-overlapping feature sets.</li>
+          <li><strong>No future data</strong>: <code>avg_processing_steps</code>, <code>median_resolution_days</code> etc. are computed per employee across their historical tickets — no future ticket outcomes are included.</li>
+        </ul>
+      </div>
+      <div class="lang-de">
+        <ul>
+          <li><strong>Zeitliche Integrität</strong>: Features für die Q-Score-Vorhersage werden ausschließlich aus Daten abgeleitet, die <em>während</em> der Ticket-Bearbeitung verfügbar waren — nicht aus späteren Ergebnissen anderer Tickets.</li>
+          <li><strong>Train-Test-Trennung</strong>: StandardScaler wird ausschließlich auf Trainingsdaten gefittet und auf Testdaten nur angewendet — kein Refitting.</li>
+          <li><strong>O-Score vollständig unabhängig</strong>: Die O-Score-Pipeline läuft auf dem Gesamtdatensatz ohne Kenntnis der Q-Score-Labels — beide Pipelines sind vollständig isoliert.</li>
+          <li><strong>Clustering-Features ≠ Scoring-Features</strong>: Die 17 Clustering-Features und die 6 Q-Score-Features stammen aus nicht-überlappenden Feature-Sets.</li>
+          <li><strong>Keine Zukunftsdaten</strong>: <code>avg_processing_steps</code>, <code>median_resolution_days</code> etc. werden aus historischen Tickets pro Mitarbeiter berechnet — keine zukünftigen Ticket-Ergebnisse einfließen.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">8</div>
+      <div class="qa-question-text">
+        <span class="lang-en">Which imputation method did you use, and how did you justify it statistically?</span>
+        <span class="lang-de">Welche Imputationsmethode haben Sie verwendet und wie haben Sie diese statistisch begründet?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <p><strong>Two strategies were used, one per feature group:</strong></p>
+        <ul>
+          <li><strong>Median imputation</strong> for efficiency features (<code>median_resolution_days</code>, <code>avg_resolution_days</code>, <code>std_resolution_days</code>, <code>pct_fast_resolved</code>, <code>avg_first_response_days</code>):
+            <br>Justification: These distributions are right-skewed (some employees have extreme resolution times). The median is robust to outliers, unlike mean imputation. NaN occurs when an employee has no fully resolved tickets, making the median of similar peers the most neutral assumption.</li>
+          <li><strong>Zero imputation</strong> for <code>std_resolution_days</code> when all tickets have the same resolution time:
+            <br>Justification: NaN here means zero variance — replacing with 0 is semantically correct, not an approximation.</li>
+        </ul>
+        <p>Missing values were rare: after filtering to ≥5 tickets per employee, only efficiency-related NaNs remained (employees with no resolved tickets). Total NaN count after imputation: <strong>0</strong>.</p>
+      </div>
+      <div class="lang-de">
+        <p><strong>Zwei Strategien wurden verwendet, eine pro Feature-Gruppe:</strong></p>
+        <ul>
+          <li><strong>Median-Imputation</strong> für Effizienz-Features (<code>median_resolution_days</code>, <code>avg_resolution_days</code>, etc.):
+            <br>Begründung: Diese Verteilungen sind rechtsschief (einige Mitarbeiter haben extreme Bearbeitungszeiten). Der Median ist robuster gegenüber Ausreißern als der Mittelwert. NaN tritt auf, wenn ein Mitarbeiter keine vollständig gelösten Tickets hat — der Median ähnlicher Peers ist die neutralste Annahme.</li>
+          <li><strong>Null-Imputation</strong> für <code>std_resolution_days</code> bei identischen Bearbeitungszeiten:
+            <br>Begründung: NaN bedeutet hier Nullvarianz — Ersatz durch 0 ist semantisch korrekt, keine Approximation.</li>
+        </ul>
+        <p>Fehlende Werte waren selten: nach Filterung auf ≥5 Tickets pro Mitarbeiter verblieben nur effizienzbedingte NaNs. Gesamt-NaN nach Imputation: <strong>0</strong>.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">9</div>
+      <div class="qa-question-text">
+        <span class="lang-en">How did you address class imbalance in your dataset?</span>
+        <span class="lang-de">Wie haben Sie das Klassenungleichgewicht in Ihrem Datensatz behandelt?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <p>Class imbalance exists in the Q-Score ground truth: Q-Score classes 3 and 4 dominate, while classes 1 and 5 are rare. Three mitigation steps were applied:</p>
+        <ul>
+          <li><strong>Stratified train-test split (80/20)</strong>: Ensures proportional class representation in both training and test sets — prevents a test set dominated by majority classes.</li>
+          <li><strong>Stratified 5-fold cross-validation</strong>: Each fold maintains the original class distribution.</li>
+          <li><strong>Soft voting ensemble</strong>: By averaging class probabilities across RF, XGBoost, and LightGBM, the ensemble is less likely to be dominated by one model's majority-class bias.</li>
+        </ul>
+        <div class="highlight">SMOTE was <em>not</em> applied — acknowledged as a limitation. The low Macro-F1 of 0.395 (vs. Weighted-F1 of ~0.65) directly reflects this unaddressed imbalance. Future work would apply SMOTE in the training pipeline.</div>
+      </div>
+      <div class="lang-de">
+        <p>Klassenungleichgewicht existiert in der Q-Score Ground Truth: Klassen 3 und 4 dominieren, Klassen 1 und 5 sind selten. Drei Gegenmaßnahmen wurden ergriffen:</p>
+        <ul>
+          <li><strong>Stratifizierter Train-Test-Split (80/20)</strong>: Gewährleistet proportionale Klassenrepräsentation in beiden Teilmengen.</li>
+          <li><strong>Stratifizierte 5-Fold Cross-Validation</strong>: Jeder Fold erhält die originale Klassenverteilung.</li>
+          <li><strong>Soft Voting Ensemble</strong>: Durch Mittelung der Klassenwahrscheinlichkeiten über RF, XGBoost und LightGBM ist das Ensemble weniger anfällig für Mehrheitsklassen-Bias.</li>
+        </ul>
+        <div class="highlight">SMOTE wurde <em>nicht</em> angewendet — als Limitation anerkannt. Der niedrige Macro-F1 von 0,395 (gegenüber Weighted-F1 von ~0,65) spiegelt dieses ungelöste Problem direkt wider. Zukünftig würde SMOTE im Trainingsprozess eingesetzt.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">10</div>
+      <div class="qa-question-text">
+        <span class="lang-en">What statistical tests did you perform to validate observed differences between groups?</span>
+        <span class="lang-de">Welche statistischen Tests wurden durchgeführt, um beobachtete Gruppenunterschiede zu validieren?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <ul>
+          <li><strong>Silhouette Score (k=4: 0.5807)</strong>: Quantifies cluster cohesion vs. separation — values above 0.5 indicate well-separated clusters.</li>
+          <li><strong>Mahalanobis distance outlier detection</strong>: χ²-test with df=17 and p&lt;0.05 threshold — 22 employees identified as multivariate outliers.</li>
+          <li><strong>Z-Score outlier detection</strong>: Per-feature Z &gt; 3.0 threshold — 37 employees flagged across all 17 features.</li>
+          <li><strong>Pearson correlation (Q vs. O Score)</strong>: Computed to quantify agreement between subjective and objective scores — result: moderate correlation (avg ~0.3–0.5), confirming the two measures are complementary, not redundant.</li>
+          <li><strong>Elbow method (Inertia)</strong>: Inertia drop from k=3 (8,074) to k=4 (6,760) and minimal gain at k=5 (5,849) validates k=4 as the elbow point.</li>
+        </ul>
+        <p>Formal hypothesis testing (ANOVA, Kruskal-Wallis) between clusters was not performed — acknowledged as a gap for future work.</p>
+      </div>
+      <div class="lang-de">
+        <ul>
+          <li><strong>Silhouette Score (k=4: 0,5807)</strong>: Quantifiziert Cluster-Kohäsion vs. Separation — Werte über 0,5 zeigen gut getrennte Cluster.</li>
+          <li><strong>Mahalanobis-Distanz Ausreißererkennung</strong>: χ²-Test mit df=17 und p&lt;0,05 — 22 Mitarbeiter als multivariate Ausreißer identifiziert.</li>
+          <li><strong>Z-Score Ausreißererkennung</strong>: Feature-weiser Z &gt; 3,0 Schwellenwert — 37 Mitarbeiter über alle 17 Features markiert.</li>
+          <li><strong>Pearson-Korrelation (Q vs. O Score)</strong>: Berechnet zur Quantifizierung der Übereinstimmung zwischen subjektiven und objektiven Scores — moderate Korrelation (~0,3–0,5), die bestätigt, dass beide Maße komplementär sind.</li>
+          <li><strong>Elbow-Methode (Inertia)</strong>: Inertia-Abfall von k=3 (8.074) auf k=4 (6.760) und minimaler Gewinn bei k=5 (5.849) validiert k=4 als Elbow-Punkt.</li>
+        </ul>
+        <p>Formale Hypothesentests (ANOVA, Kruskal-Wallis) zwischen Clustern wurden nicht durchgeführt — als Lücke für zukünftige Arbeit anerkannt.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q11 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">11</div>
+      <div class="qa-question-text">
+        <span class="lang-en">What was your baseline model and how did it guide further iterations?</span>
+        <span class="lang-de">Was war Ihr Basismodell und wie hat es weitere Iterationen geleitet?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <ul>
+          <li><strong>Q-Score baseline</strong>: A simple <code>DummyClassifier(strategy='most_frequent')</code> predicting class 3 for all samples. Baseline accuracy ≈ 40–45% (most employees rated 3 or 4). The VotingClassifier achieves 65.8% — a 20+ percentage point improvement.</li>
+          <li><strong>O-Score baseline</strong>: A rule-based rank: sort employees by <code>median_time_hours</code> alone. This single metric gives ~55% correct high/low classification. The weighted composite raises this to a nuanced 1–5 scale.</li>
+          <li><strong>Clustering baseline</strong>: k=2 gives Silhouette=0.765 but produces trivially only 2 groups with one outlier-dominated cluster. k=4 was chosen for interpretable, business-meaningful segments.</li>
+        </ul>
+        <div class="highlight">Each baseline revealed the inadequacy of single-metric approaches and motivated the ensemble / multi-component designs used in the final models.</div>
+      </div>
+      <div class="lang-de">
+        <ul>
+          <li><strong>Q-Score-Baseline</strong>: Ein einfacher <code>DummyClassifier(strategy='most_frequent')</code> der immer Klasse 3 vorhersagt. Baseline-Accuracy ≈ 40–45%. Der VotingClassifier erreicht 65,8% — eine Verbesserung von über 20 Prozentpunkten.</li>
+          <li><strong>O-Score-Baseline</strong>: Regelbasierte Rangfolge nach <code>median_time_hours</code> allein. Dieses einzelne Merkmal liefert ~55% korrekte Hoch/Niedrig-Klassifikation. Das gewichtete Composite hebt dies auf eine nuancierte 1–5-Skala.</li>
+          <li><strong>Clustering-Baseline</strong>: k=2 liefert Silhouette=0,765 aber nur 2 triviale Gruppen mit einer ausreißer-dominierten Cluster. k=4 wurde für interpretierbare, geschäftlich bedeutsame Segmente gewählt.</li>
+        </ul>
+        <div class="highlight">Jede Baseline zeigte die Unzulänglichkeit von Ein-Merkmal-Ansätzen und motivierte die Ensemble- und Mehrkomponenten-Designs der finalen Modelle.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">12</div>
+      <div class="qa-question-text">
+        <span class="lang-en">How did you ensure your cross-validation strategy reflects the true data distribution?</span>
+        <span class="lang-de">Wie haben Sie sichergestellt, dass Ihre Cross-Validation-Strategie die wahre Datenverteilung widerspiegelt?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <ul>
+          <li><strong>Stratified K-Fold (k=5)</strong>: Ensures each fold contains proportional class representation — critical for Q-Score's imbalanced 1–5 scale.</li>
+          <li><strong>Stratified train-test split</strong>: <code>train_test_split(..., stratify=y)</code> applied before CV to prevent any label leakage between splits.</li>
+          <li><strong>CV result: 65.1% average accuracy</strong> across 5 folds (±~2%) — small standard deviation confirms stable generalization, not overfitting to a lucky split.</li>
+        </ul>
+        <div class="highlight">Temporal cross-validation was not applied — this is a limitation. Since tickets span 2016–present, time-aware splits (train on earlier, test on later periods) would better simulate real-world deployment. This is recommended for future iterations.</div>
+      </div>
+      <div class="lang-de">
+        <ul>
+          <li><strong>Stratifizierte K-Fold (k=5)</strong>: Stellt sicher, dass jeder Fold proportionale Klassenrepräsentation enthält — entscheidend für die unbalancierte 1–5-Skala des Q-Scores.</li>
+          <li><strong>Stratifizierter Train-Test-Split</strong>: <code>train_test_split(..., stratify=y)</code> vor CV angewendet, um Label-Leakage zu verhindern.</li>
+          <li><strong>CV-Ergebnis: 65,1% durchschnittliche Accuracy</strong> über 5 Folds (±~2%) — kleine Standardabweichung bestätigt stabile Generalisierung, kein Overfitting auf einen zufälligen Split.</li>
+        </ul>
+        <div class="highlight">Zeitbasierte Cross-Validation wurde nicht angewendet — das ist eine anerkannte Limitation. Da Tickets von 2016 bis heute reichen, würden zeitbewusste Splits die reale Deployment-Situation besser simulieren. Empfohlen für zukünftige Iterationen.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q13 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">13</div>
+      <div class="qa-question-text">
+        <span class="lang-en">Did you experiment with ensemble models or stacking? What were the outcomes?</span>
+        <span class="lang-de">Haben Sie Ensemble-Modelle oder Stacking ausprobiert? Was waren die Ergebnisse?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <p><strong>Yes — the core approach is an ensemble:</strong></p>
+        <ul>
+          <li><strong>VotingClassifier (soft voting)</strong>: RandomForest + XGBoost + LightGBM. Each model independently predicts class probabilities; the ensemble averages them. This reduces variance compared to any single model.</li>
+          <li><strong>Optuna-optimized scorer</strong>: A second ensemble (<code>optimized_scorer.joblib</code>) using XGBoost + LightGBM with Optuna-tuned hyperparameters — slightly outperforms the standard VotingClassifier on CV.</li>
+          <li><strong>Clustering comparison</strong>: K-Means, DBSCAN, and Agglomerative Clustering were run in parallel. K-Means was selected for final use (best silhouette + interpretability), but DBSCAN's cluster_dbscan column is preserved for comparison.</li>
+        </ul>
+        <p>True model stacking (meta-learner on top of base models) was not implemented — the VotingClassifier is a simpler averaging ensemble, not a stacked generalization.</p>
+      </div>
+      <div class="lang-de">
+        <p><strong>Ja — der Kernansatz ist ein Ensemble:</strong></p>
+        <ul>
+          <li><strong>VotingClassifier (Soft Voting)</strong>: RandomForest + XGBoost + LightGBM. Jedes Modell sagt Klassenwahrscheinlichkeiten unabhängig vorher; das Ensemble mittelt sie. Reduziert Varianz gegenüber Einzelmodellen.</li>
+          <li><strong>Optuna-optimierter Scorer</strong>: Ein zweites Ensemble (<code>optimized_scorer.joblib</code>) mit XGBoost + LightGBM und Optuna-optimierten Hyperparametern — übertrifft im CV leicht den Standard-VotingClassifier.</li>
+          <li><strong>Clustering-Vergleich</strong>: K-Means, DBSCAN und Agglomerative Clustering parallel ausgeführt. K-Means für finale Nutzung gewählt (bester Silhouette + Interpretierbarkeit); DBSCAN-Spalte wird für Vergleiche beibehalten.</li>
+        </ul>
+        <p>Echtes Modell-Stacking (Meta-Lerner über Basismodellen) wurde nicht implementiert — der VotingClassifier ist ein einfaches Mittelwert-Ensemble, keine gestapelte Generalisierung.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q14 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">14</div>
+      <div class="qa-question-text">
+        <span class="lang-en">How did you evaluate and explain your model beyond traditional metrics?</span>
+        <span class="lang-de">Wie haben Sie Ihr Modell über traditionelle Metriken hinaus bewertet und erklärt?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <ul>
+          <li><strong>Quadratic Weighted Kappa (QWK = 0.618)</strong>: Specifically chosen for ordinal targets — penalizes predictions that are far from the true class more than adjacent misclassifications. More informative than accuracy for 1–5 scales.</li>
+          <li><strong>Feature importance (Gini impurity)</strong>: Aggregated across RF, XGBoost, and LightGBM — <code>spent_hours</code> (45.3%) and <code>comments_count</code> (25.3%) consistently top all three models for Q1.</li>
+          <li><strong>Confusion matrices</strong>: Visualized per Q dimension — reveal that class 3 is over-predicted (majority class bias), while classes 1 and 5 are underperforming.</li>
+          <li><strong>Bias analysis</strong>: Halo effect (inter-Q-correlation), leniency/severity bias, Q vs. O score divergence — all quantified and visualized in the dashboard.</li>
+          <li><strong>Outlier analysis</strong>: Mahalanobis distance + Z-Score identify 37 statistical outliers that warrant manual review.</li>
+        </ul>
+        <div class="highlight">SHAP values were not computed — this is the most significant gap in model explainability. SHAP would enable per-employee, per-prediction explanations directly in the dashboard.</div>
+      </div>
+      <div class="lang-de">
+        <ul>
+          <li><strong>Quadratic Weighted Kappa (QWK = 0,618)</strong>: Speziell für ordinale Targets gewählt — bestraft Vorhersagen, die weit von der wahren Klasse entfernt sind, stärker als benachbarte Fehlklassifikationen.</li>
+          <li><strong>Feature Importance (Gini-Impurity)</strong>: Aggregiert über RF, XGBoost und LightGBM — <code>spent_hours</code> (45,3%) und <code>comments_count</code> (25,3%) führen konsistent alle drei Modelle für Q1 an.</li>
+          <li><strong>Konfusionsmatrizen</strong>: Pro Q-Dimension visualisiert — zeigen, dass Klasse 3 überprognostiziert wird, während Klassen 1 und 5 unterperformen.</li>
+          <li><strong>Bias-Analyse</strong>: Halo-Effekt, Nachsichtigkeits-/Strengebias, Q vs. O Score-Divergenz — alle quantifiziert und im Dashboard visualisiert.</li>
+          <li><strong>Ausreißer-Analyse</strong>: Mahalanobis-Distanz + Z-Score identifizieren 37 statistische Ausreißer für manuelle Überprüfung.</li>
+        </ul>
+        <div class="highlight">SHAP-Werte wurden nicht berechnet — das ist die bedeutendste Lücke in der Modellerklärbarkeit. SHAP würde per-Mitarbeiter, per-Vorhersage-Erklärungen direkt im Dashboard ermöglichen.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DEPLOYMENT & IMPACT ── -->
+  <div class="category-title lang-en">Deployment, Risk &amp; Impact</div>
+  <div class="category-title lang-de">Deployment, Risiko &amp; Auswirkungen</div>
+
+  <!-- Q7 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">7</div>
+      <div class="qa-question-text">
+        <span class="lang-en">What are the real-world implications of your findings?</span>
+        <span class="lang-de">Was sind die realen Auswirkungen Ihrer Ergebnisse?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <ul>
+          <li><strong>24 overrated employees identified</strong>: Managers consistently rate these employees 1+ point above their objective performance. This quantifies systematic bias and enables targeted calibration sessions.</li>
+          <li><strong>6 "Needs Improvement" employees</strong>: Median resolution time of 455 days. These are chronic bottlenecks — early identification enables timely interventions (coaching, reassignment, workload review).</li>
+          <li><strong>7 "Specialist" employees</strong>: Low resolution rate (16.7%) but high reopen rate (17.5%) — likely handling complex, long-running projects. Currently mislabeled as underperformers by resolution-rate-focused metrics.</li>
+          <li><strong>O-Score as bias check</strong>: Provides HR and management with an independent, objective reference that cannot be influenced by personal relationships or recency bias.</li>
+          <li><strong>Scalability</strong>: The O-Score pipeline runs on all 302 employees (and scales to thousands), while Q-Score is limited to the 84 manually rated employees — a significant coverage gap in current deployment.</li>
+        </ul>
+      </div>
+      <div class="lang-de">
+        <ul>
+          <li><strong>24 überbewertete Mitarbeiter identifiziert</strong>: Manager bewerten diese Mitarbeiter konsistent >1 Punkt über ihrer objektiven Performance. Dies quantifiziert systematischen Bias und ermöglicht gezielte Kalibrierungssitzungen.</li>
+          <li><strong>6 „Needs Improvement" Mitarbeiter</strong>: Median-Bearbeitungszeit 455 Tage. Chronische Bottlenecks — frühzeitige Identifikation ermöglicht rechtzeitige Interventionen.</li>
+          <li><strong>7 „Specialist"-Mitarbeiter</strong>: Niedrige Resolution Rate (16,7%) aber hohe Reopen Rate (17,5%) — wahrscheinlich mit komplexen Langzeit-Projekten betraut. Werden derzeit von auflösungsraten-fokussierten Metriken fälschlicherweise als Underperformer eingestuft.</li>
+          <li><strong>O-Score als Bias-Check</strong>: Bietet HR und Management eine unabhängige, objektive Referenz, die nicht durch persönliche Beziehungen oder Recency Bias beeinflusst werden kann.</li>
+          <li><strong>Skalierbarkeit</strong>: Die O-Score-Pipeline läuft auf allen 302 Mitarbeitern, während Q-Score auf die 84 manuell bewerteten Mitarbeiter beschränkt ist — eine erhebliche Abdeckungslücke.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q15 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">15</div>
+      <div class="qa-question-text">
+        <span class="lang-en">What potential risks could arise from deploying your model in a real-world system?</span>
+        <span class="lang-de">Welche potenziellen Risiken könnten beim Einsatz des Modells in einem realen System entstehen?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <ul>
+          <li><strong>Automation bias</strong>: Decision-makers may over-rely on Q-Score predictions and dismiss their own judgment — especially dangerous given MAE=0.589 and low minority-class performance.</li>
+          <li><strong>Label bias propagation</strong>: Manager bias (Halo effect, leniency) in the 747 ground-truth labels is baked into the trained model. The model learns to replicate — not correct — these biases.</li>
+          <li><strong>Gaming the system</strong>: Once employees know that <code>spent_hours</code> (45% feature importance) or <code>comments_count</code> heavily influence scores, they may inflate these metrics artificially.</li>
+          <li><strong>Data drift</strong>: The model was trained on tickets from 2016–present. Organizational changes (new tools, teams, ticket categories) will shift the feature distribution — model performance will degrade over time without retraining.</li>
+          <li><strong>Privacy &amp; fairness</strong>: Clustering employees into "Needs Improvement 🔴" is a sensitive classification. Algorithmic decisions must not replace HR processes — they should inform them.</li>
+          <li><strong>Specialist misclassification</strong>: The O-Score penalizes low resolution rates. Employees on long-running projects are systematically disadvantaged by the current metric design.</li>
+        </ul>
+      </div>
+      <div class="lang-de">
+        <ul>
+          <li><strong>Automatisierungsbias</strong>: Entscheidungsträger könnten sich übermäßig auf Q-Score-Vorhersagen verlassen — besonders gefährlich angesichts MAE=0,589 und schlechter Minderheitsklassen-Performance.</li>
+          <li><strong>Label-Bias-Fortpflanzung</strong>: Manager-Bias (Halo-Effekt, Nachsichtigkeit) in den 747 Ground-Truth-Labels ist ins Modell eingebrannt — das Modell lernt, diese Biases zu replizieren, nicht zu korrigieren.</li>
+          <li><strong>Systemmanipulation</strong>: Wenn Mitarbeiter wissen, dass <code>spent_hours</code> (45% Feature-Importance) oder <code>comments_count</code> Scores stark beeinflussen, könnten sie diese Metriken künstlich aufblähen.</li>
+          <li><strong>Datendrift</strong>: Das Modell wurde auf Tickets von 2016 bis heute trainiert. Organisatorische Änderungen werden die Feature-Verteilung verschieben — ohne Retraining nimmt die Performance ab.</li>
+          <li><strong>Datenschutz &amp; Fairness</strong>: Mitarbeiter als „Needs Improvement 🔴" zu klassifizieren ist eine sensible Einordnung. Algorithmische Entscheidungen dürfen HR-Prozesse nicht ersetzen, sondern nur informieren.</li>
+          <li><strong>Specialist-Fehlklassifikation</strong>: O-Score bestraft niedrige Resolution Rates. Mitarbeiter an Langzeit-Projekten werden systematisch benachteiligt.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q16 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">16</div>
+      <div class="qa-question-text">
+        <span class="lang-en">What is the business impact of false positives vs. false negatives?</span>
+        <span class="lang-de">Was ist der geschäftliche Einfluss von False Positives vs. False Negatives?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <ul>
+          <li><strong>False Positive (predicting high performance when actual is low)</strong>: An underperforming employee is assessed as high-performing → missed training opportunity, continued bottleneck, team frustration. In HR terms: risk of wrongful promotion.</li>
+          <li><strong>False Negative (predicting low performance when actual is high)</strong>: A strong employee is flagged as at-risk → demotivation, potential resignation of key talent, unfair performance reviews. In HR terms: risk of losing top performers and legal exposure.</li>
+          <li><strong>For Q-Score specifically</strong>: An off-by-one error (predicting 3 instead of 4) has low business impact. A two-class error (predicting 2 instead of 4) is severe. The QWK of 0.618 penalizes these proportionally — but the model still makes ~34% of predictions incorrectly.</li>
+        </ul>
+        <div class="highlight"><strong>Recommendation</strong>: Use model predictions as a second opinion, not a decision. Require human review for all employees within 1 standard deviation of a cluster boundary or with a Q/O score gap &gt; 1.5.</div>
+      </div>
+      <div class="lang-de">
+        <ul>
+          <li><strong>False Positive (hohe Performance vorhergesagt, tatsächlich niedrig)</strong>: Unterleistender Mitarbeiter wird als High-Performer eingestuft → verpasste Trainingsmaßnahmen, anhaltende Bottlenecks, Frustration im Team. HR-Risiko: ungerechtfertigte Beförderung.</li>
+          <li><strong>False Negative (niedrige Performance vorhergesagt, tatsächlich hoch)</strong>: Starker Mitarbeiter wird als Risikofall eingestuft → Demotivation, potenzielle Kündigung von Schlüsseltalenten, unfaire Leistungsbeurteilung. HR-Risiko: Verlust von Top-Performern und rechtliche Exposition.</li>
+          <li><strong>Für Q-Score spezifisch</strong>: Ein Off-by-one-Fehler (Vorhersage 3 statt 4) hat geringe Auswirkungen. Ein Zwei-Klassen-Fehler (Vorhersage 2 statt 4) ist gravierend. QWK von 0,618 bestraft diese proportional.</li>
+        </ul>
+        <div class="highlight"><strong>Empfehlung</strong>: Modellvorhersagen als zweite Meinung nutzen, nicht als Entscheidung. Menschliche Überprüfung für alle Mitarbeiter innerhalb 1 Standardabweichung von einer Cluster-Grenze oder mit Q/O-Score-Differenz &gt; 1,5 vorschreiben.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LEARNINGS ── -->
+  <div class="category-title lang-en">Learnings &amp; Next Steps</div>
+  <div class="category-title lang-de">Erkenntnisse &amp; Nächste Schritte</div>
+
+  <!-- Q17 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">17</div>
+      <div class="qa-question-text">
+        <span class="lang-en">What next steps would you recommend to stakeholders?</span>
+        <span class="lang-de">Welche nächsten Schritte empfehlen Sie Stakeholdern?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <ol style="margin-left:20px">
+          <li><strong>Expand ground-truth labels</strong>: Prioritize rating 500+ additional tickets to unlock better model generalization. Target Q-Score classes 1 and 5 specifically.</li>
+          <li><strong>Implement SHAP explanations</strong>: Add per-prediction SHAP waterfall plots to the Streamlit dashboard for transparent, auditable decisions.</li>
+          <li><strong>Pilot the O-Score</strong>: Present O-Score results to managers for validation — do they agree with the objective rankings? This human-in-the-loop step is critical before HR integration.</li>
+          <li><strong>Add ticket complexity index</strong>: Normalize resolution time and steps by ticket type and priority to make inter-employee comparisons fairer.</li>
+          <li><strong>Monthly model retraining</strong>: Set up automated retraining pipeline (GitHub Actions or cron) as new rated tickets accumulate.</li>
+          <li><strong>Formal bias audit</strong>: Use the bias analysis results (24 overrated, 2 underrated employees) to initiate manager calibration sessions within 60 days.</li>
+        </ol>
+      </div>
+      <div class="lang-de">
+        <ol style="margin-left:20px">
+          <li><strong>Ground-Truth-Labels erweitern</strong>: Priorität: 500+ weitere Tickets bewerten lassen, um bessere Modellgeneralisierung zu ermöglichen. Gezielt auf Q-Score-Klassen 1 und 5 ausrichten.</li>
+          <li><strong>SHAP-Erklärungen implementieren</strong>: SHAP Waterfall-Plots pro Vorhersage im Streamlit-Dashboard für transparente, auditierbare Entscheidungen.</li>
+          <li><strong>O-Score pilotieren</strong>: O-Score-Ergebnisse Managern zur Validierung vorlegen — stimmen sie mit den objektiven Rankings überein? Dieser Human-in-the-Loop-Schritt ist vor der HR-Integration kritisch.</li>
+          <li><strong>Ticket-Komplexitätsindex hinzufügen</strong>: Bearbeitungszeit und Schritte nach Ticket-Typ und Priorität normalisieren, um Mitarbeitervergleiche fairer zu gestalten.</li>
+          <li><strong>Monatliches Modell-Retraining</strong>: Automatisierte Retraining-Pipeline (GitHub Actions oder Cron) einrichten, wenn neue bewertete Tickets anfallen.</li>
+          <li><strong>Formales Bias-Audit</strong>: Bias-Analyse-Ergebnisse (24 überbewertet, 2 unterbewertet) nutzen, um Manager-Kalibrierungssitzungen innerhalb von 60 Tagen einzuleiten.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q18 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <div class="qa-num">18</div>
+      <div class="qa-question-text">
+        <span class="lang-en">What did you learn during this project?</span>
+        <span class="lang-de">Was haben Sie während dieses Projekts gelernt?</span>
+      </div>
+    </div>
+    <div class="qa-answer">
+      <div class="lang-en">
+        <ul>
+          <li><strong>Data quality trumps model complexity</strong>: With only 603 labeled samples, no sophisticated model can overcome the statistical limitations of a small dataset. Data collection is the highest-ROI investment.</li>
+          <li><strong>Subjective labels are both valuable and dangerous</strong>: Q-Score labels carry real managerial insight — but also systematic biases. Separating signal from noise requires both statistical analysis and domain expertise.</li>
+          <li><strong>Unsupervised learning reveals structure invisible to supervised models</strong>: The "Specialist" cluster would never have been identified by a regression or classification model — clustering revealed a genuinely distinct work pattern.</li>
+          <li><strong>QWK is the right metric for ordinal targets</strong>: Accuracy alone masked the severity of class-boundary errors. QWK's ability to penalize large ordinal distances gives a more honest picture of model quality.</li>
+          <li><strong>Dual scoring is more robust than either alone</strong>: The Q/O score comparison (24 overrated employees) was the single most actionable insight — neither metric alone could have produced it.</li>
+          <li><strong>ML in HR requires extra caution</strong>: Algorithmic decisions about people demand explainability, fairness checks, and human oversight at every step — not just technical accuracy.</li>
+        </ul>
+      </div>
+      <div class="lang-de">
+        <ul>
+          <li><strong>Datenqualität schlägt Modellkomplexität</strong>: Mit nur 603 gelabelten Samples kann kein ausgefeiltes Modell die statistischen Einschränkungen eines kleinen Datensatzes überwinden. Datenerhebung ist die Investition mit dem höchsten ROI.</li>
+          <li><strong>Subjektive Labels sind wertvoll und gefährlich zugleich</strong>: Q-Score-Labels tragen echtes Managerwissen — aber auch systematische Biases. Signal von Rauschen zu trennen erfordert statistische Analyse und Domänenexpertise.</li>
+          <li><strong>Unüberwachtes Lernen enthüllt Strukturen, die überwachten Modellen verborgen bleiben</strong>: Der „Specialist"-Cluster wäre durch Regression oder Klassifikation nie identifiziert worden — Clustering deckte ein wirklich distinktives Arbeitsmuster auf.</li>
+          <li><strong>QWK ist die richtige Metrik für ordinale Targets</strong>: Accuracy allein verbirgt die Schwere von Klassengrenz-Fehlern. QWKs Fähigkeit, große Abstände zu bestrafen, liefert ein ehrlicheres Bild der Modellqualität.</li>
+          <li><strong>Duales Scoring ist robuster als jede Einzelmetrik</strong>: Der Q/O-Score-Vergleich (24 überbewertete Mitarbeiter) war die einzige wirklich handlungsrelevante Erkenntnis — keine Metrik allein hätte sie erzeugt.</li>
+          <li><strong>ML in HR erfordert besondere Sorgfalt</strong>: Algorithmische Entscheidungen über Menschen verlangen Erklärbarkeit, Fairness-Checks und menschliche Aufsicht bei jedem Schritt — nicht nur technische Genauigkeit.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<footer>
+  <p>Employee Performance ML Project · Defense Q&amp;A · Generated 2026-02-20 · Digital Electronic Gebert UG</p>
+</footer>
+
+<script>
+  function toggleLang() {
+    const body = document.body;
+    const btn  = document.querySelector('.lang-btn');
+    if (body.classList.contains('show-en')) {
+      body.classList.replace('show-en', 'show-de');
+      btn.textContent = '🇬🇧 English';
+    } else {
+      body.classList.replace('show-de', 'show-en');
+      btn.textContent = '🇩🇪 Deutsch';
+    }
+  }
+</script>
+</body>
+</html>
