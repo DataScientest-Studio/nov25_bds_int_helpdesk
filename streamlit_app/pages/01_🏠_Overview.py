@@ -300,24 +300,6 @@ else:
 
     st.markdown("---")
 
-    # Top Performers
-    section_header(e("🏆 ") + get_text('top_performers'))
-    if not data_a2['top_employees'].empty:
-        risk_icons = {'GREEN': e('🟢'), 'YELLOW': e('🟡'), 'RED': e('🔴')}
-        display = data_a2['top_employees'].copy()
-        display['risk_level'] = display['risk_level'].map(lambda x: f"{risk_icons.get(x, e('⚪'))} {x}")
-        st.dataframe(
-            display,
-            column_config={
-                'name': st.column_config.TextColumn(get_text('employees')),
-                'avg_score': st.column_config.NumberColumn("Ø Score", format="%.2f"),
-                'ticket_count': st.column_config.NumberColumn(get_text('tickets')),
-                'risk_level': st.column_config.TextColumn(get_text('risk_level')),
-            },
-            width="stretch",
-            hide_index=True
-        )
-
 
 # ─── Auto-Refresh (once, at the bottom) ─────────────────────────────────────
 if auto_refresh:

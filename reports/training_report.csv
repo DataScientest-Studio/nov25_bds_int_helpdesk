@@ -1,0 +1,91 @@
+employee,overall_score,ticket_count,risk_level,training_areas,flags,recommendations
+4lll,1.5,1,YELLOW,"Solution Quality, General Performance",-,Workshop: Systematic Problem Analysis; Mentoring: Pair work with experienced colleague
+4hggg,2.0,1,YELLOW,"Solution Quality, General Performance",-,Workshop: Systematic Problem Analysis; Mentoring: Pair work with experienced colleague
+4lqg,2.0,1,YELLOW,"Solution Quality, General Performance",-,Workshop: Systematic Problem Analysis; Mentoring: Pair work with experienced colleague
+4hgsg,3.0,1,YELLOW,General Performance,-,Mentoring: Pair work with experienced colleague
+4kll,3.0,4,YELLOW,General Performance,-,Mentoring: Pair work with experienced colleague
+4kpk,3.0,3,YELLOW,General Performance,-,Mentoring: Pair work with experienced colleague
+4kpq,3.0,2,YELLOW,General Performance,-,Mentoring: Pair work with experienced colleague
+4qsh,3.0,1,YELLOW,General Performance,-,Mentoring: Pair work with experienced colleague
+4skr,3.17,12,YELLOW,General Performance,-,Mentoring: Pair work with experienced colleague
+4oio,3.42,3,YELLOW,General Performance,-,Mentoring: Pair work with experienced colleague
+4lsh,3.44,4,YELLOW,General Performance,-,Mentoring: Pair work with experienced colleague
+4ssh,3.67,3,YELLOW,Consistency,-,Coaching: Checklists for consistent quality
+0ny0x23yoi,1.0,1,RED,"Solution Quality, General Performance","Critically low performance, Very poor individual ratings",Workshop: Systematic Problem Analysis; Mentoring: Pair work with experienced colleague
+4hgir,1.0,1,RED,"Solution Quality, General Performance","Critically low performance, Very poor individual ratings",Workshop: Systematic Problem Analysis; Mentoring: Pair work with experienced colleague
+4sgg,1.86,7,RED,"Solution Quality, General Performance",Very poor individual ratings,Workshop: Systematic Problem Analysis; Mentoring: Pair work with experienced colleague
+4hgog,1.96,6,RED,"Solution Quality, General Performance",Very poor individual ratings,Workshop: Systematic Problem Analysis; Mentoring: Pair work with experienced colleague
+4pio,2.0,2,RED,"Solution Quality, General Performance",Very poor individual ratings,Workshop: Systematic Problem Analysis; Mentoring: Pair work with experienced colleague
+4lhl,2.11,24,RED,"Solution Quality, General Performance",Very poor individual ratings,Workshop: Systematic Problem Analysis; Mentoring: Pair work with experienced colleague
+4hlg,2.5,2,RED,"Consistency, General Performance",Very poor individual ratings,Coaching: Checklists for consistent quality; Mentoring: Pair work with experienced colleague
+4sil,2.5,2,RED,"Consistency, General Performance",Very poor individual ratings,Coaching: Checklists for consistent quality; Mentoring: Pair work with experienced colleague
+4llr,2.62,13,RED,"Consistency, General Performance",Very poor individual ratings,Coaching: Checklists for consistent quality; Mentoring: Pair work with experienced colleague
+4kgr,2.75,12,RED,General Performance,Very poor individual ratings,Mentoring: Pair work with experienced colleague
+4pps,2.94,25,RED,General Performance,Very poor individual ratings,Mentoring: Pair work with experienced colleague
+4hgho,3.14,7,RED,"Consistency, General Performance",Very poor individual ratings,Coaching: Checklists for consistent quality; Mentoring: Pair work with experienced colleague
+4osr,3.22,8,RED,General Performance,Very poor individual ratings,Mentoring: Pair work with experienced colleague
+4lls,3.43,7,RED,"Consistency, General Performance",Very poor individual ratings,Coaching: Checklists for consistent quality; Mentoring: Pair work with experienced colleague
+4kgh,3.57,14,RED,-,Very poor individual ratings,
+4lpo,3.66,25,RED,-,Very poor individual ratings,
+4lsp,3.75,4,RED,Consistency,Very poor individual ratings,Coaching: Checklists for consistent quality
+4slh,3.8,5,RED,Consistency,Very poor individual ratings,Coaching: Checklists for consistent quality
+4lsk,3.88,20,RED,Consistency,Very poor individual ratings,Coaching: Checklists for consistent quality
+4sks,4.08,6,RED,Consistency,Very poor individual ratings,Coaching: Checklists for consistent quality
+4ihs,4.1,5,RED,Consistency,Very poor individual ratings,Coaching: Checklists for consistent quality
+4hgrl,4.78,18,RED,-,Very poor individual ratings,
+4lig,3.5,2,GREEN,-,-,Good work! Keep it up.
+4ris,3.5,2,GREEN,-,-,Good work! Keep it up.
+4khi,3.67,3,GREEN,-,-,Good work! Keep it up.
+4lpl,3.67,3,GREEN,-,-,Good work! Keep it up.
+4sio,3.67,3,GREEN,-,-,Good work! Keep it up.
+4hgih,4.0,1,GREEN,-,-,Good work! Keep it up.
+4hgok,4.0,1,GREEN,-,-,Good work! Keep it up.
+4kqp,4.0,2,GREEN,-,-,Good work! Keep it up.
+4lkl,4.0,1,GREEN,-,-,Good work! Keep it up.
+4qoh,4.0,1,GREEN,-,-,Good work! Keep it up.
+4sli,4.0,2,GREEN,-,-,Good work! Keep it up.
+t.y10ygh,4.0,1,GREEN,-,-,Good work! Keep it up.
+4sii,4.15,10,GREEN,-,-,Good work! Keep it up.
+4sgr,4.25,2,GREEN,-,-,Good work! Keep it up.
+4shl,4.36,7,GREEN,-,-,Good work! Keep it up.
+4lip,4.42,3,GREEN,-,-,Good work! Keep it up.
+4hpp,4.5,1,GREEN,-,-,Good work! Keep it up.
+4ioh,4.5,2,GREEN,-,-,Good work! Keep it up.
+4ops,4.5,12,GREEN,-,-,Good work! Keep it up.
+4pgp,4.5,6,GREEN,-,-,Good work! Keep it up.
+4rqs,4.5,1,GREEN,-,-,Good work! Keep it up.
+4qsk,4.6,5,GREEN,-,-,Good work! Keep it up.
+4qkr,4.62,4,GREEN,-,-,Good work! Keep it up.
+4kgp,4.67,3,GREEN,-,-,Good work! Keep it up.
+4kqo,4.67,6,GREEN,-,-,Good work! Keep it up.
+4oqq,4.67,3,GREEN,-,-,Good work! Keep it up.
+4qiq,4.67,3,GREEN,-,-,Good work! Keep it up.
+4sih,4.67,3,GREEN,-,-,Good work! Keep it up.
+4hghq,4.82,22,GREEN,-,-,Good work! Keep it up.
+4lrp,4.88,2,GREEN,-,-,Good work! Keep it up.
+4khg,4.91,17,GREEN,-,-,Good work! Keep it up.
+4hglq,4.93,11,GREEN,-,-,Good work! Keep it up.
+4hgor,4.95,22,GREEN,-,-,Good work! Keep it up.
+1n81u.adh,5.0,1,GREEN,-,-,Good work! Keep it up.
+3cxogo,5.0,5,GREEN,-,-,Good work! Keep it up.
+4ggo,5.0,1,GREEN,-,-,Good work! Keep it up.
+4hghk,5.0,44,GREEN,-,-,Good work! Keep it up.
+4hghs,5.0,22,GREEN,-,-,Good work! Keep it up.
+4hgol,5.0,16,GREEN,-,-,Good work! Keep it up.
+4hgos,5.0,30,GREEN,-,-,Good work! Keep it up.
+4hgpl,5.0,6,GREEN,-,-,Good work! Keep it up.
+4hgqg,5.0,1,GREEN,-,-,Good work! Keep it up.
+4hhgi,5.0,13,GREEN,-,-,Good work! Keep it up.
+4hhgo,5.0,10,GREEN,-,-,Good work! Keep it up.
+4kgi,5.0,8,GREEN,-,-,Good work! Keep it up.
+4kgq,5.0,3,GREEN,-,-,Good work! Keep it up.
+4klq,5.0,1,GREEN,-,-,Good work! Keep it up.
+4kqk,5.0,1,GREEN,-,-,Good work! Keep it up.
+4lqi,5.0,1,GREEN,-,-,Good work! Keep it up.
+4lrs,5.0,1,GREEN,-,-,Good work! Keep it up.
+4psk,5.0,2,GREEN,-,-,Good work! Keep it up.
+4qil,5.0,1,GREEN,-,-,Good work! Keep it up.
+4qqr,5.0,1,GREEN,-,-,Good work! Keep it up.
+4z8d4aa.c3,5.0,2,GREEN,-,-,Good work! Keep it up.
+t.d2j4d8c,5.0,1,GREEN,-,-,Good work! Keep it up.
+t.yn039ygo,5.0,2,GREEN,-,-,Good work! Keep it up.

@@ -1,0 +1,261 @@
+"""
+Clustering Pipeline for Employee Performance
+Uses K-Means, DBSCAN, and Agglomerative Clustering
+"""
+
+import pandas as pd
+import numpy as np
+import joblib
+from pathlib import Path
+from sklearn.preprocessing import RobustScaler
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
+from sklearn.metrics import silhouette_score
+import warnings
+warnings.filterwarnings('ignore')
+
+# Paths
+BASE_DIR = Path(__file__).parent.parent
+PROCESSED_DIR = BASE_DIR / "data" / "processed"
+MODELS_DIR = BASE_DIR / "models"
+MODELS_DIR.mkdir(parents=True, exist_ok=True)
+
+print("=" * 60)
+print("Clustering Pipeline")
+print("=" * 60)
+
+# ─── Load Features ────────────────────────────────────────
+print("\n[1/7] Loading features...")
+features_df = pd.read_csv(PROCESSED_DIR / "employee_features.csv")
+print(f"  Loaded: {features_df.shape[0]} employees, {features_df.shape[1]-1} features")
+
+# Define feature columns (all numeric except assignee)
+feature_cols = [
+    'median_resolution_days', 'avg_resolution_days', 'std_resolution_days',
+    'pct_fast_resolved', 'total_tickets', 'tickets_per_month', 'active_months',
+    'avg_priority', 'pct_high_priority', 'n_distinct_projects', 'n_distinct_categories',
+    'pct_reopened', 'resolution_rate', 'avg_comments',
+    'pct_sole_resolver', 'avg_first_response_days', 'avg_processing_steps'
+]
+
+# ─── Winsorize outliers ────────────────────────────────────
+print("[1/7] Winsorizing extreme outliers (clip at 99th percentile)...")
+features_clean = features_df.copy()
+for col in feature_cols:
+    p99 = features_clean[col].quantile(0.99)
+    n_clipped = (features_clean[col] > p99).sum()
+    if n_clipped > 0:
+        print(f"  Clipping {col}: {n_clipped} values above {p99:.3f}")
+    features_clean[col] = features_clean[col].clip(upper=p99)
+
+X = features_clean[feature_cols].values
+X_orig = features_df[feature_cols].values  # Keep original for profiles
+assignees = features_df['issue_assignee'].values
+
+# ─── Scale Features ────────────────────────────────────────
+print("\n[2/7] Scaling features with RobustScaler...")
+scaler = RobustScaler()
+X_scaled = scaler.fit_transform(X)
+joblib.dump(scaler, MODELS_DIR / "scaler.joblib")
+print(f"  Scaler saved to models/scaler.joblib")
+
+# ─── PCA for Visualization ────────────────────────────────
+print("[3/7] Running PCA (2 components)...")
+pca = PCA(n_components=2, random_state=42)
+X_pca = pca.fit_transform(X_scaled)
+print(f"  Explained variance: PC1={pca.explained_variance_ratio_[0]:.3f}, PC2={pca.explained_variance_ratio_[1]:.3f}")
+print(f"  Total variance explained: {pca.explained_variance_ratio_.sum():.3f}")
+
+# ─── Find Optimal K (Elbow + Silhouette) ─────────────────
+print("\n[4/7] Finding optimal cluster count (k=2..8)...")
+k_range = range(2, 9)
+inertias = []
+silhouette_scores = []
+MIN_CLUSTER_SIZE_RATIO = 0.05  # At least 5% of employees per cluster
+
+for k in k_range:
+    km = KMeans(n_clusters=k, random_state=42, n_init=10)
+    labels = km.fit_predict(X_scaled)
+    inertias.append(km.inertia_)
+    sil = silhouette_score(X_scaled, labels)
+    silhouette_scores.append(sil)
+    
+    # Check minimum cluster size
+    min_size = pd.Series(labels).value_counts().min()
+    min_ratio = min_size / len(labels)
+    flag = " ⚠️ tiny cluster" if min_ratio < MIN_CLUSTER_SIZE_RATIO else ""
+    print(f"  k={k}: inertia={km.inertia_:.1f}, silhouette={sil:.4f}, min_cluster={min_size} ({min_ratio:.1%}){flag}")
+
+# Save elbow/silhouette data
+elbow_df = pd.DataFrame({
+    'k': list(k_range),
+    'inertia': inertias,
+    'silhouette': silhouette_scores
+})
+elbow_df.to_csv(PROCESSED_DIR / "elbow_silhouette.csv", index=False)
+
+# Pick optimal k: best silhouette WITH minimum cluster size constraint
+best_k = None
+best_sil = 0
+for i, k in enumerate(k_range):
+    km_test = KMeans(n_clusters=k, random_state=42, n_init=10)
+    labels_test = km_test.fit_predict(X_scaled)
+    min_size = pd.Series(labels_test).value_counts().min()
+    min_ratio = min_size / len(labels_test)
+    
+    if min_ratio >= MIN_CLUSTER_SIZE_RATIO and silhouette_scores[i] > best_sil:
+        best_sil = silhouette_scores[i]
+        best_k = k
+
+# Fallback: if no k meets the constraint, use k=4
+if best_k is None:
+    print(f"\n  ⚠️ No k met the min cluster size constraint. Forcing k=4.")
+    best_k = 4
+    best_sil = silhouette_scores[list(k_range).index(4)]
+
+print(f"\n  Best k={best_k} (silhouette={best_sil:.4f}) [min cluster size >= {MIN_CLUSTER_SIZE_RATIO:.0%}]")
+
+# ─── K-Means with Optimal K ────────────────────────────────
+print(f"\n[5/7] Running K-Means with k={best_k}...")
+kmeans = KMeans(n_clusters=best_k, random_state=42, n_init=20)
+kmeans_labels = kmeans.fit_predict(X_scaled)
+joblib.dump(kmeans, MODELS_DIR / "kmeans_model.joblib")
+cluster_dist = pd.Series(kmeans_labels).value_counts().sort_index().to_dict()
+print(f"  K-Means saved. Cluster sizes: {cluster_dist}")
+
+# ─── DBSCAN ────────────────────────────────────────────────
+print("[5/7] Running DBSCAN...")
+dbscan = DBSCAN(eps=1.5, min_samples=5)
+dbscan_labels = dbscan.fit_predict(X_scaled)
+n_dbscan_clusters = len(set(dbscan_labels)) - (1 if -1 in dbscan_labels else 0)
+n_noise = (dbscan_labels == -1).sum()
+print(f"  DBSCAN: {n_dbscan_clusters} clusters, {n_noise} noise points")
+
+# ─── Agglomerative Clustering ──────────────────────────────
+print("[5/7] Running Agglomerative Clustering...")
+agg = AgglomerativeClustering(n_clusters=best_k)
+agg_labels = agg.fit_predict(X_scaled)
+agg_dist = pd.Series(agg_labels).value_counts().sort_index().to_dict()
+print(f"  Agglomerative cluster sizes: {agg_dist}")
+
+# ─── Assign Cluster Labels ────────────────────────────────
+print(f"\n[6/7] Assigning semantic cluster labels...")
+
+# Build result dataframe using ORIGINAL (non-winsorized) features for profiles
+result_df = features_df.copy()
+result_df['cluster'] = kmeans_labels
+result_df['cluster_dbscan'] = dbscan_labels
+result_df['cluster_agg'] = agg_labels
+
+# Compute cluster profiles from original data
+profile_df = result_df.groupby('cluster')[feature_cols].mean()
+
+# Rank clusters by composite score:
+#   Low resolution days = good, High resolution rate = good, High pct_fast_resolved = good
+# Normalize each metric to [0,1] for ranking
+def normalize(series):
+    mn, mx = series.min(), series.max()
+    if mx == mn:
+        return pd.Series([0.5] * len(series), index=series.index)
+    return (series - mn) / (mx - mn)
+
+# Performance score: lower resolution time is better (invert), higher resolution_rate & pct_fast_resolved is better
+perf_score = (
+    (1 - normalize(profile_df['median_resolution_days'])) * 0.4 +
+    normalize(profile_df['resolution_rate']) * 0.3 +
+    normalize(profile_df['pct_fast_resolved']) * 0.3
+)
+cluster_ranking = perf_score.sort_values(ascending=False)  # Best first
+print(f"  Cluster performance scores (higher = better):")
+for cluster_id, score in cluster_ranking.items():
+    res_days = profile_df.loc[cluster_id, 'median_resolution_days']
+    res_rate = profile_df.loc[cluster_id, 'resolution_rate']
+    size = (kmeans_labels == cluster_id).sum()
+    tickets = result_df[result_df['cluster'] == cluster_id]['total_tickets'].median()
+    print(f"    Cluster {cluster_id}: score={score:.3f}, med_res={res_days:.1f}d, res_rate={res_rate:.3f}, n={size}, med_tickets={tickets:.0f}")
+
+# Assign labels
+ranked = list(cluster_ranking.index)
+n = len(ranked)
+cluster_sizes = result_df.groupby('cluster').size()
+total_employees = len(result_df)
+
+label_map = {}
+for i, c in enumerate(ranked):
+    size = cluster_sizes[c]
+    size_ratio = size / total_employees
+    sp = profile_df.loc[c]
+    
+    if i == 0:
+        label_map[c] = "High Performer 🟢"
+    elif i == n - 1:
+        # Check: if very long resolution time → Needs Improvement, else Specialist
+        if sp['median_resolution_days'] > profile_df['median_resolution_days'].median() * 5:
+            label_map[c] = "Needs Improvement 🔴"
+        else:
+            label_map[c] = "Needs Improvement 🔴"
+    elif sp['resolution_rate'] < 0.40:
+        # Very low resolution rate → unusual work pattern → Specialist
+        label_map[c] = "Specialist ⚫"
+    elif size_ratio < 0.10 and n >= 4:
+        # Small cluster with unusual characteristics
+        overall = profile_df.mean()
+        if (sp['n_distinct_projects'] > overall['n_distinct_projects'] * 1.3 or
+            sp['tickets_per_month'] > overall['tickets_per_month'] * 2 or
+            sp['tickets_per_month'] < overall['tickets_per_month'] * 0.3):
+            label_map[c] = "Specialist ⚫"
+        else:
+            label_map[c] = "Solid Performer 🟡"
+    else:
+        label_map[c] = "Solid Performer 🟡"
+
+print(f"\n  Cluster Label Map: {label_map}")
+result_df['cluster_label'] = result_df['cluster'].map(label_map)
+
+# ─── Cluster Profiles with Labels ─────────────────────────
+profile_labeled = result_df.groupby(['cluster', 'cluster_label'])[feature_cols].mean().round(4)
+profile_labeled = profile_labeled.reset_index()
+print(f"\n  Final cluster profiles:")
+print(profile_labeled[['cluster', 'cluster_label', 'median_resolution_days', 'resolution_rate',
+                         'total_tickets', 'pct_fast_resolved', 'pct_reopened']].to_string(index=False))
+
+# ─── Save Results ─────────────────────────────────────────
+print(f"\n[7/7] Saving results...")
+
+result_df.to_csv(PROCESSED_DIR / "cluster_results.csv", index=False)
+print(f"  ✅ cluster_results.csv: {result_df.shape}")
+
+profile_labeled.to_csv(PROCESSED_DIR / "cluster_profiles.csv", index=False)
+print(f"  ✅ cluster_profiles.csv: {profile_labeled.shape}")
+
+pca_df = pd.DataFrame(X_pca, columns=['PC1', 'PC2'])
+pca_df['issue_assignee'] = assignees
+pca_df['cluster'] = kmeans_labels
+pca_df['cluster_label'] = [label_map[c] for c in kmeans_labels]
+pca_df.to_csv(PROCESSED_DIR / "pca_results.csv", index=False)
+print(f"  ✅ pca_results.csv: {pca_df.shape}")
+
+# ─── Feature Importance ────────────────────────────────────
+loadings_df = pd.DataFrame({
+    'feature': feature_cols,
+    'PC1_loading': np.abs(pca.components_[0]),
+    'PC2_loading': np.abs(pca.components_[1]),
+})
+loadings_df['importance'] = (loadings_df['PC1_loading'] * pca.explained_variance_ratio_[0] +
+                              loadings_df['PC2_loading'] * pca.explained_variance_ratio_[1])
+loadings_df = loadings_df.sort_values('importance', ascending=False)
+loadings_df.to_csv(PROCESSED_DIR / "feature_importance.csv", index=False)
+print(f"\n  Top features (by PCA importance):")
+for _, row in loadings_df.head(5).iterrows():
+    print(f"    {row['feature']}: {row['importance']:.4f}")
+
+print(f"\n{'='*60}")
+print(f"✅ Clustering complete!")
+print(f"   Employees analyzed: {len(result_df)}")
+print(f"   Clusters found: {best_k}")
+print(f"   Best silhouette score: {best_sil:.4f}")
+print(f"   Cluster distribution:")
+dist = result_df['cluster_label'].value_counts()
+for label, count in dist.items():
+    print(f"     {label}: {count} employees ({count/len(result_df)*100:.1f}%)")
+print(f"{'='*60}")

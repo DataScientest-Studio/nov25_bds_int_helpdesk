@@ -105,54 +105,77 @@ else:
     st.markdown("#### Step-by-step overview of the data flow")
 
 # Graphviz-Diagramm — kreuzungsfreies TB-Layout
-st.graphviz_chart("""
-digraph dataflow {
+if lang == 'de':
+    _gv_issues    = "issues.csv\\n(66.691 Zeilen)"
+    _gv_snapshot  = "issues_snapshot.csv\\n(90.963 Zeilen)"
+    _gv_sample    = "issues_snapshot_sample.xlsx\\n(747 Zeilen, Ground Truth)"
+    _gv_history   = "issues_change_history.csv\\n(257.508 Zeilen)"
+    _gv_utterance = "sample_utterances.csv\\n(30.104 Zeilen)"
+    _gv_loader    = "data_loader.py\\nLädt alle Datensätze"
+    _gv_oscore    = "o_score.py\\nBerechnet O-Score"
+    _gv_oresult   = "o_score_results.csv\\n(pro Mitarbeiter)"
+    _gv_app       = "app.py\\nHauptanwendung"
+    _gv_feateng   = "feature_engineering.py\\nErstellt ML-Features"
+else:
+    _gv_issues    = "issues.csv\\n(66,691 rows)"
+    _gv_snapshot  = "issues_snapshot.csv\\n(90,963 rows)"
+    _gv_sample    = "issues_snapshot_sample.xlsx\\n(747 rows, Ground Truth)"
+    _gv_history   = "issues_change_history.csv\\n(257,508 rows)"
+    _gv_utterance = "sample_utterances.csv\\n(30,104 rows)"
+    _gv_loader    = "data_loader.py\\nLoads all datasets"
+    _gv_oscore    = "o_score.py\\nCalculates O-Score"
+    _gv_oresult   = "o_score_results.csv\\n(per employee)"
+    _gv_app       = "app.py\\nMain Application"
+    _gv_feateng   = "feature_engineering.py\\nCreates ML features"
+
+st.graphviz_chart(f"""
+digraph dataflow {{
     rankdir=TB;
     node [shape=box, style=filled, fontname="Arial", fontsize=11];
     splines=ortho;
 
-    subgraph cluster_raw {
+    subgraph cluster_raw {{
         label="Raw Data";
         style=filled;
         color=lightgrey;
         rank=same;
-        issues [label="issues.csv\\n(66.691 Zeilen)", fillcolor="#AED6F1"];
-        snapshot [label="issues_snapshot.csv\\n(90.963 Zeilen)", fillcolor="#AED6F1"];
-        sample [label="issues_snapshot_sample.xlsx\\n(747 Zeilen, Ground Truth)", fillcolor="#A9DFBF"];
-        history [label="issues_change_history.csv\\n(257.508 Zeilen)", fillcolor="#AED6F1"];
-        utterances [label="sample_utterances.csv\\n(30.104 Zeilen)", fillcolor="#AED6F1"];
-    }
+        issues [label="{_gv_issues}", fillcolor="#AED6F1"];
+        snapshot [label="{_gv_snapshot}", fillcolor="#AED6F1"];
+        sample [label="{_gv_sample}", fillcolor="#A9DFBF"];
+        history [label="{_gv_history}", fillcolor="#AED6F1"];
+        utterances [label="{_gv_utterance}", fillcolor="#AED6F1"];
+    }}
 
-    data_loader [label="data_loader.py\\nLädt alle Datensätze", fillcolor="#FAD7A0"];
+    data_loader [label="{_gv_loader}", fillcolor="#FAD7A0"];
 
-    subgraph cluster_qpipeline {
+    subgraph cluster_qpipeline {{
         label="Q-Score Pipeline";
         style=filled;
         color="#FDEDEC";
-        feat_eng [label="feature_engineering.py\\nErstellt ML-Features", fillcolor="#FAD7A0"];
+        feat_eng [label="{_gv_feateng}", fillcolor="#FAD7A0"];
         ml_model_q [label="ml_model_q.py\\n(Q-Score mit QWK)", fillcolor="#F1948A"];
         q_score_model [label="q_score_model.joblib\\n(RF+XGB+LGB Ensemble)", fillcolor="#85C1E9"];
-        optimized [label="optimized_scorer.joblib\\n(XGB+LGB, Optuna-optimiert)", fillcolor="#5DADE2"];
-    }
+        optimized [label="optimized_scorer.joblib\\n(XGB+LGB, Optuna)", fillcolor="#5DADE2"];
+    }}
 
-    subgraph cluster_opipeline {
+    subgraph cluster_opipeline {{
         label="O-Score Pipeline";
         style=filled;
         color="#EBF5FB";
-        o_score [label="o_score.py\\nBerechnet O-Score", fillcolor="#FAD7A0"];
-        o_score_results [label="o_score_results.csv\\n(pro Mitarbeiter)", fillcolor="#AED6F1"];
+        o_score [label="{_gv_oscore}", fillcolor="#FAD7A0"];
+        o_score_results [label="{_gv_oresult}", fillcolor="#AED6F1"];
         ml_model_o [label="ml_model_o.py\\n(O-Score Classifier)", fillcolor="#F1948A"];
         o_score_model [label="o_score_model.joblib\\n(RF+XGB+LGB Classifier)", fillcolor="#85C1E9"];
-    }
+    }}
 
     analytics [label="nlp_analysis\\ndialog_analysis\\nprocess_compliance\\nbias_analysis\\ntrend_analysis\\ntraining_deficits", fillcolor="#F9E79F", shape=box];
 
-    subgraph cluster_dashboard {
+    subgraph cluster_dashboard {{
         label="Streamlit Dashboard (Port 8501)";
         style=filled;
         color="#E9F7EF";
-        dashboard [label="app.py\\nHauptanwendung", fillcolor="#82E0AA"];
-        subgraph cluster_pages {
+        dashboard [label="{_gv_app}", fillcolor="#82E0AA"];
+        subgraph cluster_pages {{
             label="pages/";
             style=filled;
             color="#D5F5E3";
@@ -164,38 +187,32 @@ digraph dataflow {
             p5 [label="05_Operations", fillcolor="#A9DFBF"];
             p6 [label="10_Architecture", fillcolor="#A9DFBF"];
             p7 [label="11_IO_Docs", fillcolor="#A9DFBF"];
-        }
-    }
+        }}
+    }}
 
-    // Rohdaten → data_loader
     issues -> data_loader;
     snapshot -> data_loader;
     sample -> data_loader;
     history -> data_loader;
     utterances -> data_loader;
 
-    // Q-Score Pipeline
     data_loader -> feat_eng;
     feat_eng -> ml_model_q;
     ml_model_q -> q_score_model;
     ml_model_q -> optimized [label="Optuna"];
 
-    // O-Score Pipeline
     data_loader -> o_score;
     o_score -> o_score_results;
     o_score_results -> ml_model_o;
     ml_model_o -> o_score_model;
 
-    // Analytics-Module (Sammelpfeil)
-    data_loader -> analytics [label="nlp_analysis\\ndialog_analysis\\nprocess_compliance\\nbias_analysis\\ntrend_analysis\\ntraining_deficits"];
+    data_loader -> analytics;
 
-    // → Dashboard
     q_score_model -> dashboard;
     optimized -> dashboard;
     o_score_model -> dashboard;
     analytics -> dashboard;
 
-    // Dashboard → Pages
     dashboard -> p1;
     dashboard -> p2;
     dashboard -> p3;
@@ -203,11 +220,38 @@ digraph dataflow {
     dashboard -> p5;
     dashboard -> p6;
     dashboard -> p7;
-}
+}}
 """, use_container_width=True)
 
 # ── 4. Datenquellen ────────────────────────────────────────────────────────
 section_header(T['sec_datasources'])
+
+_desc_de = [
+    'Haupt-Issue-Datensatz: Ticket-Metadaten, Workflow-Zeiten (wf_*), Workflow-Ereignisse (wfe_*), Bearbeitungsschritte',
+    'Snapshot pro Mitarbeiter/Ticket-Kombination mit turn-Nummer; Basis für O-Score-Berechnung',
+    'Ground Truth: 747 manuell bewertete Tickets mit Q1, Q2, Q3 (Manager-Bewertungen, Skala 1–5)',
+    'Audit-Trail: Alle Feldänderungen pro Ticket mit Zeitstempel und Änderungsgruppe',
+    'Kommentar-Utterances: 30.104 einzelne Textbeiträge mit Autor-Rolle und Sequenzposition',
+    'Prozessierter ML-Datensatz: 6 Features + Q1/Q2/Q3 Targets (nur valide Samples)',
+    'O-Score pro Mitarbeiter: Qualität, Effizienz, Produktivität, Kommunikation (0–1) → O-Score (1–5)',
+    'Workflow-Analyse: Compliance-Score, Reopens, Backward-Steps pro Ticket',
+    'NLP-Features pro Issue: Sentiment (compound/pos/neg), Politeness, Urgency, Technikalität',
+    'Dialog-Akt-Klassifikation: 12 Kategorien (QUESTION, COMPLAINT, THANKS, etc.)',
+]
+_desc_en = [
+    'Main issue dataset: Ticket metadata, workflow times (wf_*), workflow events (wfe_*), processing steps',
+    'Snapshot per employee/ticket combination with turn number; basis for O-Score calculation',
+    'Ground truth: 747 manually rated tickets with Q1, Q2, Q3 (manager ratings, scale 1–5)',
+    'Audit trail: All field changes per ticket with timestamp and change group',
+    'Comment utterances: 30,104 individual text contributions with author role and sequence position',
+    'Processed ML dataset: 6 features + Q1/Q2/Q3 targets (valid samples only)',
+    'O-Score per employee: Quality, Efficiency, Productivity, Communication (0–1) → O-Score (1–5)',
+    'Workflow analysis: Compliance score, reopens, backward steps per ticket',
+    'NLP features per issue: Sentiment (compound/pos/neg), Politeness, Urgency, Technicality',
+    'Dialog-act classification: 12 categories (QUESTION, COMPLAINT, THANKS, etc.)',
+]
+_rows_de = ['66.691', '90.963', '747', '257.508', '30.104', '603', '~variabel', '~variabel', '~variabel', '~variabel']
+_rows_en = ['66,691', '90,963', '747', '257,508', '30,104', '603', '~variable', '~variable', '~variable', '~variable']
 
 datasources = {
     T['file']: [
@@ -222,26 +266,9 @@ datasources = {
         'data/processed/nlp_features.csv',
         'data/processed/dialog_acts.csv',
     ],
-    T['rows']: [
-        '66.691', '90.963', '747', '257.508', '30.104',
-        '603', '~variabel', '~variabel', '~variabel', '~variabel'
-    ],
-    T['cols']: [
-        '58', '60', '19', '6', '9',
-        '9', '~15', '6', '~15', '7'
-    ],
-    T['description']: [
-        'Haupt-Issue-Datensatz: Ticket-Metadaten, Workflow-Zeiten (wf_*), Workflow-Ereignisse (wfe_*), Bearbeitungsschritte',
-        'Snapshot pro Mitarbeiter/Ticket-Kombination mit turn-Nummer; Basis für O-Score-Berechnung',
-        'Ground Truth: 747 manuell bewertete Tickets mit Q1, Q2, Q3 (Manager-Bewertungen, Skala 1–5)',
-        'Audit-Trail: Alle Feldänderungen pro Ticket mit Zeitstempel und Änderungsgruppe',
-        'Kommentar-Utterances: 30.104 einzelne Textbeiträge mit Autor-Rolle und Sequenzposition',
-        'Prozessierter ML-Datensatz: 6 Features + Q1/Q2/Q3 Targets (nur valide Samples)',
-        'O-Score pro Mitarbeiter: Qualität, Effizienz, Produktivität, Kommunikation (0–1) → O-Score (1–5)',
-        'Workflow-Analyse: Compliance-Score, Reopens, Backward-Steps pro Ticket',
-        'NLP-Features pro Issue: Sentiment (compound/pos/neg), Politeness, Urgency, Technikalität',
-        'Dialog-Akt-Klassifikation: 12 Kategorien (QUESTION, COMPLAINT, THANKS, etc.)',
-    ],
+    T['rows']:        _rows_en if lang == 'en' else _rows_de,
+    T['cols']:        ['58', '60', '19', '6', '9', '9', '~15', '6', '~15', '7'],
+    T['description']: _desc_en if lang == 'en' else _desc_de,
 }
 
 df_sources = pd.DataFrame(datasources)
