@@ -30,7 +30,6 @@ TEXTS = {
         'model_name': 'Modell', 'component': 'Komponente', 'param': 'Parameter', 'value': 'Wert',
         'note_optimized': '⚡ **optimized_scorer.joblib** — Durch Optuna-Hyperparameter-Suche optimiertes Modell (kein RandomForest, nur XGB+LGB)',
         'note_perf': '**q_score_model.joblib** — Basis-Ensemble (RF+XGB+LGB)',
-        'note_o': '**o_score_model.joblib** — Trainiert auf O-Score-Klassen 1–5 (7 aggregierte Features)',
     },
     'en': {
         'title': '📋 I/O Documentation',
@@ -40,7 +39,6 @@ TEXTS = {
         'model_name': 'Model', 'component': 'Component', 'param': 'Parameter', 'value': 'Value',
         'note_optimized': '⚡ **optimized_scorer.joblib** — Optuna-optimized model (no RandomForest, XGB+LGB only)',
         'note_perf': '**q_score_model.joblib** — Base ensemble (RF+XGB+LGB)',
-        'note_o': '**o_score_model.joblib** — Trained on O-Score classes 1–5 (7 aggregated features)',
     },
 }
 T = TEXTS.get(lang, TEXTS['de'])
@@ -170,53 +168,7 @@ st.markdown("**Trainings-Split:** 80 % Train / 20 % Test, stratifiziert nach Tar
 
 st.markdown("---")
 
-# ── 2c. o_score_model.joblib ─────────────────────────────────────────────────
-st.markdown("### 🎯 o_score_model.joblib — O-Score (Objective Rating)")
-st.info(T['note_o'])
-st.markdown("**Architektur:** VotingClassifier (soft voting) — RF + XGB + LGB, ein einziges Modell (kein Q1/Q2/Q3-Split)")
-
-o_params_rf = {
-    'n_estimators': 100, 'max_depth': 6, 'random_state': 42, 'n_jobs': -1,
-    'criterion': 'gini', 'max_features': 'sqrt', 'min_samples_split': 2,
-    'min_samples_leaf': 1, 'bootstrap': True, 'oob_score': False,
-}
-o_params_xgb = {
-    'n_estimators': 100, 'max_depth': 6, 'learning_rate': 0.1, 'random_state': 42,
-    'verbosity': 0, 'objective': 'binary:logistic', 'eval_metric': 'mlogloss',
-    'use_label_encoder': False, 'colsample_bytree': None, 'subsample': None,
-}
-o_params_lgb = {
-    'n_estimators': 100, 'max_depth': 6, 'learning_rate': 0.1, 'random_state': 42,
-    'verbose': -1, 'boosting_type': 'gbdt', 'num_leaves': 31,
-    'colsample_bytree': 1.0, 'min_child_samples': 20, 'subsample': 1.0,
-    'reg_alpha': 0.0, 'reg_lambda': 0.0,
-}
-
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.markdown("**RandomForestClassifier**")
-    rows = [[p, str(v)] for p, v in o_params_rf.items()]
-    st.dataframe(pd.DataFrame(rows, columns=[T['param'], T['value']]),
-                 use_container_width=True, hide_index=True)
-with col2:
-    st.markdown("**XGBClassifier**")
-    rows = [[p, str(v)] for p, v in o_params_xgb.items()]
-    st.dataframe(pd.DataFrame(rows, columns=[T['param'], T['value']]),
-                 use_container_width=True, hide_index=True)
-with col3:
-    st.markdown("**LGBMClassifier**")
-    rows = [[p, str(v)] for p, v in o_params_lgb.items()]
-    st.dataframe(pd.DataFrame(rows, columns=[T['param'], T['value']]),
-                 use_container_width=True, hide_index=True)
-
-st.markdown("**Scaler:** `StandardScaler(copy=True, with_mean=True, with_std=True)`")
-st.markdown("**Feature-Spalten (7):** `ticket_count, median_time_hours, avg_steps, avg_comments, reopen_rate, first_touch_rate, success_rate`")
-st.markdown("**Diskretisierung:** O-Score → Klassen 1–5 via `pd.cut(bins=[0, 1.8, 2.6, 3.4, 4.2, 5.1])`")
-st.markdown("**Trainings-Split:** 80 % Train / 20 % Test, stratifiziert · 5-Fold Stratified CV")
-
-st.markdown("---")
-
-# ── 2d. kmeans_model.joblib ──────────────────────────────────────────────────
+# ── 2c. kmeans_model.joblib ──────────────────────────────────────────────────
 st.markdown("### 🔬 kmeans_model.joblib — Clustering")
 if lang == 'de':
     st.info("**kmeans_model.joblib** — K-Means Clustering auf 302 Mitarbeitern · 17 normalisierte Features · 4 semantische Cluster")

@@ -174,10 +174,8 @@ digraph dataflow {{
     subgraph cluster_opipeline {{
         label="O-Score Pipeline";
         style=filled; color="#EBF5FB";
-        o_score    [label="{_gv_oscore}",  fillcolor="#FAD7A0"];
-        o_result   [label="{_gv_oresult}", fillcolor="#AED6F1"];
-        ml_model_o [label="ml_model_o.py\\nVotingClassifier (RF+XGB+LGB)", fillcolor="#F1948A"];
-        o_model    [label="o_score_model.joblib",   fillcolor="#85C1E9"];
+        o_score  [label="{_gv_oscore}",  fillcolor="#FAD7A0"];
+        o_result [label="{_gv_oresult}", fillcolor="#AED6F1"];
     }}
 
     subgraph cluster_clustering {{
@@ -218,8 +216,6 @@ digraph dataflow {{
 
     snapshot   -> o_score;
     o_score    -> o_result;
-    o_result   -> ml_model_o;
-    ml_model_o -> o_model;
 
     snapshot   -> uns_feat;
     history    -> uns_feat;
@@ -233,7 +229,7 @@ digraph dataflow {{
 
     q_model    -> dashboard;
     opt_model  -> dashboard;
-    o_model    -> dashboard;
+    o_result   -> dashboard;
     clu_res    -> dashboard;
     km_model   -> dashboard;
     analytics  -> dashboard;
@@ -340,7 +336,6 @@ section_header(T['sec_models'])
 _models_de = [
     ('models/q_score_model.joblib',    'VotingClassifier (RF+XGB+LGB)',  'Q-Score Klassifikation Q1/Q2/Q3 · Acc=65,8% · QWK=0,618'),
     ('models/optimized_scorer.joblib', 'VotingClassifier (XGB+LGB)',     'Optuna-optimierter Q-Score Scorer · XGB+LGB ohne RF'),
-    ('models/o_score_model.joblib',    'VotingClassifier (RF+XGB+LGB)',  'O-Score Klassifikation (Klassen 1–5) · 7 aggregierte Features'),
     ('models/kmeans_model.joblib',     'KMeans(k=4, n_init=20)',         'Clustering-Modell · Silhouette=0,5807 · Inertia=6747,69'),
     ('models/scaler.joblib',           'RobustScaler',                   'Skalierung für Clustering (Winsorisierung auf 99. Perzentil vorher)'),
     ('models/scaler_kmeans.joblib',    'RobustScaler',                   'Alternative Scaler (kmeans_*-Dateinamen-Variante)'),
@@ -349,7 +344,6 @@ _models_de = [
 _models_en = [
     ('models/q_score_model.joblib',    'VotingClassifier (RF+XGB+LGB)',  'Q-Score classification Q1/Q2/Q3 · Acc=65.8% · QWK=0.618'),
     ('models/optimized_scorer.joblib', 'VotingClassifier (XGB+LGB)',     'Optuna-optimized Q-Score scorer · XGB+LGB without RF'),
-    ('models/o_score_model.joblib',    'VotingClassifier (RF+XGB+LGB)',  'O-Score classification (classes 1–5) · 7 aggregated features'),
     ('models/kmeans_model.joblib',     'KMeans(k=4, n_init=20)',         'Clustering model · Silhouette=0.5807 · Inertia=6747.69'),
     ('models/scaler.joblib',           'RobustScaler',                   'Scaler for clustering (winsorizing at 99th percentile applied prior)'),
     ('models/scaler_kmeans.joblib',    'RobustScaler',                   'Alternative scaler (kmeans_* filename variant)'),
@@ -508,12 +502,9 @@ data/raw/issues_snapshot.csv (90.963 Zeilen)
   ├── o_score_raw → o_score (1–5, skaliert)
   └── 231 Mitarbeiter (≥3 Tickets Filter)
   ↓ data/processed/o_score_results.csv
-  ↓ ml_model_o.py
-  ├── bins=[0, 1.8, 2.6, 3.4, 4.2, 5.1]
-  ├── StandardScaler
-  ├── VotingClassifier (RF+XGB+LGB)
-  └── 5-Fold CV
-  ↓ models/o_score_model.joblib
+    ✅ Kein separater ML-Klassifikationsschritt —
+       o_score_results.csv wird direkt im
+       Dashboard visualisiert
 ```
             """)
         else:
@@ -542,12 +533,9 @@ data/raw/issues_snapshot.csv (90,963 rows)
   ├── o_score_raw → o_score (1–5, scaled)
   └── 231 employees (≥3 tickets filter)
   ↓ data/processed/o_score_results.csv
-  ↓ ml_model_o.py
-  ├── bins=[0, 1.8, 2.6, 3.4, 4.2, 5.1]
-  ├── StandardScaler
-  ├── VotingClassifier (RF+XGB+LGB)
-  └── 5-Fold CV
-  ↓ models/o_score_model.joblib
+    ✅ No separate ML classification step —
+       o_score_results.csv is used directly
+       in the dashboard
 ```
             """)
     with col2:

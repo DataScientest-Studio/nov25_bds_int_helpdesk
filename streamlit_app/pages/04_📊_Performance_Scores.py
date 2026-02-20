@@ -76,14 +76,6 @@ def load_q_score_model():
     return None, None
 
 
-@st.cache_resource
-def load_o_score_model():
-    o_path = MODELS_DIR / "o_score_model.joblib"
-    if o_path.exists():
-        return joblib.load(o_path), "o_score"
-    return None, None
-
-
 @st.cache_data
 def load_data_d6():
     o_score_path = DATA_DIR / "processed" / "o_score_results.csv"

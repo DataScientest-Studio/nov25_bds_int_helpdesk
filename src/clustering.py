@@ -8,9 +8,11 @@ DATA SCIENCE NOTE: Dieses Clustering ist leakage-frei weil:
 3. Keine Rang-Funktionen die Train/Test kontaminieren könnten
 4. Kein Train/Test-Split notwendig (Clustering = beschreibend, nicht prädiktiv)
 
-Das bisherige O-Score-Modell (ml_model_o.py) verletzt zwei Data-Science-Regeln:
+Hinweis: Ein früherer ML-Klassifikator (ml_model_o.py) wurde entfernt, da er zwei
+Data-Science-Regeln verletzt hat:
 - Tautologisches Modell: Zielwert = deterministische Funktion der Features
 - Data Leakage: Rang-basierte Features über Gesamtdatensatz vor Train/Test-Split
+Der O-Score wird nun direkt als regelbasierter Composite-Score (o_score.py) bereitgestellt.
 """
 
 import os

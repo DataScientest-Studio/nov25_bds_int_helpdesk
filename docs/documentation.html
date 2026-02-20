@@ -810,29 +810,18 @@ aside::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; 
           <text x="367" y="258" text-anchor="middle" font-size="9" fill="#c2410c">Gewichtetes Scoring</text>
           <text x="367" y="272" text-anchor="middle" font-size="9" fill="#c2410c">35/25/20/20 %</text>
 
-          <!-- Arrow 2b→2c -->
+          <!-- Arrow 2b→2c (output CSV) -->
           <line x1="447" y1="247" x2="457" y2="247" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
 
-          <!-- Box 2c: ml_model_o.py -->
-          <rect x="459" y="207" width="168" height="80" rx="6"
-                fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
-          <text x="543" y="228" text-anchor="middle" font-size="10" font-weight="700" fill="#ea580c">⚙️ ml_model_o.py</text>
-          <text x="543" y="243" text-anchor="middle" font-size="9" fill="#c2410c">o_score_results.csv</text>
-          <text x="543" y="257" text-anchor="middle" font-size="9" fill="#c2410c">VotingClassifier</text>
-          <text x="543" y="271" text-anchor="middle" font-size="9" fill="#c2410c">RF + XGB + LGB</text>
-
-          <!-- Arrow 2c→2d -->
-          <line x1="627" y1="247" x2="637" y2="247" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
-
-          <!-- Box 2d: o_score_model -->
-          <rect x="639" y="207" width="175" height="80" rx="6"
+          <!-- Box 2c: o_score_results.csv (spans cols 3+4, wider) -->
+          <rect x="459" y="207" width="355" height="80" rx="6"
                 fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
-          <text x="726" y="228" text-anchor="middle" font-size="10" font-weight="700" fill="#16a34a">🧠 o_score_model</text>
-          <text x="726" y="242" text-anchor="middle" font-size="9" fill="#15803d">.joblib</text>
-          <text x="726" y="256" text-anchor="middle" font-size="9" fill="#16a34a">231 Mitarbeiter</text>
-          <text x="726" y="270" text-anchor="middle" font-size="9" fill="#16a34a">O-Score 1–5</text>
+          <text x="636" y="228" text-anchor="middle" font-size="10" font-weight="700" fill="#16a34a">📄 o_score_results.csv</text>
+          <text x="636" y="243" text-anchor="middle" font-size="9" fill="#15803d">231 Mitarbeiter · O-Score 1–5 (rule-based)</text>
+          <text x="636" y="257" text-anchor="middle" font-size="9" fill="#16a34a">Kein separater ML-Klassifikationsschritt —</text>
+          <text x="636" y="271" text-anchor="middle" font-size="9" fill="#16a34a">direkt im Dashboard verwendbar</text>
 
-          <!-- Arrow 2d→Dashboard -->
+          <!-- Arrow 2c→Dashboard -->
           <line x1="814" y1="247" x2="870" y2="247" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr-o)"/>
 
           <!-- ══════════════════════════════════
@@ -1024,8 +1013,8 @@ aside::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; 
             <!-- Box D: Models -->
             <rect x="446" y="25" width="130" height="70" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
             <text x="511" y="49" text-anchor="middle" font-size="11" font-weight="700" fill="#16a34a">🧠 Models</text>
-            <text x="511" y="63" text-anchor="middle" font-size="9"  fill="#15803d">q_score · o_score</text>
-            <text x="511" y="77" text-anchor="middle" font-size="9"  fill="#15803d">kmeans · scaler</text>
+            <text x="511" y="63" text-anchor="middle" font-size="9"  fill="#15803d">q_score · kmeans</text>
+            <text x="511" y="77" text-anchor="middle" font-size="9"  fill="#15803d">scaler (RobustScaler)</text>
             <!-- Arrow D→E -->
             <line x1="576" y1="60" x2="596" y2="60" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr2)"/>
             <!-- Box E: Processed Data -->
@@ -1217,12 +1206,6 @@ aside::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; 
                 <td><span class="badge badge-green">XGB+LGB (Optuna)</span></td>
                 <td class="de">Optuna-optimierter Scorer mit besseren Hyperparametern</td>
                 <td class="en">Optuna-optimized scorer with tuned hyperparameters</td>
-              </tr>
-              <tr>
-                <td>o_score_model.joblib</td>
-                <td><span class="badge badge-green">VotingClassifier</span></td>
-                <td class="de">VotingClassifier für O-Score Klassifikation in 5 Bins</td>
-                <td class="en">VotingClassifier for O-Score classification into 5 bins</td>
               </tr>
               <tr>
                 <td>kmeans_model.joblib</td>
