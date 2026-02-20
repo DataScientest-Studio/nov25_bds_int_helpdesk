@@ -1691,6 +1691,63 @@ def render_settings_sidebar():
         if st.button(emoji_label, width="stretch", type=emoji_type, key='emoji_btn'):
             st.session_state.show_emojis = not st.session_state.show_emojis
             st.rerun()
+
+    # ── Slides ────────────────────────────────────────────────────────────
+    import base64
+    from pathlib import Path
+
+    slides_dir = Path(__file__).parent.parent.parent / "docs" / "Slides"
+    slide_files = sorted(
+        slides_dir.glob("*.SVG"),
+        key=lambda p: p.name.lower()
+    ) if slides_dir.exists() else []
+
+    # Also pick up lowercase .svg extension
+    slide_files += sorted(
+        [p for p in slides_dir.glob("*.svg") if p not in slide_files],
+        key=lambda p: p.name.lower()
+    ) if slides_dir.exists() else []
+
+    if slide_files:
+        st.sidebar.markdown("---")
+        st.sidebar.markdown("#### 🎞️ Slides")
+
+        # Init index in session state
+        if "slide_index" not in st.session_state:
+            st.session_state.slide_index = 0
+
+        n = len(slide_files)
+        idx = st.session_state.slide_index % n
+
+        # Prev / Counter / Next
+        c1, c2, c3 = st.sidebar.columns([1, 2, 1])
+        with c1:
+            if st.button("◀", key="slide_prev", use_container_width=True):
+                st.session_state.slide_index = (idx - 1) % n
+                st.rerun()
+        with c2:
+            st.markdown(
+                f"<div style='text-align:center;font-size:12px;padding-top:6px;"
+                f"font-weight:600;color:#475569;'>{idx + 1} / {n}</div>",
+                unsafe_allow_html=True
+            )
+        with c3:
+            if st.button("▶", key="slide_next", use_container_width=True):
+                st.session_state.slide_index = (idx + 1) % n
+                st.rerun()
+
+        # Slide name
+        st.sidebar.caption(slide_files[idx].stem)
+
+        # Display SVG inline (base64)
+        svg_bytes = slide_files[idx].read_bytes()
+        b64 = base64.b64encode(svg_bytes).decode()
+        st.sidebar.markdown(
+            f'<img src="data:image/svg+xml;base64,{b64}" '
+            f'style="width:100%;border-radius:6px;border:1px solid #e1e5ec;'
+            f'background:white;margin-top:4px;" />',
+            unsafe_allow_html=True
+        )
     
 
 
