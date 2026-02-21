@@ -103,25 +103,22 @@ with nav_right:
 st.markdown("---")
 
 # ── Slide anzeigen ────────────────────────────────────────────────────────────
-svg_bytes = slides[idx].read_bytes()
+def fix_svg_fonts(svg_bytes: bytes) -> str:
+    """Safari-Fix: Calibri durch Cross-Platform Font ersetzen + responsiv."""
+    import re
+    text = svg_bytes.decode('utf-8', errors='replace')
+    text = (text
+        .replace('Calibri,Calibri_MSFontService,sans-serif', 'Arial,Helvetica,sans-serif')
+        .replace('Calibri,Calibri_MSFontService', 'Arial,Helvetica')
+        .replace('"Calibri"', 'Arial')
+        .replace("'Calibri'", 'Arial'))
+    # Responsiv: width/height durch 100%/auto ersetzen damit SVG den Container füllt
+    text = re.sub(r'(<svg[^>]*)\bwidth="[^"]*"', r'\1width="100%"', text, count=1)
+    text = re.sub(r'(<svg[^>]*)\bheight="[^"]*"', r'\1height="auto"', text, count=1)
+    return text
 
-# Safari-Fix: Calibri (Microsoft-only) durch systemübergreifenden Font ersetzen
-svg_text = svg_bytes.decode('utf-8', errors='replace')
-svg_text = svg_text.replace(
-    'Calibri,Calibri_MSFontService,sans-serif',
-    '-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,Helvetica,sans-serif'
-).replace(
-    'Calibri,Calibri_MSFontService',
-    '-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,Helvetica'
-).replace(
-    '"Calibri"',
-    'Arial'
-).replace(
-    "'Calibri'",
-    'Arial'
-)
-b64 = base64.b64encode(svg_text.encode('utf-8')).decode()
-
+svg_clean = fix_svg_fonts(slides[idx].read_bytes())
+# Inline SVG einbetten (kein base64, kein img-Tag → funktioniert zuverlässig in allen Browsern)
 st.markdown(
     f"""<div style="
             background:transparent;
@@ -130,9 +127,11 @@ st.markdown(
             padding:16px;
             box-shadow:0 2px 8px rgba(0,0,0,0.15);
             text-align:center;
+            overflow:hidden;
         ">
-        <img src="data:image/svg+xml;base64,{b64}"
-             style="max-width:100%;height:auto;border-radius:6px;" />
+        <div style="width:100%;max-width:100%;">
+        {svg_clean}
+        </div>
     </div>""",
     unsafe_allow_html=True
 )
@@ -143,12 +142,9 @@ with st.expander("🗂️ Alle Slides" if lang == 'de' else "🗂️ All Slides"
     cols = st.columns(min(n, 4))
     for i, slide in enumerate(slides):
         with cols[i % 4]:
-            raw = slide.read_bytes().decode('utf-8', errors='replace')
-            raw = raw.replace(
-                'Calibri,Calibri_MSFontService,sans-serif',
-                '-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,Helvetica,sans-serif'
-            ).replace('Calibri,Calibri_MSFontService', '-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,Helvetica')
-            b64_thumb = base64.b64encode(raw.encode('utf-8')).decode()
+            b64_thumb = base64.b64encode(
+                fix_svg_fonts(slide.read_bytes()).encode('utf-8')
+            ).decode()
             border = "2px solid #2563eb" if i == idx else "1px solid rgba(255,255,255,0.15)"
             bg = "rgba(37,99,235,0.15)" if i == idx else "transparent"
             st.markdown(
