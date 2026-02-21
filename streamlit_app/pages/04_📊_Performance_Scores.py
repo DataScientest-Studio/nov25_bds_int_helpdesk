@@ -788,6 +788,113 @@ with tab_d4:
             else:
                 st.info(get_text('confusion_matrix') + " " + get_text('not_available'))
 
+        # ── ML-Model Select ───────────────────────────────────────────────────
+        st.markdown("---")
+        section_header(e("🤖 ") + t("ML-Modell Auswahl", "ML-Model Select"))
+
+        st.markdown(t(
+            """
+Das Q-Score-Modell ist ein **Soft-Voting-Ensemble** aus drei komplementären Klassifikatoren,
+die jeweils unabhängig für die Targets **Q1**, **Q2** und **Q3** trainiert wurden.
+Die Vorhersage ergibt sich aus dem gemittelten Klassenwahrscheinlichkeits-Vektor aller drei Modelle.
+""",
+            """
+The Q-Score model is a **Soft-Voting Ensemble** of three complementary classifiers,
+each trained independently for targets **Q1**, **Q2**, and **Q3**.
+The final prediction is derived from the averaged class probability vector of all three models.
+"""
+        ))
+
+        col_rf, col_xgb, col_lgb = st.columns(3)
+
+        with col_rf:
+            st.markdown("### 🌲 Random Forest")
+            st.markdown(t("**Hyperparameter:**", "**Hyperparameters:**"))
+            st.code("""n_estimators : 100
+max_depth    : 6
+max_features : sqrt
+min_samples_leaf : 1
+random_state : 42""", language="yaml")
+            st.markdown(t(
+                """
+**Begründung:**
+Random Forest baut viele unkorrelierte Entscheidungsbäume und mittelt deren Ausgaben.
+Er ist robust gegenüber Overfitting, benötigt wenig Tuning und liefert stabile
+Feature-Importances — ideal als Anker im Ensemble.
+`max_depth=6` begrenzt die Komplexität; `sqrt`-Features erhöhen die Diversität der Bäume.
+""",
+                """
+**Rationale:**
+Random Forest builds many uncorrelated decision trees and averages their outputs.
+It is robust against overfitting, requires little tuning, and provides stable
+feature importances — ideal as an anchor in the ensemble.
+`max_depth=6` limits complexity; `sqrt` features increase tree diversity.
+"""
+            ))
+
+        with col_xgb:
+            st.markdown("### ⚡ XGBoost")
+            st.markdown(t("**Hyperparameter:**", "**Hyperparameters:**"))
+            st.code("""n_estimators  : 100
+max_depth     : 6
+learning_rate : 0.1
+random_state  : 42""", language="yaml")
+            st.markdown(t(
+                """
+**Begründung:**
+XGBoost ist ein Gradient-Boosting-Verfahren das sequenziell auf Fehler des Vorgängers
+optimiert. Es liefert oft die höchste Einzelmodell-Accuracy und ist besonders stark
+bei tabellarischen Daten mit gemischten Feature-Typen.
+`learning_rate=0.1` + `n_estimators=100` ist ein bewährtes, stabiles Verhältnis.
+""",
+                """
+**Rationale:**
+XGBoost is a gradient boosting method that sequentially optimizes on the errors
+of the previous model. It typically delivers the highest single-model accuracy and
+excels with tabular data containing mixed feature types.
+`learning_rate=0.1` + `n_estimators=100` is a proven, stable configuration.
+"""
+            ))
+
+        with col_lgb:
+            st.markdown("### 💡 LightGBM")
+            st.markdown(t("**Hyperparameter:**", "**Hyperparameters:**"))
+            st.code("""n_estimators   : 100
+max_depth      : 6
+learning_rate  : 0.1
+num_leaves     : 31
+subsample      : 1.0
+colsample_bytree: 1.0
+random_state   : 42""", language="yaml")
+            st.markdown(t(
+                """
+**Begründung:**
+LightGBM ist eine schnelle, speichereffiziente Boosting-Implementierung mit
+blattbasiertem Wachstum (leaf-wise) statt tiefenbasiertem (level-wise wie XGBoost).
+Es ergänzt XGBoost durch einen anderen Optimierungspfad und verbessert so die
+Ensemble-Diversität. `num_leaves=31` ist der LightGBM-Standardwert für ausgewogene Komplexität.
+""",
+                """
+**Rationale:**
+LightGBM is a fast, memory-efficient boosting implementation using leaf-wise
+growth instead of level-wise growth (as in XGBoost). It complements XGBoost
+through a different optimization path, improving ensemble diversity.
+`num_leaves=31` is the LightGBM default for balanced complexity.
+"""
+            ))
+
+        st.markdown("---")
+        st.info(t(
+            "💡 **Warum ein Ensemble?** Kein einzelnes Modell ist in allen Situationen optimal. "
+            "Durch Kombination der Stärken von Random Forest (Stabilität), XGBoost (Accuracy) "
+            "und LightGBM (Geschwindigkeit & Diversität) wird die Gesamtvorhersage robuster — "
+            "insbesondere bei unsicheren Grenzfällen (Score 2 vs. 3 oder 3 vs. 4).",
+            "💡 **Why an Ensemble?** No single model is optimal in all situations. "
+            "By combining the strengths of Random Forest (stability), XGBoost (accuracy) "
+            "and LightGBM (speed & diversity), the overall prediction becomes more robust — "
+            "especially at uncertain boundaries (Score 2 vs. 3 or 3 vs. 4)."
+        ))
+
 
 # ════════════════════════════════════════════════════════════════════════════
 # Tab 5: Overall Performance
