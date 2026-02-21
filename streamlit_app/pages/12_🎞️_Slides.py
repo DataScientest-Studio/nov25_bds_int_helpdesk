@@ -108,11 +108,11 @@ b64 = base64.b64encode(svg_bytes).decode()
 
 st.markdown(
     f"""<div style="
-            background:white;
-            border:1px solid #e1e5ec;
+            background:transparent;
+            border:1px solid rgba(255,255,255,0.15);
             border-radius:10px;
             padding:16px;
-            box-shadow:0 2px 8px rgba(0,0,0,0.06);
+            box-shadow:0 2px 8px rgba(0,0,0,0.15);
             text-align:center;
         ">
         <img src="data:image/svg+xml;base64,{b64}"
@@ -128,14 +128,14 @@ with st.expander("🗂️ Alle Slides" if lang == 'de' else "🗂️ All Slides"
     for i, slide in enumerate(slides):
         with cols[i % 4]:
             b64_thumb = base64.b64encode(slide.read_bytes()).decode()
-            border = "2px solid #2563eb" if i == idx else "1px solid #e1e5ec"
-            bg = "#dbeafe" if i == idx else "white"
+            border = "2px solid #2563eb" if i == idx else "1px solid rgba(255,255,255,0.15)"
+            bg = "rgba(37,99,235,0.15)" if i == idx else "transparent"
             st.markdown(
                 f"""<div style="background:{bg};border:{border};border-radius:8px;
                          padding:8px;margin-bottom:8px;cursor:pointer;text-align:center;">
                     <img src="data:image/svg+xml;base64,{b64_thumb}"
                          style="width:100%;height:auto;border-radius:4px;" />
-                    <div style="font-size:11px;font-weight:600;color:#475569;
+                    <div style="font-size:11px;font-weight:600;color:inherit;
                                 margin-top:6px;">{slide.stem}</div>
                 </div>""",
                 unsafe_allow_html=True
