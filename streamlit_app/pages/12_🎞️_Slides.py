@@ -104,7 +104,23 @@ st.markdown("---")
 
 # ── Slide anzeigen ────────────────────────────────────────────────────────────
 svg_bytes = slides[idx].read_bytes()
-b64 = base64.b64encode(svg_bytes).decode()
+
+# Safari-Fix: Calibri (Microsoft-only) durch systemübergreifenden Font ersetzen
+svg_text = svg_bytes.decode('utf-8', errors='replace')
+svg_text = svg_text.replace(
+    'Calibri,Calibri_MSFontService,sans-serif',
+    '-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,Helvetica,sans-serif'
+).replace(
+    'Calibri,Calibri_MSFontService',
+    '-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,Helvetica'
+).replace(
+    '"Calibri"',
+    'Arial'
+).replace(
+    "'Calibri'",
+    'Arial'
+)
+b64 = base64.b64encode(svg_text.encode('utf-8')).decode()
 
 st.markdown(
     f"""<div style="
@@ -127,7 +143,12 @@ with st.expander("🗂️ Alle Slides" if lang == 'de' else "🗂️ All Slides"
     cols = st.columns(min(n, 4))
     for i, slide in enumerate(slides):
         with cols[i % 4]:
-            b64_thumb = base64.b64encode(slide.read_bytes()).decode()
+            raw = slide.read_bytes().decode('utf-8', errors='replace')
+            raw = raw.replace(
+                'Calibri,Calibri_MSFontService,sans-serif',
+                '-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,Helvetica,sans-serif'
+            ).replace('Calibri,Calibri_MSFontService', '-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,Helvetica')
+            b64_thumb = base64.b64encode(raw.encode('utf-8')).decode()
             border = "2px solid #2563eb" if i == idx else "1px solid rgba(255,255,255,0.15)"
             bg = "rgba(37,99,235,0.15)" if i == idx else "transparent"
             st.markdown(
