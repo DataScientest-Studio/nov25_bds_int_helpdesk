@@ -956,6 +956,7 @@ with tab_overall:
             sel_avail = st.selectbox(
                 t("Verfügbarkeit filtern:", "Filter by availability:"),
                 options=avail_opts,
+                index=1,
                 key='op_avail_filter'
             )
         with col_f3:
