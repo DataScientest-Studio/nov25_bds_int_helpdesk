@@ -10,7 +10,7 @@ import joblib
 from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import (
-    accuracy_score, cohen_kappa_score, mean_absolute_error, 
+    accuracy_score, cohen_kappa_score, mean_absolute_error,
     confusion_matrix, f1_score
 )
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
@@ -22,24 +22,24 @@ def quadratic_weighted_kappa(y_true, y_pred, num_classes=5):
     Penalizes larger deviations more than smaller ones.
     """
     cm = confusion_matrix(y_true, y_pred, labels=list(range(num_classes)))
-    
+
     weights = np.zeros((num_classes, num_classes))
     for i in range(num_classes):
         for j in range(num_classes):
             weights[i, j] = ((i - j) ** 2) / ((num_classes - 1) ** 2)
-    
+
     hist_true = np.bincount(y_true, minlength=num_classes)
     hist_pred = np.bincount(y_pred, minlength=num_classes)
-    
+
     n = len(y_true)
     expected = np.outer(hist_true, hist_pred).astype(float) / n
-    
+
     num = np.sum(weights * cm)
     den = np.sum(weights * expected)
-    
+
     if den == 0:
         return 1.0
-    
+
     return 1.0 - (num / den)
 
 # Optional: XGBoost and LightGBM
@@ -59,14 +59,14 @@ except ImportError:
 def create_model():
     """
     Create ML ensemble.
-    
+
     Consists of:
     - XGBoost (if available)
     - LightGBM (if available)
     - RandomForest (always available)
     """
     estimators = []
-    
+
     # RandomForest (base)
     rf = RandomForestClassifier(
         n_estimators=100,
@@ -75,7 +75,7 @@ def create_model():
         n_jobs=-1
     )
     estimators.append(('rf', rf))
-    
+
     # XGBoost
     if XGBOOST_AVAILABLE:
         xgb_model = xgb.XGBClassifier(
@@ -86,7 +86,7 @@ def create_model():
             verbosity=0
         )
         estimators.append(('xgb', xgb_model))
-    
+
     # LightGBM
     if LIGHTGBM_AVAILABLE:
         lgb_model = lgb.LGBMClassifier(
@@ -97,45 +97,45 @@ def create_model():
             verbose=-1
         )
         estimators.append(('lgb', lgb_model))
-    
+
     # Voting Ensemble
     ensemble = VotingClassifier(
         estimators=estimators,
         voting='soft'
     )
-    
+
     return ensemble
 
 
 def train_model(X, y, test_size=0.2):
     """
     Train the model.
-    
+
     Args:
         X: Features DataFrame
         y: Target DataFrame (Q1, Q2, Q3)
         test_size: Test data proportion
-        
+
     Returns:
         dict: Trained models and metrics
     """
     print("\n MODEL TRAINING")
     print("="*50)
-    
+
     targets = ['Q1', 'Q2', 'Q3']
     models = {}
     metrics = {}
     feature_importance = {}
-    
+
     # Scaler
     scaler = StandardScaler()
-    
+
     for target in targets:
-        print(f"\n📊 Training for {target}...")
-        
+        print(f"\n Training for {target}...")
+
         # Prepare target (Scores 1-5 -> 0-4)
         y_target = y[target].values - 1
-        
+
         # Train-Test Split
         X_train, X_test, y_train, y_test = train_test_split(
             X.values, y_target,
@@ -143,36 +143,36 @@ def train_model(X, y, test_size=0.2):
             random_state=42,
             stratify=y_target
         )
-        
+
         # Scaling
         X_train_scaled = scaler.fit_transform(X_train)
         X_test_scaled = scaler.transform(X_test)
-        
+
         print(f"   Train: {len(X_train)}, Test: {len(X_test)}")
-        
+
         # Create and train model
         model = create_model()
         model.fit(X_train_scaled, y_train)
-        
+
         # Prediction
         y_pred = model.predict(X_test_scaled)
-        
+
         # Base metrics
         accuracy = accuracy_score(y_test, y_pred)
         mae = mean_absolute_error(y_test, y_pred)
-        
+
         # F1-Scores
         f1_macro = f1_score(y_test, y_pred, average='macro', zero_division=0)
         f1_weighted = f1_score(y_test, y_pred, average='weighted', zero_division=0)
-        
+
         # Kappa metrics
         kappa = cohen_kappa_score(y_test, y_pred)
         qwk = quadratic_weighted_kappa(np.array(y_test), np.array(y_pred))
-        
+
         # Cross-Validation
         cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
         cv_scores = cross_val_score(model, scaler.fit_transform(X.values), y_target, cv=cv, scoring='accuracy')
-        
+
         metrics[target] = {
             'accuracy': round(accuracy, 3),
             'mae': round(mae, 3),
@@ -184,7 +184,7 @@ def train_model(X, y, test_size=0.2):
             'cv_std': round(cv_scores.std(), 3),
             'confusion_matrix': confusion_matrix(y_test, y_pred).tolist()
         }
-        
+
         print(f"   Accuracy: {accuracy:.3f}")
         print(f"   MAE: {mae:.3f}")
         print(f"   Macro-F1: {f1_macro:.3f}")
@@ -192,9 +192,9 @@ def train_model(X, y, test_size=0.2):
         print(f"   Kappa: {kappa:.3f}")
         print(f"   QWK: {qwk:.3f}")
         print(f"   CV: {cv_scores.mean():.3f} ± {cv_scores.std():.3f}")
-        
+
         models[target] = model
-        
+
         # Feature Importance (from RandomForest)
         if hasattr(model.named_estimators_['rf'], 'feature_importances_'):
             importance_df = pd.DataFrame({
@@ -202,7 +202,7 @@ def train_model(X, y, test_size=0.2):
                 'importance': model.named_estimators_['rf'].feature_importances_
             }).sort_values('importance', ascending=False)
             feature_importance[target] = importance_df
-    
+
     return {
         'models': models,
         'scaler': scaler,
@@ -215,7 +215,7 @@ def save_model(model_data, output_path="models/q_score_model.joblib"):
     """Save the trained model."""
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     joblib.dump(model_data, output_path)
     print(f"\n Model saved: {output_path}")
 
@@ -233,17 +233,17 @@ def print_summary(metrics):
     print("\n" + "="*50)
     print(" MODEL SUMMARY")
     print("="*50)
-    
+
     for target, m in metrics.items():
         print(f"\n{target}:")
         print(f"   Accuracy: {m['accuracy']}")
         print(f"   Kappa: {m['kappa']}")
         print(f"   CV: {m['cv_mean']} ± {m['cv_std']}")
-    
+
     # Average
     avg_acc = np.mean([m['accuracy'] for m in metrics.values()])
     avg_kappa = np.mean([m['kappa'] for m in metrics.values()])
-    
+
     print(f"\n TOTAL:")
     print(f"   Avg Accuracy: {avg_acc:.3f}")
     print(f"   Avg Kappa: {avg_kappa:.3f}")
@@ -253,32 +253,32 @@ if __name__ == "__main__":
     print("="*50)
     print(" ML MODEL TRAINING")
     print("="*50)
-    
+
     # Load ML dataset
     data_path = Path("data/processed/ml_dataset.csv")
-    
+
     if data_path.exists():
         df = pd.read_csv(data_path)
         print(f" Loaded: {len(df)} samples")
-        
+
         # Separate features and targets
         target_cols = ['Q1', 'Q2', 'Q3']
         feature_cols = [col for col in df.columns if col not in target_cols]
-        
+
         X = df[feature_cols]
         y = df[target_cols]
-        
+
         print(f"   Features: {len(feature_cols)}")
-        
+
         # Training
         model_data = train_model(X, y)
-        
+
         # Summary
         print_summary(model_data['metrics'])
-        
+
         # Save
         save_model(model_data)
-        
+
         # Show top features
         print("\n Top 5 Features (Q1):")
         if 'Q1' in model_data['feature_importance']:

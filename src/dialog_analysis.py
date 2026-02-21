@@ -74,19 +74,19 @@ PATTERNS = {
 def classify_text(text):
     """
     Classify a text as Dialog Act.
-    
+
     Args:
         text: Text to classify
-        
+
     Returns:
         dict: Dialog Act and confidence
     """
     if not text or not isinstance(text, str) or len(text.strip()) < 3:
         return {'act': 'OTHER', 'name': 'Other', 'confidence': 0.0}
-    
+
     text = text.strip()
     matches = {}
-    
+
     # Check all patterns
     for act, patterns in PATTERNS.items():
         match_count = 0
@@ -95,15 +95,15 @@ def classify_text(text):
                 match_count += 1
         if match_count > 0:
             matches[act] = match_count
-    
+
     # No matches -> OTHER
     if not matches:
         return {'act': 'OTHER', 'name': 'Other', 'confidence': 0.3}
-    
+
     # Best match
     best_act = max(matches, key=matches.get)
     confidence = min(matches[best_act] / len(PATTERNS[best_act]), 1.0)
-    
+
     return {
         'act': best_act,
         'name': DIALOG_ACTS[best_act],
@@ -114,27 +114,27 @@ def classify_text(text):
 def process_comments(utterances_df):
     """
     Classify all comments.
-    
+
     Args:
         utterances_df: DataFrame with comments
-        
+
     Returns:
         DataFrame with Dialog Act classification
     """
-    print("💬 Classifying comments...")
-    
+    print(" Classifying comments...")
+
     # Find text column
     text_col = 'actionbody' if 'actionbody' in utterances_df.columns else 'body'
-    
+
     results = []
     total = len(utterances_df)
-    
+
     for idx, row in utterances_df.iterrows():
         text = row.get(text_col, "")
-        
+
         # Classify
         result = classify_text(str(text) if pd.notna(text) else "")
-        
+
         results.append({
             'issueid': row.get('issueid', idx),
             'author': row.get('author', 'unknown'),
@@ -144,49 +144,49 @@ def process_comments(utterances_df):
             'confidence': result['confidence'],
             'text_preview': str(text)[:100] if pd.notna(text) else ""
         })
-        
+
         if (idx + 1) % 5000 == 0:
             print(f"   {idx+1:,}/{total:,} classified...")
-    
-    print(f"✅ {len(results):,} comments classified")
+
+    print(f" {len(results):,} comments classified")
     return pd.DataFrame(results)
 
 
 def get_distribution(dialog_df):
     """Calculate the distribution of Dialog Acts."""
     distribution = dialog_df['dialog_act'].value_counts()
-    
-    print("\n📊 Dialog Act Distribution:")
+
+    print("\n Dialog Act Distribution:")
     for act, count in distribution.items():
         pct = count / len(dialog_df) * 100
         name = DIALOG_ACTS.get(act, act)
         print(f"   {name:<15} {count:>6} ({pct:>5.1f}%)")
-    
+
     return distribution
 
 
 if __name__ == "__main__":
     print("="*50)
-    print("💬 DIALOG ANALYSIS")
+    print(" DIALOG ANALYSIS")
     print("="*50)
-    
+
     # Load utterances
     data_path = Path("data/raw/sample_utterances.csv")
-    
+
     if data_path.exists():
         utterances = pd.read_csv(data_path)
-        print(f"📁 Loaded: {len(utterances):,} comments")
-        
+        print(f" Loaded: {len(utterances):,} comments")
+
         # Classify
         dialog_df = process_comments(utterances)
-        
+
         # Show distribution
         get_distribution(dialog_df)
-        
+
         # Save
         output_path = Path("data/processed/dialog_acts.csv")
         output_path.parent.mkdir(parents=True, exist_ok=True)
         dialog_df.to_csv(output_path, index=False)
-        print(f"\n💾 Saved: {output_path}")
+        print(f"\n Saved: {output_path}")
     else:
-        print("❌ Utterances file not found!")
+        print(" Utterances file not found!")

@@ -24,7 +24,7 @@ print("=" * 60)
 print("Clustering Pipeline")
 print("=" * 60)
 
-# ─── Load Features ────────────────────────────────────────
+#  Load Features
 print("\n[1/7] Loading features...")
 features_df = pd.read_csv(PROCESSED_DIR / "employee_features.csv")
 print(f"  Loaded: {features_df.shape[0]} employees, {features_df.shape[1]-1} features")
@@ -38,7 +38,7 @@ feature_cols = [
     'pct_sole_resolver', 'avg_first_response_days', 'avg_processing_steps'
 ]
 
-# ─── Winsorize outliers ────────────────────────────────────
+#  Winsorize outliers
 print("[1/7] Winsorizing extreme outliers (clip at 99th percentile)...")
 features_clean = features_df.copy()
 for col in feature_cols:
@@ -52,21 +52,21 @@ X = features_clean[feature_cols].values
 X_orig = features_df[feature_cols].values  # Keep original for profiles
 assignees = features_df['issue_assignee'].values
 
-# ─── Scale Features ────────────────────────────────────────
+#  Scale Features
 print("\n[2/7] Scaling features with RobustScaler...")
 scaler = RobustScaler()
 X_scaled = scaler.fit_transform(X)
 joblib.dump(scaler, MODELS_DIR / "scaler.joblib")
 print(f"  Scaler saved to models/scaler.joblib")
 
-# ─── PCA for Visualization ────────────────────────────────
+#  PCA for Visualization
 print("[3/7] Running PCA (2 components)...")
 pca = PCA(n_components=2, random_state=42)
 X_pca = pca.fit_transform(X_scaled)
 print(f"  Explained variance: PC1={pca.explained_variance_ratio_[0]:.3f}, PC2={pca.explained_variance_ratio_[1]:.3f}")
 print(f"  Total variance explained: {pca.explained_variance_ratio_.sum():.3f}")
 
-# ─── Find Optimal K (Elbow + Silhouette) ─────────────────
+#  Find Optimal K (Elbow + Silhouette)
 print("\n[4/7] Finding optimal cluster count (k=2..8)...")
 k_range = range(2, 9)
 inertias = []
@@ -79,11 +79,11 @@ for k in k_range:
     inertias.append(km.inertia_)
     sil = silhouette_score(X_scaled, labels)
     silhouette_scores.append(sil)
-    
+
     # Check minimum cluster size
     min_size = pd.Series(labels).value_counts().min()
     min_ratio = min_size / len(labels)
-    flag = " ⚠️ tiny cluster" if min_ratio < MIN_CLUSTER_SIZE_RATIO else ""
+    flag = "  tiny cluster" if min_ratio < MIN_CLUSTER_SIZE_RATIO else ""
     print(f"  k={k}: inertia={km.inertia_:.1f}, silhouette={sil:.4f}, min_cluster={min_size} ({min_ratio:.1%}){flag}")
 
 # Save elbow/silhouette data
@@ -102,20 +102,20 @@ for i, k in enumerate(k_range):
     labels_test = km_test.fit_predict(X_scaled)
     min_size = pd.Series(labels_test).value_counts().min()
     min_ratio = min_size / len(labels_test)
-    
+
     if min_ratio >= MIN_CLUSTER_SIZE_RATIO and silhouette_scores[i] > best_sil:
         best_sil = silhouette_scores[i]
         best_k = k
 
 # Fallback: if no k meets the constraint, use k=4
 if best_k is None:
-    print(f"\n  ⚠️ No k met the min cluster size constraint. Forcing k=4.")
+    print(f"\n   No k met the min cluster size constraint. Forcing k=4.")
     best_k = 4
     best_sil = silhouette_scores[list(k_range).index(4)]
 
 print(f"\n  Best k={best_k} (silhouette={best_sil:.4f}) [min cluster size >= {MIN_CLUSTER_SIZE_RATIO:.0%}]")
 
-# ─── K-Means with Optimal K ────────────────────────────────
+#  K-Means with Optimal K
 print(f"\n[5/7] Running K-Means with k={best_k}...")
 kmeans = KMeans(n_clusters=best_k, random_state=42, n_init=20)
 kmeans_labels = kmeans.fit_predict(X_scaled)
@@ -123,7 +123,7 @@ joblib.dump(kmeans, MODELS_DIR / "kmeans_model.joblib")
 cluster_dist = pd.Series(kmeans_labels).value_counts().sort_index().to_dict()
 print(f"  K-Means saved. Cluster sizes: {cluster_dist}")
 
-# ─── DBSCAN ────────────────────────────────────────────────
+#  DBSCAN
 print("[5/7] Running DBSCAN...")
 dbscan = DBSCAN(eps=1.5, min_samples=5)
 dbscan_labels = dbscan.fit_predict(X_scaled)
@@ -131,14 +131,14 @@ n_dbscan_clusters = len(set(dbscan_labels)) - (1 if -1 in dbscan_labels else 0)
 n_noise = (dbscan_labels == -1).sum()
 print(f"  DBSCAN: {n_dbscan_clusters} clusters, {n_noise} noise points")
 
-# ─── Agglomerative Clustering ──────────────────────────────
+#  Agglomerative Clustering
 print("[5/7] Running Agglomerative Clustering...")
 agg = AgglomerativeClustering(n_clusters=best_k)
 agg_labels = agg.fit_predict(X_scaled)
 agg_dist = pd.Series(agg_labels).value_counts().sort_index().to_dict()
 print(f"  Agglomerative cluster sizes: {agg_dist}")
 
-# ─── Assign Cluster Labels ────────────────────────────────
+#  Assign Cluster Labels
 print(f"\n[6/7] Assigning semantic cluster labels...")
 
 # Build result dataframe using ORIGINAL (non-winsorized) features for profiles
@@ -185,57 +185,57 @@ for i, c in enumerate(ranked):
     size = cluster_sizes[c]
     size_ratio = size / total_employees
     sp = profile_df.loc[c]
-    
+
     if i == 0:
-        label_map[c] = "High Performer 🟢"
+        label_map[c] = "High Performer "
     elif i == n - 1:
         # Check: if very long resolution time → Low Performer, else Specialist
         if sp['median_resolution_days'] > profile_df['median_resolution_days'].median() * 5:
-            label_map[c] = "Low Performer 🔴"
+            label_map[c] = "Low Performer "
         else:
-            label_map[c] = "Low Performer 🔴"
+            label_map[c] = "Low Performer "
     elif sp['resolution_rate'] < 0.40:
         # Very low resolution rate → unusual work pattern → Specialist
-        label_map[c] = "Specialist ⚫"
+        label_map[c] = "Specialist "
     elif size_ratio < 0.10 and n >= 4:
         # Small cluster with unusual characteristics
         overall = profile_df.mean()
         if (sp['n_distinct_projects'] > overall['n_distinct_projects'] * 1.3 or
             sp['tickets_per_month'] > overall['tickets_per_month'] * 2 or
             sp['tickets_per_month'] < overall['tickets_per_month'] * 0.3):
-            label_map[c] = "Specialist ⚫"
+            label_map[c] = "Specialist "
         else:
-            label_map[c] = "Solid Performer 🟡"
+            label_map[c] = "Solid Performer "
     else:
-        label_map[c] = "Solid Performer 🟡"
+        label_map[c] = "Solid Performer "
 
 print(f"\n  Cluster Label Map: {label_map}")
 result_df['cluster_label'] = result_df['cluster'].map(label_map)
 
-# ─── Cluster Profiles with Labels ─────────────────────────
+#  Cluster Profiles with Labels
 profile_labeled = result_df.groupby(['cluster', 'cluster_label'])[feature_cols].mean().round(4)
 profile_labeled = profile_labeled.reset_index()
 print(f"\n  Final cluster profiles:")
 print(profile_labeled[['cluster', 'cluster_label', 'median_resolution_days', 'resolution_rate',
                          'total_tickets', 'pct_fast_resolved', 'pct_reopened']].to_string(index=False))
 
-# ─── Save Results ─────────────────────────────────────────
+#  Save Results
 print(f"\n[7/7] Saving results...")
 
 result_df.to_csv(PROCESSED_DIR / "cluster_results.csv", index=False)
-print(f"  ✅ cluster_results.csv: {result_df.shape}")
+print(f"   cluster_results.csv: {result_df.shape}")
 
 profile_labeled.to_csv(PROCESSED_DIR / "cluster_profiles.csv", index=False)
-print(f"  ✅ cluster_profiles.csv: {profile_labeled.shape}")
+print(f"   cluster_profiles.csv: {profile_labeled.shape}")
 
 pca_df = pd.DataFrame(X_pca, columns=['PC1', 'PC2'])
 pca_df['issue_assignee'] = assignees
 pca_df['cluster'] = kmeans_labels
 pca_df['cluster_label'] = [label_map[c] for c in kmeans_labels]
 pca_df.to_csv(PROCESSED_DIR / "pca_results.csv", index=False)
-print(f"  ✅ pca_results.csv: {pca_df.shape}")
+print(f"   pca_results.csv: {pca_df.shape}")
 
-# ─── Feature Importance ────────────────────────────────────
+#  Feature Importance
 loadings_df = pd.DataFrame({
     'feature': feature_cols,
     'PC1_loading': np.abs(pca.components_[0]),
@@ -250,7 +250,7 @@ for _, row in loadings_df.head(5).iterrows():
     print(f"    {row['feature']}: {row['importance']:.4f}")
 
 print(f"\n{'='*60}")
-print(f"✅ Clustering complete!")
+print(f" Clustering complete!")
 print(f"   Employees analyzed: {len(result_df)}")
 print(f"   Clusters found: {best_k}")
 print(f"   Best silhouette score: {best_sil:.4f}")

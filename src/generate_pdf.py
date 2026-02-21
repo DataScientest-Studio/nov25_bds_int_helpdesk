@@ -11,40 +11,40 @@ import base64
 def embed_images_in_html(html_content, plots_dir):
     """Replaces image references with base64-embedded images."""
     plots_path = Path(plots_dir)
-    
+
     # Find all image references
     import re
     img_pattern = r'<img[^>]*src="([^"]*)"[^>]*>'
-    
+
     def replace_img(match):
         src = match.group(1)
         img_path = plots_path / Path(src).name
-        
+
         if img_path.exists():
             with open(img_path, 'rb') as f:
                 img_data = base64.b64encode(f.read()).decode()
             return f'<img src="data:image/png;base64,{img_data}" style="max-width:100%; height:auto;">'
         return match.group(0)
-    
+
     return re.sub(img_pattern, replace_img, html_content)
 
 
 def md_to_pdf(md_path, pdf_path, plots_dir):
     """Converts Markdown to PDF."""
     print(f"  Reading: {md_path}")
-    
+
     with open(md_path, 'r', encoding='utf-8') as f:
         md_content = f.read()
-    
+
     # Replace plot paths
     md_content = md_content.replace('](plots/', f']({plots_dir}/')
-    
+
     # Markdown to HTML
     html_content = markdown.markdown(
         md_content,
         extensions=['tables', 'fenced_code', 'toc']
     )
-    
+
     # CSS for PDF (NO italic font!)
     css = """
     <style>
@@ -145,7 +145,7 @@ def md_to_pdf(md_path, pdf_path, plots_dir):
         }
     </style>
     """
-    
+
     # Complete HTML document
     full_html = f"""
     <!DOCTYPE html>
@@ -159,16 +159,16 @@ def md_to_pdf(md_path, pdf_path, plots_dir):
     </body>
     </html>
     """
-    
+
     # Embed images
     full_html = embed_images_in_html(full_html, plots_dir)
-    
+
     # Save HTML (for debugging)
     html_path = pdf_path.replace('.pdf', '.html')
     with open(html_path, 'w', encoding='utf-8') as f:
         f.write(full_html)
     print(f"  HTML: {html_path}")
-    
+
     # Generate PDF with weasyprint
     try:
         from weasyprint import HTML
@@ -184,10 +184,10 @@ def main():
     print("="*60)
     print("PDF GENERATOR")
     print("="*60)
-    
+
     base_dir = Path(".")
     plots_dir = base_dir / "reports" / "plots"
-    
+
     # German version
     print("\n1. German documentation...")
     md_to_pdf(
@@ -195,7 +195,7 @@ def main():
         str(base_dir / "reports" / "Projektdokumentation_DE.pdf"),
         str(plots_dir)
     )
-    
+
     # English version
     print("\n2. English documentation...")
     md_to_pdf(
@@ -203,7 +203,7 @@ def main():
         str(base_dir / "reports" / "Project_Documentation_EN.pdf"),
         str(plots_dir)
     )
-    
+
     print("\n" + "="*60)
     print("DONE!")
     print("="*60)

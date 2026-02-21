@@ -17,7 +17,7 @@ print("=" * 60)
 print("Feature Engineering Pipeline")
 print("=" * 60)
 
-# ─── Load Data ─────────────────────────────────────────────
+#  Load Data
 print("\n[1/5] Loading issues_snapshot.csv...")
 df = pd.read_csv(RAW_DIR / "issues_snapshot.csv")
 print(f"  Loaded: {len(df):,} rows, {df.shape[1]} columns")
@@ -26,13 +26,13 @@ print("[1/5] Loading issues_change_history.csv...")
 ch = pd.read_csv(RAW_DIR / "issues_change_history.csv")
 print(f"  Loaded: {len(ch):,} rows")
 
-# ─── Parse Dates ───────────────────────────────────────────
+#  Parse Dates
 print("\n[2/5] Parsing dates...")
 df['issue_created'] = pd.to_datetime(df['issue_created'], utc=True, errors='coerce')
 df['issue_resolution_date'] = pd.to_datetime(df['issue_resolution_date'], utc=True, errors='coerce')
 ch['created'] = pd.to_datetime(ch['created'], utc=True, errors='coerce')
 
-# ─── Priority Encoding ─────────────────────────────────────
+#  Priority Encoding
 print("[2/5] Encoding priorities...")
 PRIORITY_MAP = {
     'Blocker': 5,
@@ -45,11 +45,11 @@ PRIORITY_MAP = {
 }
 df['priority_numeric'] = df['issue_priority'].map(PRIORITY_MAP).fillna(2)
 
-# ─── Global Median for Fast Resolution ────────────────────
+#  Global Median for Fast Resolution
 global_median_sec = df['wf_total_time'].dropna().median()
 print(f"  Global median resolution time: {global_median_sec/86400:.2f} days")
 
-# ─── Reassignment Tickets ─────────────────────────────────
+#  Reassignment Tickets
 print("\n[3/5] Computing reassignment data from change history...")
 # Tickets that were reassigned (field='assignee' appears in change history)
 reassigned_issues = set(
@@ -57,7 +57,7 @@ reassigned_issues = set(
 )
 print(f"  Tickets with reassignments: {len(reassigned_issues):,}")
 
-# ─── First Status Change (First Response) ────────────────
+#  First Status Change (First Response)
 print("[3/5] Computing first status change times...")
 status_changes = ch[ch['field'] == 'status'].copy()
 status_changes = status_changes.sort_values('created')
@@ -80,51 +80,51 @@ df['first_response_sec'] = (
 ).dt.total_seconds()
 df['first_response_sec'] = df['first_response_sec'].clip(lower=0)
 
-# ─── Active Months ────────────────────────────────────────
+#  Active Months
 print("[3/5] Computing active months...")
 df['year_month'] = df['issue_created'].dt.to_period('M')
 
-# ─── Per-Assignee Feature Engineering ────────────────────
+#  Per-Assignee Feature Engineering
 print("\n[4/5] Engineering per-assignee features...")
 
 def compute_features(group):
     n = len(group)
-    
+
     # Efficiency
     total_times = group['wf_total_time'].dropna()
     med_res_days = total_times.median() / 86400 if len(total_times) > 0 else np.nan
     avg_res_days = total_times.mean() / 86400 if len(total_times) > 0 else np.nan
     std_res_days = total_times.std() / 86400 if len(total_times) > 0 else np.nan
     pct_fast = (total_times < global_median_sec).sum() / len(total_times) if len(total_times) > 0 else np.nan
-    
+
     # Volume
     months = group['year_month'].nunique()
     total = n
     tpm = total / months if months > 0 else 0
-    
+
     # Complexity
     avg_prio = group['priority_numeric'].mean()
     pct_high_prio = (group['priority_numeric'] >= 3).sum() / n
     n_projects = group['issue_proj'].nunique()
     n_categories = group['issue_type'].nunique()
-    
+
     # Quality
     pct_reopened = (group['wfe_reopened'] > 0).sum() / n
     resolution_rate = group['issue_status'].isin(['closed', 'done']).sum() / n
     avg_comments = group['issue_comments_count'].mean()
-    
+
     # Workflow - Sole Resolver
     issue_ids = set(group['id'].dropna().astype(int))
     reassigned_in_group = len(issue_ids & reassigned_issues)
     pct_sole_resolver = 1 - (reassigned_in_group / n)
-    
+
     # First response time
     fr = group['first_response_sec'].dropna()
     avg_first_response_days = fr.mean() / 86400 if len(fr) > 0 else np.nan
-    
+
     # Processing steps
     avg_steps = group['processing_steps'].mean()
-    
+
     return pd.Series({
         # Efficiency
         'median_resolution_days': med_res_days,
@@ -161,10 +161,10 @@ features_df = df_filtered.groupby('issue_assignee').apply(compute_features)
 features_df = features_df.reset_index()
 print(f"  Feature matrix shape: {features_df.shape}")
 
-# ─── Handle NaN Values ────────────────────────────────────
+#  Handle NaN Values
 print("\n[5/5] Handling NaN values...")
 # Efficiency features: impute with median
-efficiency_cols = ['median_resolution_days', 'avg_resolution_days', 'std_resolution_days', 
+efficiency_cols = ['median_resolution_days', 'avg_resolution_days', 'std_resolution_days',
                    'pct_fast_resolved', 'avg_first_response_days']
 for col in efficiency_cols:
     med = features_df[col].median()
@@ -180,10 +180,10 @@ features_df['std_resolution_days'] = features_df['std_resolution_days'].fillna(0
 print(f"\n  NaN remaining: {features_df.isna().sum().sum()}")
 print(f"  Final feature matrix: {features_df.shape[0]} employees × {features_df.shape[1]-1} features")
 
-# ─── Save ────────────────────────────────────────────────
+#  Save
 out_path = PROCESSED_DIR / "employee_features.csv"
 features_df.to_csv(out_path, index=False)
-print(f"\n✅ Saved: {out_path}")
+print(f"\n Saved: {out_path}")
 
 # Quick summary
 print("\nFeature summary:")

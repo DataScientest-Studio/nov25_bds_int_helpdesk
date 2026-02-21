@@ -278,7 +278,7 @@ def select_best(comparison_results: list) -> dict:
         valid = comparison_results
 
     best = max(valid, key=lambda r: r['silhouette'])
-    print(f"\n  ✅ Best valid configuration: {best['algorithm']} k={best['k']} "
+    print(f"\n   Best valid configuration: {best['algorithm']} k={best['k']} "
           f"(Silhouette={best['silhouette']:.4f})")
     return best
 
@@ -440,7 +440,7 @@ def run():
     # Save
     cluster_csv = DATA_PROCESSED / "employee_clusters.csv"
     cluster_df.to_csv(cluster_csv, index=False)
-    print(f"  ✅ Cluster CSV: {cluster_csv} ({len(cluster_df)} employees)")
+    print(f"   Cluster CSV: {cluster_csv} ({len(cluster_df)} employees)")
 
     # Cluster profiles
     profile_valid = profile_df.reset_index()
@@ -448,12 +448,12 @@ def run():
     profile_valid.drop(columns=['_cluster'], inplace=True)
     profile_csv = DATA_PROCESSED / "cluster_profiles.csv"
     profile_valid.to_csv(profile_csv, index=False)
-    print(f"  ✅ Profile CSV: {profile_csv}")
+    print(f"   Profile CSV: {profile_csv}")
 
     # Algorithm comparison
     comparison_csv = DATA_PROCESSED / "clustering_comparison.csv"
     df_comparison.to_csv(comparison_csv, index=False)
-    print(f"  ✅ Comparison CSV: {comparison_csv}")
+    print(f"   Comparison CSV: {comparison_csv}")
 
     # Save model bundle
     model_path = MODELS_DIR / "employee_clustering.joblib"
@@ -471,7 +471,7 @@ def run():
         'dim_reduction': dim,
         'comparison_df': df_comparison,
     }, model_path)
-    print(f"  ✅ Model: {model_path}")
+    print(f"   Model: {model_path}")
 
     # --- Summary ---
     print("\n" + "=" * 65)
