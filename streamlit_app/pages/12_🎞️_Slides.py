@@ -104,7 +104,7 @@ st.markdown("---")
 
 # ── Slide anzeigen ────────────────────────────────────────────────────────────
 def fix_svg_fonts(svg_bytes: bytes) -> str:
-    """Safari-Fix: Calibri durch Cross-Platform Font ersetzen + responsiv."""
+    """Safari-Fix: Calibri durch Cross-Platform Font + viewBox für responsives Scaling."""
     import re
     text = svg_bytes.decode('utf-8', errors='replace')
     text = (text
@@ -112,25 +112,32 @@ def fix_svg_fonts(svg_bytes: bytes) -> str:
         .replace('Calibri,Calibri_MSFontService', 'Arial,Helvetica')
         .replace('"Calibri"', 'Arial')
         .replace("'Calibri'", 'Arial'))
-    # Responsiv: width/height durch 100%/auto ersetzen damit SVG den Container füllt
+    # viewBox aus width/height ableiten (falls noch nicht vorhanden)
+    if 'viewBox' not in text:
+        w_match = re.search(r'<svg[^>]*\bwidth="(\d+)"', text)
+        h_match = re.search(r'<svg[^>]*\bheight="(\d+)"', text)
+        if w_match and h_match:
+            w, h = w_match.group(1), h_match.group(1)
+            text = re.sub(r'(<svg\b)', rf'\1 viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMid meet"', text, count=1)
+    # Feste px-Werte durch responsive Werte ersetzen
     text = re.sub(r'(<svg[^>]*)\bwidth="[^"]*"', r'\1width="100%"', text, count=1)
-    text = re.sub(r'(<svg[^>]*)\bheight="[^"]*"', r'\1height="auto"', text, count=1)
+    text = re.sub(r'(<svg[^>]*)\bheight="[^"]*"', r'\1height="100%"', text, count=1)
     return text
 
 svg_clean = fix_svg_fonts(slides[idx].read_bytes())
-# Inline SVG einbetten (kein base64, kein img-Tag → funktioniert zuverlässig in allen Browsern)
+# Inline SVG — 16:9 Aspect-Ratio-Container für korrektes Scaling
 st.markdown(
     f"""<div style="
             background:transparent;
             border:1px solid rgba(255,255,255,0.15);
             border-radius:10px;
-            padding:16px;
+            padding:8px;
             box-shadow:0 2px 8px rgba(0,0,0,0.15);
-            text-align:center;
-            overflow:hidden;
         ">
-        <div style="width:100%;max-width:100%;">
-        {svg_clean}
+        <div style="position:relative;width:100%;padding-bottom:56.25%;">
+            <div style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;border-radius:6px;">
+                {svg_clean}
+            </div>
         </div>
     </div>""",
     unsafe_allow_html=True
