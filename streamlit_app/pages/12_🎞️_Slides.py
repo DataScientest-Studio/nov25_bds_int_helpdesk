@@ -26,11 +26,12 @@ SLIDES_DIR = Path(__file__).parent.parent.parent / "docs" / "Slides"
 def load_slides():
     if not SLIDES_DIR.exists():
         return []
+    # PNG bevorzugen, SVG als Fallback
     files = sorted(
-        list(SLIDES_DIR.glob("*.SVG")) + list(SLIDES_DIR.glob("*.svg")),
+        list(SLIDES_DIR.glob("*.PNG")) + list(SLIDES_DIR.glob("*.png"))
+        or list(SLIDES_DIR.glob("*.SVG")) + list(SLIDES_DIR.glob("*.svg")),
         key=lambda p: p.name.lower()
     )
-    # Deduplizieren (falls sowohl .SVG als auch .svg)
     seen = set()
     unique = []
     for f in files:
@@ -103,18 +104,8 @@ with nav_right:
 st.markdown("---")
 
 # ── Slide anzeigen ────────────────────────────────────────────────────────────
-def fix_svg_fonts(svg_bytes: bytes) -> bytes:
-    """Safari-Fix: Calibri durch Cross-Platform Font ersetzen."""
-    text = svg_bytes.decode('utf-8', errors='replace')
-    text = (text
-        .replace('Calibri,Calibri_MSFontService,sans-serif', 'Arial,Helvetica,sans-serif')
-        .replace('Calibri,Calibri_MSFontService', 'Arial,Helvetica')
-        .replace('"Calibri"', 'Arial')
-        .replace("'Calibri'", 'Arial'))
-    return text.encode('utf-8')
-
-# st.image() — Streamlit rendert SVG nativ, skaliert korrekt, kein HTML-Workaround nötig
-st.image(fix_svg_fonts(slides[idx].read_bytes()), use_container_width=True)
+# ── Slide anzeigen ────────────────────────────────────────────────────────────
+st.image(str(slides[idx]), use_container_width=True)
 
 # ── Thumbnail-Leiste ──────────────────────────────────────────────────────────
 st.markdown("<br>", unsafe_allow_html=True)
@@ -122,14 +113,15 @@ with st.expander("🗂️ Alle Slides" if lang == 'de' else "🗂️ All Slides"
     cols = st.columns(min(n, 4))
     for i, slide in enumerate(slides):
         with cols[i % 4]:
-            b64_thumb = base64.b64encode(fix_svg_fonts(slide.read_bytes())).decode()
+            b64_thumb = base64.b64encode(slide.read_bytes()).decode()
+            mime = "image/png" if slide.suffix.lower() == ".png" else "image/svg+xml"
 
             border = "2px solid #2563eb" if i == idx else "1px solid rgba(255,255,255,0.15)"
             bg = "rgba(37,99,235,0.15)" if i == idx else "transparent"
             st.markdown(
                 f"""<div style="background:{bg};border:{border};border-radius:8px;
                          padding:8px;margin-bottom:8px;cursor:pointer;text-align:center;">
-                    <img src="data:image/svg+xml;base64,{b64_thumb}"
+                    <img src="data:{mime};base64,{b64_thumb}"
                          style="width:100%;height:auto;border-radius:4px;" />
                     <div style="font-size:11px;font-weight:600;color:inherit;
                                 margin-top:6px;">{slide.stem}</div>
