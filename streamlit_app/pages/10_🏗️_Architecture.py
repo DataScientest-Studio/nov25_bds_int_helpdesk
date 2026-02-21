@@ -693,7 +693,7 @@ issues_snapshot.csv + issues_change_history.csv
 | 0 | High Performer 🟢 | 273 | 90,4% |
 | 1 | Solid Performer 🟡 | 16 | 5,3% |
 | 2 | Specialist ⚫ | 7 | 2,3% |
-| 3 | Needs Improvement 🔴 | 6 | 2,0% |
+| 3 | Low Performer 🔴 | 6 | 2,0% |
 
 #### KMeans-Parameter
 | Parameter | Wert | Begründung |
@@ -725,7 +725,7 @@ issues_snapshot.csv + issues_change_history.csv
 | 0 | High Performer 🟢 | 273 | 90.4% |
 | 1 | Solid Performer 🟡 | 16 | 5.3% |
 | 2 | Specialist ⚫ | 7 | 2.3% |
-| 3 | Needs Improvement 🔴 | 6 | 2.0% |
+| 3 | Low Performer 🔴 | 6 | 2.0% |
 
 #### KMeans Parameters
 | Parameter | Value | Justification |

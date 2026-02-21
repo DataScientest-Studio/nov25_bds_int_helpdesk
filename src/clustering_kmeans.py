@@ -189,11 +189,11 @@ for i, c in enumerate(ranked):
     if i == 0:
         label_map[c] = "High Performer 🟢"
     elif i == n - 1:
-        # Check: if very long resolution time → Needs Improvement, else Specialist
+        # Check: if very long resolution time → Low Performer, else Specialist
         if sp['median_resolution_days'] > profile_df['median_resolution_days'].median() * 5:
-            label_map[c] = "Needs Improvement 🔴"
+            label_map[c] = "Low Performer 🔴"
         else:
-            label_map[c] = "Needs Improvement 🔴"
+            label_map[c] = "Low Performer 🔴"
     elif sp['resolution_rate'] < 0.40:
         # Very low resolution rate → unusual work pattern → Specialist
         label_map[c] = "Specialist ⚫"

@@ -226,7 +226,7 @@ avg_comments, pct_sole_resolver, avg_first_response_days, avg_processing_steps`
 | High Performer 🟢 | 273 (90,4%) | ~98% | ~14 Tage |
 | Solid Performer 🟡 | 16 (5,3%) | ~87% | ~45 Tage |
 | Specialist ⚫ | 7 (2,3%) | ~17% | ~120 Tage |
-| Needs Improvement 🔴 | 6 (2,0%) | ~62% | ~455 Tage |
+| Low Performer 🔴 | 6 (2,0%) | ~62% | ~455 Tage |
 
 **Vergleichsalgorithmen:** DBSCAN(eps=1.5, min_samples=5) · AgglomerativeClustering(n_clusters=4, linkage='ward')
 
@@ -251,7 +251,7 @@ avg_comments, pct_sole_resolver, avg_first_response_days, avg_processing_steps`
 | High Performer 🟢 | 273 (90.4%) | ~98% | ~14 days |
 | Solid Performer 🟡 | 16 (5.3%) | ~87% | ~45 days |
 | Specialist ⚫ | 7 (2.3%) | ~17% | ~120 days |
-| Needs Improvement 🔴 | 6 (2.0%) | ~62% | ~455 days |
+| Low Performer 🔴 | 6 (2.0%) | ~62% | ~455 days |
 
 **Comparison algorithms:** DBSCAN(eps=1.5, min_samples=5) · AgglomerativeClustering(n_clusters=4, linkage='ward')
 
