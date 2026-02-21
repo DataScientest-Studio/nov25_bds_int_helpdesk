@@ -103,31 +103,18 @@ with nav_right:
 st.markdown("---")
 
 # ── Slide anzeigen ────────────────────────────────────────────────────────────
-def fix_svg_fonts(svg_bytes: bytes) -> str:
+def fix_svg_fonts(svg_bytes: bytes) -> bytes:
     """Safari-Fix: Calibri durch Cross-Platform Font ersetzen."""
     text = svg_bytes.decode('utf-8', errors='replace')
-    return (text
+    text = (text
         .replace('Calibri,Calibri_MSFontService,sans-serif', 'Arial,Helvetica,sans-serif')
         .replace('Calibri,Calibri_MSFontService', 'Arial,Helvetica')
         .replace('"Calibri"', 'Arial')
         .replace("'Calibri'", 'Arial'))
+    return text.encode('utf-8')
 
-# Base64-img: Browser rendert SVG nativ, kein DOM-Eingriff → Text bleibt korrekt positioniert
-b64 = base64.b64encode(fix_svg_fonts(slides[idx].read_bytes()).encode('utf-8')).decode()
-
-st.markdown(
-    f"""<div style="
-            background:transparent;
-            border:1px solid rgba(255,255,255,0.15);
-            border-radius:10px;
-            padding:8px;
-            box-shadow:0 2px 8px rgba(0,0,0,0.15);
-        ">
-        <img src="data:image/svg+xml;base64,{b64}"
-             style="width:100%;height:auto;display:block;border-radius:6px;" />
-    </div>""",
-    unsafe_allow_html=True
-)
+# st.image() — Streamlit rendert SVG nativ, skaliert korrekt, kein HTML-Workaround nötig
+st.image(fix_svg_fonts(slides[idx].read_bytes()), use_container_width=True)
 
 # ── Thumbnail-Leiste ──────────────────────────────────────────────────────────
 st.markdown("<br>", unsafe_allow_html=True)
@@ -135,9 +122,7 @@ with st.expander("🗂️ Alle Slides" if lang == 'de' else "🗂️ All Slides"
     cols = st.columns(min(n, 4))
     for i, slide in enumerate(slides):
         with cols[i % 4]:
-            b64_thumb = base64.b64encode(
-                fix_svg_fonts(slide.read_bytes()).encode('utf-8')
-            ).decode()
+            b64_thumb = base64.b64encode(fix_svg_fonts(slide.read_bytes())).decode()
 
             border = "2px solid #2563eb" if i == idx else "1px solid rgba(255,255,255,0.15)"
             bg = "rgba(37,99,235,0.15)" if i == idx else "transparent"
