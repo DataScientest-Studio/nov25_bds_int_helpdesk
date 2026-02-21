@@ -7,7 +7,7 @@ import numpy as np
 from pathlib import Path
 
 
-# Erwarteter Prozessfluss
+# Expected process flow
 EXPECTED_PROCESS = ["Open", "In Progress", "Resolved", "Closed"]
 
 # Allowed status transitions
@@ -22,13 +22,13 @@ VALID_TRANSITIONS = {
 
 def check_compliance(status_history):
     """
-    Check if a workflow correctly follows the process.
+    Check whether a workflow correctly follows the defined process.
     
     Args:
-        status_history: Liste der Status-Werte
+        status_history: List of status values
         
     Returns:
-        dict: Compliance-Ergebnis
+        dict: Compliance result
     """
     if not status_history or len(status_history) < 2:
         return {
@@ -57,7 +57,7 @@ def check_compliance(status_history):
             if curr_idx < prev_idx:
                 backward_steps += 1
     
-    # Compliance-Score berechnen
+    # Calculate compliance score
     total_transitions = len(status_history) - 1
     compliance_score = 1.0 - (violations / total_transitions)
     
@@ -71,18 +71,18 @@ def check_compliance(status_history):
 
 def analyze_workflow_from_wfe(issues_df):
     """
-    Analyze Workflows basierend auf wfe_* columns.
-    (wfe_ = Number of passes per status)
+    Analyze workflows based on wfe_* columns.
+    (wfe_ = number of passes per status)
     
     Args:
-        issues_df: DataFrame mit Issues
+        issues_df: DataFrame with issues
         
     Returns:
-        DataFrame mit Compliance-Analyse
+        DataFrame with compliance analysis
     """
-    print("🔄 Analysiere Workflows...")
+    print("🔄 Analyzing workflows...")
     
-    # Finde alle wfe_ columns
+    # Find all wfe_ columns
     wfe_cols = [col for col in issues_df.columns if col.startswith('wfe_')]
     
     results = []
@@ -90,7 +90,7 @@ def analyze_workflow_from_wfe(issues_df):
     for idx, row in issues_df.iterrows():
         issue_id = row.get('id', idx)
         
-        # Calculate Metriken
+        # Calculate metrics
         total_steps = sum(row[col] for col in wfe_cols if pd.notna(row[col]))
         
         # Count reopens
@@ -98,13 +98,13 @@ def analyze_workflow_from_wfe(issues_df):
         if 'wfe_reopened' in issues_df.columns:
             reopens = row['wfe_reopened'] if pd.notna(row['wfe_reopened']) else 0
         
-        # Backward steps (multiple passes)
+        # Backward steps (multiple passes through same status)
         backward = 0
         for col in wfe_cols:
             if pd.notna(row[col]) and row[col] > 1:
                 backward += row[col] - 1
         
-        # Compliance Score
+        # Compliance score
         penalty = (reopens * 0.1) + (backward * 0.05)
         compliance_score = max(0, 1.0 - penalty)
         
@@ -117,16 +117,16 @@ def analyze_workflow_from_wfe(issues_df):
             'is_compliant': compliance_score > 0.8
         })
         
-        # Fortschritt
+        # Progress indicator
         if (idx + 1) % 10000 == 0:
-            print(f"   {idx+1:,}/{len(issues_df):,} analysiert...")
+            print(f"   {idx+1:,}/{len(issues_df):,} analyzed...")
     
-    print(f"✅ {len(results):,} Issues analysiert")
+    print(f"✅ {len(results):,} issues analyzed")
     return pd.DataFrame(results)
 
 
 def get_compliance_summary(workflow_df):
-    """Create eine Summary der Compliance."""
+    """Create a compliance summary."""
     return {
         'total_issues': len(workflow_df),
         'compliant_count': int(workflow_df['is_compliant'].sum()),
@@ -140,32 +140,32 @@ def get_compliance_summary(workflow_df):
 
 if __name__ == "__main__":
     print("="*50)
-    print("🔄 PROZESS-COMPLIANCE")
+    print("🔄 PROCESS COMPLIANCE")
     print("="*50)
     
-    # Issues laden
+    # Load issues
     data_path = Path("data/raw/issues.csv")
     
     if data_path.exists():
         issues = pd.read_csv(data_path)
-        print(f"📁 Loaded: {len(issues):,} Issues")
+        print(f"📁 Loaded: {len(issues):,} issues")
         
-        # Analyse
+        # Analysis
         workflow_df = analyze_workflow_from_wfe(issues)
         
         # Summary
         summary = get_compliance_summary(workflow_df)
         
-        print("\n📊 ZUSAMMENFASSUNG:")
-        print(f"   Total Issues: {summary['total_issues']:,}")
+        print("\n📊 SUMMARY:")
+        print(f"   Total issues: {summary['total_issues']:,}")
         print(f"   Compliant: {summary['compliant_count']:,} ({summary['compliance_rate']}%)")
-        print(f"   Ø Compliance Score: {summary['avg_compliance_score']}")
-        print(f"   Reopen Rate: {summary['reopen_rate']}%")
+        print(f"   Avg compliance score: {summary['avg_compliance_score']}")
+        print(f"   Reopen rate: {summary['reopen_rate']}%")
         
-        # Saven
+        # Save
         output_path = Path("data/processed/workflow_analysis.csv")
         output_path.parent.mkdir(parents=True, exist_ok=True)
         workflow_df.to_csv(output_path, index=False)
         print(f"\n💾 Saved: {output_path}")
     else:
-        print("❌ Issues-Datei not found!")
+        print("❌ Issues file not found!")

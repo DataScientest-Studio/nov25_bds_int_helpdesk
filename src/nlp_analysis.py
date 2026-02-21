@@ -13,7 +13,7 @@ try:
     VADER_AVAILABLE = True
 except ImportError:
     VADER_AVAILABLE = False
-    print("⚠️ VADER nicht installiert. Installiere mit: pip install vaderSentiment")
+    print("⚠️ VADER not installed. Install with: pip install vaderSentiment")
 
 
 # Word lists for pattern recognition
@@ -40,10 +40,10 @@ SOLUTION_WORDS = [
 
 def analyze_sentiment(text):
     """
-    Analyze das Sentiment eines Textes.
+    Analyze the sentiment of a text.
     
     Returns:
-        dict: Sentiment-Scores (compound, pos, neg, neu)
+        dict: Sentiment scores (compound, pos, neg, neu)
     """
     if not VADER_AVAILABLE:
         return {'compound': 0, 'pos': 0, 'neg': 0, 'neu': 1}
@@ -56,7 +56,7 @@ def analyze_sentiment(text):
 
 
 def extract_text_features(text):
-    """Extrahiert Basis-Features aus Text."""
+    """Extract basic features from text."""
     if pd.isna(text) or not str(text).strip():
         return {
             'word_count': 0,
@@ -98,17 +98,17 @@ def extract_patterns(text):
 
 def process_utterances(utterances_df):
     """
-    Verarbeitet alle Utterances und extrahiert NLP-Features.
+    Process all utterances and extract NLP features.
     
     Args:
-        utterances_df: DataFrame mit Kommentaren
+        utterances_df: DataFrame with comments
         
     Returns:
-        DataFrame mit NLP-Features
+        DataFrame with NLP features
     """
-    print("🔤 Verarbeite Kommentare...")
+    print("🔤 Processing comments...")
     
-    # Text-Spalte finden
+    # Find text column
     text_col = 'actionbody' if 'actionbody' in utterances_df.columns else 'body'
     
     results = []
@@ -120,7 +120,7 @@ def process_utterances(utterances_df):
         # Sentiment
         sentiment = analyze_sentiment(text)
         
-        # Text-Features
+        # Text features
         text_feat = extract_text_features(text)
         
         # Patterns
@@ -136,17 +136,17 @@ def process_utterances(utterances_df):
             **patterns
         })
         
-        # Fortschrittsanzeige
+        # Progress indicator
         if (idx + 1) % 5000 == 0:
-            print(f"   {idx+1:,}/{total:,} verarbeitet...")
+            print(f"   {idx+1:,}/{total:,} processed...")
     
-    print(f"✅ {len(results):,} Kommentare analysiert")
+    print(f"✅ {len(results):,} comments analyzed")
     return pd.DataFrame(results)
 
 
 def aggregate_by_issue(features_df):
-    """Aggregiert NLP-Features pro Issue."""
-    print("📊 Aggregiere pro Issue...")
+    """Aggregate NLP features per issue."""
+    print("📊 Aggregating per issue...")
     
     aggregated = features_df.groupby('issueid').agg({
         'sentiment_compound': ['mean', 'std', 'min', 'max'],
@@ -160,40 +160,40 @@ def aggregate_by_issue(features_df):
         'solution_score': 'sum'
     }).reset_index()
     
-    # columns umbenennen
+    # Rename columns
     aggregated.columns = ['_'.join(col).strip('_') for col in aggregated.columns]
     
-    print(f"✅ {len(aggregated):,} Issues aggregiert")
+    print(f"✅ {len(aggregated):,} issues aggregated")
     return aggregated
 
 
 if __name__ == "__main__":
     print("="*50)
-    print("🔤 NLP-ANALYSE")
+    print("🔤 NLP ANALYSIS")
     print("="*50)
     
-    # Utterances laden
+    # Load utterances
     data_path = Path("data/raw/sample_utterances.csv")
     
     if data_path.exists():
         utterances = pd.read_csv(data_path)
-        print(f"📁 Loaded: {len(utterances):,} Kommentare")
+        print(f"📁 Loaded: {len(utterances):,} comments")
         
-        # Verarbeiten
+        # Process
         features = process_utterances(utterances)
         
-        # Aggregieren
+        # Aggregate
         issue_features = aggregate_by_issue(features)
         
-        # Saven
+        # Save
         output_path = Path("data/processed/nlp_features.csv")
         output_path.parent.mkdir(parents=True, exist_ok=True)
         issue_features.to_csv(output_path, index=False)
         print(f"\n💾 Saved: {output_path}")
         
-        # Statistiken
+        # Statistics
         if 'sentiment_compound_mean' in issue_features.columns:
             avg_sentiment = issue_features['sentiment_compound_mean'].mean()
-            print(f"\n📊 Durchschnittliches Sentiment: {avg_sentiment:.3f}")
+            print(f"\n📊 Average sentiment: {avg_sentiment:.3f}")
     else:
-        print("❌ Utterances-Datei not found!")
+        print("❌ Utterances file not found!")

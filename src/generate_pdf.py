@@ -1,6 +1,6 @@
 """
-PDF-Generator fur Projektdokumentation
-Converts Markdown to PDF with embedded plots
+PDF Generator for project documentation.
+Converts Markdown to PDF with embedded plots.
 """
 
 import markdown
@@ -9,10 +9,10 @@ import base64
 
 
 def embed_images_in_html(html_content, plots_dir):
-    """Ersetzt Bild-Referenzen durch base64-eingebettete Bilder."""
+    """Replaces image references with base64-embedded images."""
     plots_path = Path(plots_dir)
     
-    # Finde alle Bild-Referenzen
+    # Find all image references
     import re
     img_pattern = r'<img[^>]*src="([^"]*)"[^>]*>'
     
@@ -30,22 +30,22 @@ def embed_images_in_html(html_content, plots_dir):
 
 
 def md_to_pdf(md_path, pdf_path, plots_dir):
-    """Konvertiert Markdown zu PDF."""
-    print(f"  Lese: {md_path}")
+    """Converts Markdown to PDF."""
+    print(f"  Reading: {md_path}")
     
     with open(md_path, 'r', encoding='utf-8') as f:
         md_content = f.read()
     
-    # Ersetze Plot-Pfade
+    # Replace plot paths
     md_content = md_content.replace('](plots/', f']({plots_dir}/')
     
-    # Markdown zu HTML
+    # Markdown to HTML
     html_content = markdown.markdown(
         md_content,
         extensions=['tables', 'fenced_code', 'toc']
     )
     
-    # CSS fur PDF (KEINE Kursivschrift!)
+    # CSS for PDF (NO italic font!)
     css = """
     <style>
         @page {
@@ -58,7 +58,7 @@ def md_to_pdf(md_path, pdf_path, plots_dir):
             line-height: 1.5;
             color: #333;
         }
-        /* KEINE KURSIVSCHRIFT */
+        /* NO ITALIC */
         em, i {
             font-style: normal !important;
             font-weight: normal;
@@ -146,7 +146,7 @@ def md_to_pdf(md_path, pdf_path, plots_dir):
     </style>
     """
     
-    # Vollstandiges HTML
+    # Complete HTML document
     full_html = f"""
     <!DOCTYPE html>
     <html>
@@ -160,44 +160,44 @@ def md_to_pdf(md_path, pdf_path, plots_dir):
     </html>
     """
     
-    # Bilder einbetten
+    # Embed images
     full_html = embed_images_in_html(full_html, plots_dir)
     
-    # HTML speichern (fur Debug)
+    # Save HTML (for debugging)
     html_path = pdf_path.replace('.pdf', '.html')
     with open(html_path, 'w', encoding='utf-8') as f:
         f.write(full_html)
     print(f"  HTML: {html_path}")
     
-    # PDF erstellen mit weasyprint
+    # Generate PDF with weasyprint
     try:
         from weasyprint import HTML
         HTML(string=full_html).write_pdf(pdf_path)
         print(f"  PDF: {pdf_path}")
         return True
     except Exception as e:
-        print(f"  Fehler bei PDF-Erstellung: {e}")
+        print(f"  Error generating PDF: {e}")
         return False
 
 
 def main():
     print("="*60)
-    print("PDF-GENERATOR")
+    print("PDF GENERATOR")
     print("="*60)
     
     base_dir = Path(".")
     plots_dir = base_dir / "reports" / "plots"
     
-    # Deutsche Version
-    print("\n1. Deutsche Dokumentation...")
+    # German version
+    print("\n1. German documentation...")
     md_to_pdf(
         base_dir / "reports" / "Projektdokumentation_DE.md",
         str(base_dir / "reports" / "Projektdokumentation_DE.pdf"),
         str(plots_dir)
     )
     
-    # Englische Version
-    print("\n2. Englische Dokumentation...")
+    # English version
+    print("\n2. English documentation...")
     md_to_pdf(
         base_dir / "reports" / "Project_Documentation_EN.md",
         str(base_dir / "reports" / "Project_Documentation_EN.pdf"),
@@ -205,7 +205,7 @@ def main():
     )
     
     print("\n" + "="*60)
-    print("FERTIG!")
+    print("DONE!")
     print("="*60)
 
 
