@@ -104,28 +104,17 @@ st.markdown("---")
 
 # ── Slide anzeigen ────────────────────────────────────────────────────────────
 def fix_svg_fonts(svg_bytes: bytes) -> str:
-    """Safari-Fix: Calibri durch Cross-Platform Font + viewBox für responsives Scaling."""
-    import re
+    """Safari-Fix: Calibri durch Cross-Platform Font ersetzen."""
     text = svg_bytes.decode('utf-8', errors='replace')
-    text = (text
+    return (text
         .replace('Calibri,Calibri_MSFontService,sans-serif', 'Arial,Helvetica,sans-serif')
         .replace('Calibri,Calibri_MSFontService', 'Arial,Helvetica')
         .replace('"Calibri"', 'Arial')
         .replace("'Calibri'", 'Arial'))
-    # viewBox aus width/height ableiten (falls noch nicht vorhanden)
-    if 'viewBox' not in text:
-        w_match = re.search(r'<svg[^>]*\bwidth="(\d+)"', text)
-        h_match = re.search(r'<svg[^>]*\bheight="(\d+)"', text)
-        if w_match and h_match:
-            w, h = w_match.group(1), h_match.group(1)
-            text = re.sub(r'(<svg\b)', rf'\1 viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMid meet"', text, count=1)
-    # Feste px-Werte durch responsive Werte ersetzen
-    text = re.sub(r'(<svg[^>]*)\bwidth="[^"]*"', r'\1width="100%"', text, count=1)
-    text = re.sub(r'(<svg[^>]*)\bheight="[^"]*"', r'\1height="100%"', text, count=1)
-    return text
 
-svg_clean = fix_svg_fonts(slides[idx].read_bytes())
-# Inline SVG — 16:9 Aspect-Ratio-Container für korrektes Scaling
+# Base64-img: Browser rendert SVG nativ, kein DOM-Eingriff → Text bleibt korrekt positioniert
+b64 = base64.b64encode(fix_svg_fonts(slides[idx].read_bytes()).encode('utf-8')).decode()
+
 st.markdown(
     f"""<div style="
             background:transparent;
@@ -134,11 +123,8 @@ st.markdown(
             padding:8px;
             box-shadow:0 2px 8px rgba(0,0,0,0.15);
         ">
-        <div style="position:relative;width:100%;padding-bottom:56.25%;">
-            <div style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;border-radius:6px;">
-                {svg_clean}
-            </div>
-        </div>
+        <img src="data:image/svg+xml;base64,{b64}"
+             style="width:100%;height:auto;display:block;border-radius:6px;" />
     </div>""",
     unsafe_allow_html=True
 )
@@ -152,6 +138,7 @@ with st.expander("🗂️ Alle Slides" if lang == 'de' else "🗂️ All Slides"
             b64_thumb = base64.b64encode(
                 fix_svg_fonts(slide.read_bytes()).encode('utf-8')
             ).decode()
+
             border = "2px solid #2563eb" if i == idx else "1px solid rgba(255,255,255,0.15)"
             bg = "rgba(37,99,235,0.15)" if i == idx else "transparent"
             st.markdown(
