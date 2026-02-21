@@ -1,6 +1,6 @@
 """
-Plot generator for project documentation
-Creates all required visualizations as PNG (300 dpi)
+Plot generator for project documentation.
+Creates all required visualizations as PNG (300 dpi).
 """
 
 import pandas as pd
@@ -20,36 +20,36 @@ plt.rcParams['font.size'] = 10
 plt.rcParams['axes.titlesize'] = 12
 plt.rcParams['axes.labelsize'] = 10
 
-# Output-Verzeichnis
+# Output directory
 OUTPUT_DIR = Path("reports/plots")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def load_data():
     """Load all required data."""
-    print("📊 Load Data...")
+    print("📊 Loading data...")
     
     data = {}
     
-    # ML-Datasatz
+    # ML dataset
     ml_path = Path("data/processed/ml_dataset.csv")
     if ml_path.exists():
         data['ml_dataset'] = pd.read_csv(ml_path)
-        print(f"   ML-Dataset: {len(data['ml_dataset'])} Samples")
+        print(f"   ML dataset: {len(data['ml_dataset'])} samples")
     
-    # Ground Truth (bewertete Samples)
+    # Ground truth (rated samples)
     gt_path = Path("data/raw/issues_snapshot_sample.xlsx")
     if gt_path.exists():
         data['ground_truth'] = pd.read_excel(gt_path)
-        print(f"   Ground Truth: {len(data['ground_truth'])} Samples")
+        print(f"   Ground truth: {len(data['ground_truth'])} samples")
     
     # Load model for feature importance
     model_path = Path("models/performance_scorer.joblib")
     if model_path.exists():
         data['model'] = joblib.load(model_path)
-        print("   Model geladen")
+        print("   Model loaded")
     
-    # Workflow-Analyse
+    # Workflow analysis
     wf_path = Path("data/processed/workflow_analysis.csv")
     if wf_path.exists():
         data['workflow'] = pd.read_csv(wf_path)
@@ -59,11 +59,11 @@ def load_data():
 
 
 def plot_score_distribution(data):
-    """Plot 1: Histogramm der Q1, Q2, Q3 Scores."""
-    print("📈 Erstelle Score-Verteilung...")
+    """Plot 1: Histogram of Q1, Q2, Q3 scores."""
+    print("📈 Creating score distribution...")
     
     if 'ground_truth' not in data:
-        print("   ⚠️ Ground Truth not available")
+        print("   ⚠️ Ground truth not available")
         return
     
     df = data['ground_truth']
@@ -83,11 +83,11 @@ def plot_score_distribution(data):
             counts = df[col].value_counts().sort_index()
             ax.bar(counts.index, counts.values, color=color, edgecolor='black', alpha=0.8)
             ax.set_xlabel('Score (1-5)')
-            ax.set_ylabel('Anzahl')
+            ax.set_ylabel('Count')
             ax.set_title(label)
             ax.set_xticks([1, 2, 3, 4, 5])
             
-            # Mittelwert-Linie
+            # Mean line
             mean_val = df[col].mean()
             ax.axvline(mean_val, color='red', linestyle='--', linewidth=2, label=f'Mean: {mean_val:.2f}')
             ax.legend()
@@ -99,11 +99,11 @@ def plot_score_distribution(data):
 
 
 def plot_correlation_matrix(data):
-    """Plot 2: Korrelationsmatrix (Halo-Effekt visualisieren)."""
-    print("📈 Erstelle Korrelationsmatrix...")
+    """Plot 2: Correlation matrix (visualizing the Halo Effect)."""
+    print("📈 Creating correlation matrix...")
     
     if 'ground_truth' not in data:
-        print("   ⚠️ Ground Truth not available")
+        print("   ⚠️ Ground truth not available")
         return
     
     df = data['ground_truth']
@@ -127,9 +127,9 @@ def plot_correlation_matrix(data):
             ax=ax
         )
         
-        ax.set_title('Q-Score Korrelationsmatrix\n(Hohe Werte = Halo-Effekt)', fontsize=14, fontweight='bold')
+        ax.set_title('Q-Score Correlation Matrix\n(High values = Halo Effect)', fontsize=14, fontweight='bold')
         
-        # Labels anpassen
+        # Adjust axis labels
         labels = ['Q1\n(Accuracy)', 'Q2\n(Thoroughness)', 'Q3\n(Client Rel.)']
         ax.set_xticklabels(labels)
         ax.set_yticklabels(labels)
@@ -141,20 +141,20 @@ def plot_correlation_matrix(data):
 
 
 def plot_employee_performance(data):
-    """Plot 3: Top/Bottom 10 Employee."""
-    print("📈 Erstelle Employee-Performance...")
+    """Plot 3: Top/Bottom 10 employees."""
+    print("📈 Creating employee performance chart...")
     
     if 'ground_truth' not in data:
-        print("   ⚠️ Ground Truth not available")
+        print("   ⚠️ Ground truth not available")
         return
     
     df = data['ground_truth']
     
     if 'assignee' not in df.columns:
-        print("   ⚠️ 'assignee' Spalte not found")
+        print("   ⚠️ 'assignee' column not found")
         return
     
-    # Aggregiere pro Employee mit neuer Formel:
+    # Aggregate per employee using the new formula:
     # Quality = (Q1 + Q2) / 2, Client = Q3, Overall = 0.5 * Quality + 0.5 * Client
     emp_scores = df.groupby('assignee').agg({
         'Q1': 'mean',
@@ -168,7 +168,7 @@ def plot_employee_performance(data):
     
     emp_scores = emp_scores.sort_values('overall', ascending=False)
     
-    # Top 10 und Bottom 10
+    # Top 10 and bottom 10
     top10 = emp_scores.head(10)
     bottom10 = emp_scores.tail(10)
     
@@ -181,12 +181,12 @@ def plot_employee_performance(data):
     ax1.set_yticks(range(len(top10)))
     ax1.set_yticklabels([f"MA-{i+1}" for i in range(len(top10))])
     ax1.set_xlabel('Overall Score')
-    ax1.set_title('TOP 10 Employee', fontsize=12, fontweight='bold')
+    ax1.set_title('TOP 10 Employees', fontsize=12, fontweight='bold')
     ax1.set_xlim(0, 5)
-    ax1.axvline(3.0, color='orange', linestyle='--', alpha=0.7, label='Grenzwert (3.0)')
+    ax1.axvline(3.0, color='orange', linestyle='--', alpha=0.7, label='Threshold (3.0)')
     ax1.legend()
     
-    # Score-Werte anzeigen
+    # Display score values
     for i, (bar, val) in enumerate(zip(bars1, top10['overall'])):
         ax1.text(val + 0.05, bar.get_y() + bar.get_height()/2, f'{val:.2f}', va='center')
     
@@ -198,10 +198,10 @@ def plot_employee_performance(data):
     ax2.set_yticks(range(len(bottom10_sorted)))
     ax2.set_yticklabels([f"MA-{89-i}" for i in range(len(bottom10_sorted))])
     ax2.set_xlabel('Overall Score')
-    ax2.set_title('BOTTOM 10 Employee', fontsize=12, fontweight='bold')
+    ax2.set_title('BOTTOM 10 Employees', fontsize=12, fontweight='bold')
     ax2.set_xlim(0, 5)
-    ax2.axvline(3.0, color='orange', linestyle='--', alpha=0.7, label='Grenzwert (3.0)')
-    ax2.axvline(2.0, color='red', linestyle='--', alpha=0.7, label='Kritisch (2.0)')
+    ax2.axvline(3.0, color='orange', linestyle='--', alpha=0.7, label='Threshold (3.0)')
+    ax2.axvline(2.0, color='red', linestyle='--', alpha=0.7, label='Critical (2.0)')
     ax2.legend()
     
     for i, (bar, val) in enumerate(zip(bars2, bottom10_sorted['overall'])):
@@ -214,37 +214,37 @@ def plot_employee_performance(data):
 
 
 def plot_workflow_status(data):
-    """Plot 4: Workflow-Status Verteilung."""
-    print("📈 Erstelle Workflow-Status...")
+    """Plot 4: Workflow status distribution."""
+    print("📈 Creating workflow status chart...")
     
-    # Example data for typical helpdesk workflow
+    # Example data for a typical helpdesk workflow
     status_data = {
         'Status': ['Open', 'In Progress', 'Waiting Feedback', 'Verification', 'Resolved', 'Closed'],
-        'Anteil': [5, 15, 10, 8, 12, 50]
+        'Share': [5, 15, 10, 8, 12, 50]
     }
     
     df_status = pd.DataFrame(status_data)
     
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
     
-    # Pie Chart
+    # Pie chart
     ax1 = axes[0]
     colors = ['#3498db', '#e74c3c', '#f39c12', '#9b59b6', '#2ecc71', '#1abc9c']
     wedges, texts, autotexts = ax1.pie(
-        df_status['Anteil'],
+        df_status['Share'],
         labels=df_status['Status'],
         autopct='%1.1f%%',
         colors=colors,
         explode=[0, 0, 0, 0, 0, 0.05],
         shadow=True
     )
-    ax1.set_title('Ticket-Status Verteilung', fontsize=12, fontweight='bold')
+    ax1.set_title('Ticket Status Distribution', fontsize=12, fontweight='bold')
     
-    # Bar Chart
+    # Bar chart
     ax2 = axes[1]
-    bars = ax2.bar(df_status['Status'], df_status['Anteil'], color=colors, edgecolor='black')
-    ax2.set_ylabel('Anteil (%)')
-    ax2.set_title('Workflow-Status (Bar Chart)', fontsize=12, fontweight='bold')
+    bars = ax2.bar(df_status['Status'], df_status['Share'], color=colors, edgecolor='black')
+    ax2.set_ylabel('Share (%)')
+    ax2.set_title('Workflow Status (Bar Chart)', fontsize=12, fontweight='bold')
     ax2.tick_params(axis='x', rotation=45)
     
     for bar in bars:
@@ -258,11 +258,11 @@ def plot_workflow_status(data):
 
 
 def plot_confusion_matrices(data):
-    """Plot 5: Confusion Matrix pro Q-Score."""
-    print("📈 Erstelle Confusion Matrices...")
+    """Plot 5: Confusion matrix per Q-score."""
+    print("📈 Creating confusion matrices...")
     
     if 'model' not in data or 'ml_dataset' not in data:
-        print("   ⚠️ Model oder Data not available")
+        print("   ⚠️ Model or data not available")
         return
     
     model_data = data['model']
@@ -287,7 +287,7 @@ def plot_confusion_matrices(data):
         if target in model_data.get('metrics', {}):
             cm = np.array(model_data['metrics'][target]['confusion_matrix'])
             
-            # Normalisierte Confusion Matrix
+            # Normalized confusion matrix
             cm_norm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
             cm_norm = np.nan_to_num(cm_norm)
             
@@ -306,7 +306,7 @@ def plot_confusion_matrices(data):
             ax.set_ylabel('Actual')
             ax.set_title(label, fontsize=10, fontweight='bold')
     
-    plt.suptitle('Confusion Matrices (Normalisiert)', fontsize=14, fontweight='bold', y=1.02)
+    plt.suptitle('Confusion Matrices (Normalized)', fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout()
     plt.savefig(OUTPUT_DIR / "05_confusion_matrices.png", bbox_inches='tight')
     plt.close()
@@ -314,8 +314,8 @@ def plot_confusion_matrices(data):
 
 
 def plot_feature_importance(data):
-    """Plot 6: Feature Importance (Top 10)."""
-    print("📈 Erstelle Feature Importance...")
+    """Plot 6: Feature importance (top 10)."""
+    print("📈 Creating feature importance chart...")
     
     if 'model' not in data:
         print("   ⚠️ Model not available")
@@ -324,10 +324,10 @@ def plot_feature_importance(data):
     model_data = data['model']
     
     if 'feature_importance' not in model_data:
-        print("   ⚠️ Feature Importance nicht im Model")
+        print("   ⚠️ Feature importance not in model")
         return
     
-    # Q1 Feature Importance als Beispiel
+    # Q1 feature importance as example
     if 'Q1' in model_data['feature_importance']:
         fi_df = model_data['feature_importance']['Q1'].head(10)
         
@@ -339,9 +339,9 @@ def plot_feature_importance(data):
         ax.set_yticks(range(len(fi_df)))
         ax.set_yticklabels(fi_df['feature'].values[::-1])
         ax.set_xlabel('Importance Score')
-        ax.set_title('Top 10 Features (basierend auf RandomForest)', fontsize=12, fontweight='bold')
+        ax.set_title('Top 10 Features (based on RandomForest)', fontsize=12, fontweight='bold')
         
-        # Werte anzeigen
+        # Display values
         for bar in bars:
             width = bar.get_width()
             ax.text(width + 0.005, bar.get_y() + bar.get_height()/2, f'{width:.3f}', va='center')
@@ -355,10 +355,10 @@ def plot_feature_importance(data):
 
 
 def plot_team_score_trend(data):
-    """Plot 7: Team-Score Trend (simuliert)."""
-    print("📈 Erstelle Team-Score Trend...")
+    """Plot 7: Team score trend (simulated)."""
+    print("📈 Creating team score trend...")
     
-    # Simulierte monatliche Data
+    # Simulated monthly data
     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     
     np.random.seed(42)
@@ -376,14 +376,14 @@ def plot_team_score_trend(data):
     ax.plot(months, client_scores, 's-', label='Client Score (Q3)', color='#e74c3c', linewidth=2, markersize=8)
     ax.plot(months, overall_scores, '^-', label='Overall Score', color='#2ecc71', linewidth=3, markersize=10)
     
-    ax.axhline(3.0, color='orange', linestyle='--', alpha=0.7, label='Grenzwert Training (3.0)')
-    ax.axhline(2.0, color='red', linestyle='--', alpha=0.7, label='Kritischer Grenzwert (2.0)')
+    ax.axhline(3.0, color='orange', linestyle='--', alpha=0.7, label='Training threshold (3.0)')
+    ax.axhline(2.0, color='red', linestyle='--', alpha=0.7, label='Critical threshold (2.0)')
     
     ax.fill_between(months, 3.0, 5.0, alpha=0.1, color='green', label='GREEN Zone')
     ax.fill_between(months, 2.0, 3.0, alpha=0.1, color='orange', label='YELLOW Zone')
     ax.fill_between(months, 0, 2.0, alpha=0.1, color='red', label='RED Zone')
     
-    ax.set_xlabel('Monat')
+    ax.set_xlabel('Month')
     ax.set_ylabel('Score')
     ax.set_title('Team Performance Trend 2025', fontsize=14, fontweight='bold')
     ax.set_ylim(1, 5)
@@ -397,49 +397,49 @@ def plot_team_score_trend(data):
 
 
 def plot_risk_distribution(data):
-    """Plot 8: Risk Level Verteilung."""
-    print("📈 Erstelle Risk-Verteilung...")
+    """Plot 8: Risk level distribution."""
+    print("📈 Creating risk distribution chart...")
     
-    # Typische Verteilung
+    # Typical distribution
     risk_data = {
         'Risk Level': ['GREEN', 'YELLOW', 'RED'],
-        'Anzahl': [72, 14, 3],
-        'Farbe': ['#27ae60', '#f39c12', '#e74c3c']
+        'Count': [72, 14, 3],
+        'Color': ['#27ae60', '#f39c12', '#e74c3c']
     }
     
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
     
-    # Pie Chart
+    # Pie chart
     ax1 = axes[0]
     wedges, texts, autotexts = ax1.pie(
-        risk_data['Anzahl'],
+        risk_data['Count'],
         labels=risk_data['Risk Level'],
-        autopct=lambda pct: f'{pct:.1f}%\n({int(pct/100*sum(risk_data["Anzahl"]))})',
-        colors=risk_data['Farbe'],
+        autopct=lambda pct: f'{pct:.1f}%\n({int(pct/100*sum(risk_data["Count"]))})',
+        colors=risk_data['Color'],
         explode=[0, 0.05, 0.1],
         shadow=True,
         textprops={'fontsize': 11}
     )
-    ax1.set_title('Employee Risk-Verteilung', fontsize=12, fontweight='bold')
+    ax1.set_title('Employee Risk Distribution', fontsize=12, fontweight='bold')
     
-    # Erklarung
+    # Explanation
     ax2 = axes[1]
     ax2.axis('off')
     
     explanation = """
-    RISK LEVEL KLASSIFIKATION
+    RISK LEVEL CLASSIFICATION
     
     GREEN (Score >= 3.0):
-    - Keine Aktion erforderlich
-    - Performance im akzeptablen Bereich
+    - No action required
+    - Performance within acceptable range
     
     YELLOW (Score 2.0 - 3.0):
-    - Training empfohlen
-    - Workshop, Coaching oder Mentoring
+    - Training recommended
+    - Workshop, coaching or mentoring
     
     RED (Score < 2.0):
-    - Disziplinarische Prufung
-    - HR-Gesprach, Performance Plan
+    - Disciplinary review required
+    - HR meeting, performance plan
     """
     
     ax2.text(0.1, 0.5, explanation, fontsize=11, fontfamily='monospace',
@@ -452,13 +452,13 @@ def plot_risk_distribution(data):
 
 
 def plot_workflow_diagram():
-    """Plot 9: Workflow-Prozess Diagramm."""
-    print("📈 Erstelle Workflow-Diagramm...")
+    """Plot 9: Workflow process diagram."""
+    print("📈 Creating workflow diagram...")
     
     fig, ax = plt.subplots(figsize=(14, 8))
     ax.axis('off')
     
-    # Positionen der Boxen
+    # Box positions
     boxes = {
         'Report Issue': (0.1, 0.8, '#e74c3c'),
         'Initial Investigation': (0.3, 0.8, '#3498db'),
@@ -486,7 +486,7 @@ def plot_workflow_diagram():
             ax.add_patch(rect)
             ax.text(x, y, name, ha='center', va='center', fontsize=8, fontweight='bold', color='white')
     
-    # Pfeile
+    # Arrows
     arrows = [
         ((0.18, 0.8), (0.22, 0.8)),  # Report -> Investigation
         ((0.38, 0.8), (0.44, 0.8)),  # Investigation -> Valid?
@@ -505,7 +505,7 @@ def plot_workflow_diagram():
         ax.annotate('', xy=(x2, y2), xytext=(x1, y1),
                    arrowprops=dict(arrowstyle='->', color='black', lw=1.5))
     
-    # Labels fur Ja/Nein
+    # Yes/No labels
     ax.text(0.5, 0.88, 'No', fontsize=8, ha='center')
     ax.text(0.58, 0.82, 'Yes', fontsize=8, ha='left')
     
@@ -520,10 +520,10 @@ def plot_workflow_diagram():
 
 
 def plot_model_comparison():
-    """Plot 10: Model-Metriken Vergleich."""
-    print("📈 Erstelle Model-Vergleich...")
+    """Plot 10: Model metrics comparison."""
+    print("📈 Creating model comparison chart...")
     
-    # Neue Metriken mit max_depth=6
+    # Updated metrics with max_depth=6
     metrics = {
         'Q-Score': ['Q1', 'Q2', 'Q3'],
         'Accuracy': [0.678, 0.653, 0.727],
@@ -580,7 +580,7 @@ def plot_model_comparison():
         height = bar.get_height()
         ax3.text(bar.get_x() + bar.get_width()/2., height + 0.02, f'{height:.3f}', ha='center', fontweight='bold')
     
-    plt.suptitle('ML-Model Performance (max_depth=6)', fontsize=14, fontweight='bold', y=1.02)
+    plt.suptitle('ML Model Performance (max_depth=6)', fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout()
     plt.savefig(OUTPUT_DIR / "10_model_metrics.png", bbox_inches='tight')
     plt.close()
@@ -589,16 +589,16 @@ def plot_model_comparison():
 
 def main():
     print("="*60)
-    print("📊 PLOT-GENERATOR FUR PROJEKTDOKUMENTATION")
+    print("📊 PLOT GENERATOR FOR PROJECT DOCUMENTATION")
     print("="*60)
     
-    # Data laden
+    # Load data
     data = load_data()
     
-    print("\n📈 Erstelle Plots...")
+    print("\n📈 Creating plots...")
     print("-"*40)
     
-    # Alle Plots erstellen
+    # Create all plots
     plot_score_distribution(data)
     plot_correlation_matrix(data)
     plot_employee_performance(data)
@@ -611,7 +611,7 @@ def main():
     plot_model_comparison()
     
     print("\n" + "="*60)
-    print(f"✅ FERTIG! {len(list(OUTPUT_DIR.glob('*.png')))} Plots erstellt in {OUTPUT_DIR}")
+    print(f"✅ DONE! {len(list(OUTPUT_DIR.glob('*.png')))} plots created in {OUTPUT_DIR}")
     print("="*60)
 
 
